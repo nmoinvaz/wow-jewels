@@ -105,8 +105,9 @@
   // the run before it, up to twice. Past the tenth level the clock runs faster again, so that the quickest hand
   // is beaten in the end.
   // Spy mode comes on when no row has been made for so many steps, of the game or since the last spying, and stays
-  // on so many, or until a row is made: while it is on, the picture shows the rows a jewel could make.
-  const SPY_AFTER = HZ * 10, SPY_FOR = HZ * 12;
+  // on so many, or until a row is made: while it is on, the picture shows the rows a jewel could make. SPY says
+  // whether it comes on at all, and it is off.
+  const SPY = false, SPY_AFTER = HZ * 10, SPY_FOR = HZ * 12;
   // how many steps the pace of time won back is a mean over, for the picture of how likely the game is to be lost
   const PACE = HZ * 20;
   const TIME = HZ * 90, drain = level => 1 + 0.08 * (level - 1) + 0.004 * Math.max(0, level - 10) ** 2, BACK = HZ * 3;
@@ -526,7 +527,7 @@
       S.shown += (S.time - S.shown) * 0.07;
       if (S.time > 0 && S.time < HZ * 10 && Math.ceil(S.time / HZ) !== Math.ceil(was / HZ)) say(S, 'tick', Math.ceil(S.time / HZ));
       // spy mode, when no row has been made for a while
-      if (S.n >= S.spying) { S.spy = S.n; S.spying = S.n + SPY_FOR + SPY_AFTER; say(S, 'spy'); }
+      if (SPY && S.n >= S.spying) { S.spy = S.n; S.spying = S.n + SPY_FOR + SPY_AFTER; say(S, 'spy'); }
       // the townie's shout, when the clock is getting low or the next level is near, and no one else is up
       const low = S.time < CHEER_UNDER && S.time > CHEER_OVER, near = S.cheered !== S.level && S.into >= CHEER_NEAR * need(S.level);
       if (S.mode !== 'mask' && (low || near) && S.n > S.hush && S.n - S.cheer >= CHEER_REST) { S.cheer = S.n; S.hush = S.n + CHEER_UP; if (near) S.cheered = S.level; say(S, 'cheer'); }
