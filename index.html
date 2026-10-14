@@ -43,6 +43,16 @@
   .settings a { color: var(--focus); }
   .settings button { padding: 8px 16px; border: 0; border-radius: 6px; background: var(--focus); color: #17110a; font: inherit; font-weight: 600; cursor: pointer; }
   .settings :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+  /* with "scores" the settings card has two tabs, the settings and the best scores, each a panel of its own */
+  .settings .tabs { display: flex; gap: 6px; }
+  .settings .tabs[hidden], .settings .panel[hidden], .settings label[hidden], .settings button[hidden] { display: none; }
+  .settings .tabs button { flex: 1; padding: 6px 10px; border: 1px solid var(--note); background: transparent; color: var(--note); }
+  .settings .tabs button[aria-selected=true] { border-color: var(--focus); background: var(--focus); color: #17110a; }
+  .settings .panel { display: grid; gap: 10px; }
+  .settings ol { margin: 0; padding: 0 0 0 26px; display: grid; gap: 3px; font-variant-numeric: tabular-nums; }
+  .settings li span { float: right; }
+  .settings li.mine { color: var(--focus); font-weight: 600; }
+  .settings input[type=text] { width: 100%; min-width: 0; box-sizing: border-box; padding: 6px 8px; border: 1px solid var(--note); border-radius: 6px; background: #fffdf6; color: #17110a; font: inherit; font-size: 16px; user-select: text; -webkit-user-select: text; }
   .veil { position: fixed; inset: 0; display: grid; place-content: center; gap: 6px; margin: 0; background: rgba(8, 6, 5, 0.62); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); color: var(--note); font: 15px ui-sans-serif, system-ui, sans-serif; text-align: center; cursor: pointer; touch-action: manipulation; }
   .veil[hidden] { display: none; }
   .veil b { font-size: 30px; letter-spacing: 0.14em; text-transform: uppercase; }
@@ -69,7 +79,7 @@
 <div class="veil" id="veil" hidden><b>Paused</b><span id="veil-how"></span></div>
 <button class="full pause" id="pause" type="button" aria-label="Pause" aria-pressed="false" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path class="out" d="M5.2 3v10M10.8 3v10"/><path class="in" d="M5 3l8 5-8 5z"/></svg></button>
 <button class="full gear" id="gear" type="button" aria-label="Settings" aria-expanded="false" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="2.3"/><path d="M8 1.6v2.1M8 12.3v2.1M1.6 8h2.1M12.3 8h2.1M3.5 3.5L5 5M11 11l1.5 1.5M3.5 12.5L5 11M11 5l1.5-1.5"/></svg></button>
-<form class="settings" id="settings" autocomplete="off" hidden><b>Settings</b><label>Effects <input type="range" id="fx" min="0" max="100" step="1"></label><label>Music <input type="range" id="mu" min="0" max="100" step="1"></label><label>Station <select id="station"><option value="">Off</option></select></label><p id="radio-says"></p><p id="radio-song"></p><p id="radio-credit"></p><button type="submit">Done</button></form>
+<form class="settings" id="settings" autocomplete="off" hidden><div class="tabs" id="tabs" role="tablist" hidden><button type="button" role="tab" id="tab-set" aria-selected="true">Settings</button><button type="button" role="tab" id="tab-best" aria-selected="false">Best scores</button></div><b id="set-head">Settings</b><div class="panel" id="set-panel"><label>Effects <input type="range" id="fx" min="0" max="100" step="1"></label><label>Music <input type="range" id="mu" min="0" max="100" step="1"></label><label>Station <select id="station"><option value="">Off</option></select></label><p id="radio-says"></p><p id="radio-song"></p><p id="radio-credit"></p></div><div class="panel" id="best-panel" hidden><ol id="best"></ol><p id="best-none" hidden>No scores yet.</p><p id="scores-says"></p><label id="post" hidden>Name <input id="post-name" type="text" maxlength="16" enterkeyhint="send" autocapitalize="words" spellcheck="false"></label><button type="button" id="post-go" hidden>Post my score</button></div><button type="submit">Done</button></form>
 <button class="full" id="full" type="button" aria-label="Full screen" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path class="out" d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/><path class="in" d="M6 2v4H2M14 6h-4V2M10 14v-4h4M2 10h4v4"/></svg></button>
 <form class="ask" id="ask" autocomplete="off" hidden><label id="ask-label" for="ask-text"></label><div><input id="ask-text" type="text" enterkeyhint="done" autocapitalize="words" spellcheck="false"><button type="submit">OK</button></div></form>
 <div class="home" id="update" hidden><p id="update-says"></p><div><button type="button" class="yes" id="update-go">Reload</button><button type="button" id="update-later">Later</button></div></div>
@@ -456,6 +466,9 @@ const VOICES = "borat tommy happy val mask urkel bueller schnikes cheer redeem c
   // of 1 / hz seconds, in place: held is the keys down during the step and hit those that went down in it, each
   // as { key: true }, and n is the step's number. A state is kept every `keep` steps (a second's worth), so going
   // back in time, or being told of a press after its step was taken, costs at most that many steps again.
+  // save() gives where the world has come to, as plain data, and a world made with it as `from` and told the same
+  // events again takes it up there, so a long game can be played through in pieces, as a server checking a score
+  // does. Events from before that step are counted in it already.
   function world(o) {
     const hz = o.hz || 60, keep = o.keep || hz, events = [], kept = [];
     let state = null, held = {}, n = 0, ei = 0;
@@ -466,8 +479,8 @@ const VOICES = "borat tommy happy val mask urkel bueller schnikes cheer redeem c
       const k = kept[kept.length - 1];
       state = copy(k.state); held = copy(k.held); n = k.n; ei = k.ei;
     }
-    kept.push({ n: 0, ei: 0, held: {}, state: copy(o.init()) });
-    restart(0);
+    kept.push(o.from ? copy(o.from) : { n: 0, ei: 0, held: {}, state: copy(o.init()) });
+    restart(kept[0].n);
     // a key pressed or let go at e.t seconds; anything else is ignored
     function input(e) {
       if ((e.type !== 'press' && e.type !== 'release') || e.key == null) return;
@@ -476,7 +489,7 @@ const VOICES = "borat tommy happy val mask urkel bueller schnikes cheer redeem c
       while (i > 0 && events[i - 1].s > ev.s) i--;
       events.splice(i, 0, ev);
       // its step was taken already: take it again from the last kept state before it
-      if (ev.s < n) { while (kept.length > 1 && kept[kept.length - 1].n > ev.s) kept.pop(); restart(ev.s); }
+      if (ev.s < n && ev.s >= kept[0].n) { while (kept.length > 1 && kept[kept.length - 1].n > ev.s) kept.pop(); restart(ev.s); }
     }
     function at(t) {
       const to = stepOf(t);
@@ -494,7 +507,8 @@ const VOICES = "borat tommy happy val mask urkel bueller schnikes cheer redeem c
       }
       return state;
     }
-    return { input, at, hz, events };
+    const save = () => ({ n, ei, held: copy(held), state: copy(state) });
+    return { input, at, save, hz, events };
   }
 
   // pad({ stick: { x, y, w, h, dead, reach }, buttons: [{ key, x, y, w, h }] }): the places on the picture, in
@@ -1086,7 +1100,10 @@ const VOICES = "borat tommy happy val mask urkel bueller schnikes cheer redeem c
   }
   // how far above its place a falling jewel is, in cells, k steps into a fall
   const above = (d, k) => Math.max(0, d - 0.5 * FALL * k * k);
-  return { create, rows, moves, beside, through, need, above, drain, N, CELLS, KINDS, PEACOCK, ACROSS, DOWN, HZ, SWAP, CLEAR, FALL, HINT, AGAIN, WOW, WOW_GAP, TIME, BORAT, BORAT_IN, BORAT_UP, TOMMY_UP, HAPPY_UP, CHURCH_UP, VAL_UP, MASK_UP, MASK_LANDS, URKEL_UP, ROLL_UP, REDEEM_UP, CHEER_UP, SCHNIKES_UP, BLAST, BACK, MEAT_MIN, MEAT_REST, WANT_FOR, GILT_FOR, MARK, ALARM, ALARM_UP, TURNING };
+  // what a game came to once it is over, for a page to post and a server to check by playing it again, or null
+  // while one is going
+  const result = S => (S.phase === 'over' ? { game: S.games, score: S.score, level: S.level } : null);
+  return { create, result, rows, moves, beside, through, need, above, drain, N, CELLS, KINDS, PEACOCK, ACROSS, DOWN, HZ, SWAP, CLEAR, FALL, HINT, AGAIN, WOW, WOW_GAP, TIME, BORAT, BORAT_IN, BORAT_UP, TOMMY_UP, HAPPY_UP, CHURCH_UP, VAL_UP, MASK_UP, MASK_LANDS, URKEL_UP, ROLL_UP, REDEEM_UP, CHEER_UP, SCHNIKES_UP, BLAST, BACK, MEAT_MIN, MEAT_REST, WANT_FOR, GILT_FOR, MARK, ALARM, ALARM_UP, TURNING };
 });
 
 </script>
@@ -2931,7 +2948,7 @@ const Game = (function () {
       board = [...board, entry].sort((a, b) => b.s - a.s || a.d - b.d).slice(0, TOP);
       save();
       // the first score to make the board is asked a name
-      if (!entry.n && board.includes(entry) && env.ask) env.ask({ label: 'A top score! Your name for the board:', max: NAME }).then(name => { if (name) { entry.n = name.slice(0, NAME); save(); env.store.set('name', entry.n); } });
+      if (!entry.n && board.includes(entry) && env.ask) env.ask({ label: 'A top score! Your name for the board:', max: NAME, value: String(env.store.get('name') || '').slice(0, NAME) }).then(name => { if (name) { entry.n = name.slice(0, NAME); save(); env.store.set('name', entry.n); } });
     }
     // the board's rows from y down, the game just played picked out
     function scores(g, cx, y, w, mine) {
@@ -3761,7 +3778,9 @@ const Game = (function () {
 
     // whether a game is going at a time, for the page to keep it across a reload
     const playing = t => world.at(t).phase === 'play';
-    return { draw, input, sounds, world, playing, painting: 0, get board() { return board; } };
+    // what the last game came to, once it is over, for the page to post to the scores
+    const result = t => R.result(world.at(t));
+    return { draw, input, sounds, world, playing, result, painting: 0, get board() { return board; } };
   }
   return { create };
 })();
@@ -3773,7 +3792,7 @@ window.__FILM__ = Game;
 <script>
 'use strict';
 // A generic game page: the game draws from the page's clock, and is told what is pressed and let go.
-const CONFIG = {"title": "Wow Jewels", "art": {"width": 1920, "height": 1080, "portrait": {"width": 1080, "height": 1920}}, "loop": 12, "film": {"global": "Game"}, "smooth": true, "game": {"keys": {"Space": "go", "Enter": "go", "KeyS": "meat"}, "background": "#1a1208", "moves": true, "fullscreen": true, "volume": 0.8, "pause": true, "home": true, "settings": true, "resume": "rules.js", "radio": [{"id": "house-nation-uk-house", "name": "House Nation UK (house)", "urls": ["https://streaming.radio.co/s06bd9d805/listen"], "home": "https://housenationuk.com/", "now": {"url": "https://public.radio.co/stations/s06bd9d805/status", "path": "current_track.title"}}, {"id": "sunshine-live-house", "name": "sunshine live: House", "urls": ["https://stream.sunshine-live.de/house/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "sunshine-live-classic-vocal-house", "name": "sunshine live: Classic & Vocal House", "urls": ["https://stream.sunshine-live.de/vocalhouse/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "rm-fm-house", "name": "rm.fm House", "urls": ["https://house-high.rautemusik.fm/"], "home": "https://www.rm.fm/house"}, {"id": "technolovers-funky-house", "name": "Technolovers Funky House", "urls": ["https://stream.technolovers.fm/funky-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-deep-house", "name": "Technolovers Deep House", "urls": ["https://stream.technolovers.fm/deep-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-ibiza-house", "name": "Technolovers Ibiza House", "urls": ["https://stream.technolovers.fm/ibiza-house"], "home": "https://technolovers.fm/"}, {"id": "somafm-beatblender", "name": "SomaFM Beat Blender (deep house)", "urls": ["https://ice2.somafm.com/beatblender-128-mp3", "https://ice6.somafm.com/beatblender-128-mp3", "https://ice5.somafm.com/beatblender-128-mp3"], "home": "https://somafm.com/beatblender/", "now": {"url": "https://somafm.com/songs/beatblender.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-thetrip", "name": "SomaFM The Trip (progressive house)", "urls": ["https://ice2.somafm.com/thetrip-128-mp3", "https://ice6.somafm.com/thetrip-128-mp3", "https://ice5.somafm.com/thetrip-128-mp3"], "home": "https://somafm.com/thetrip/", "now": {"url": "https://somafm.com/songs/thetrip.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-groovesalad", "name": "SomaFM Groove Salad (downtempo)", "urls": ["https://ice2.somafm.com/groovesalad-128-mp3", "https://ice6.somafm.com/groovesalad-128-mp3", "https://ice5.somafm.com/groovesalad-128-mp3"], "home": "https://somafm.com/groovesalad/", "now": {"url": "https://somafm.com/songs/groovesalad.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-fluid", "name": "SomaFM Fluid (instrumental hip hop)", "urls": ["https://ice2.somafm.com/fluid-128-mp3", "https://ice6.somafm.com/fluid-128-mp3", "https://ice5.somafm.com/fluid-128-mp3"], "home": "https://somafm.com/fluid/", "now": {"url": "https://somafm.com/songs/fluid.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-spacestation", "name": "SomaFM Space Station Soma (space electronic)", "urls": ["https://ice2.somafm.com/spacestation-128-mp3", "https://ice6.somafm.com/spacestation-128-mp3", "https://ice5.somafm.com/spacestation-128-mp3"], "home": "https://somafm.com/spacestation/", "now": {"url": "https://somafm.com/songs/spacestation.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-secretagent", "name": "SomaFM Secret Agent (spy lounge)", "urls": ["https://ice2.somafm.com/secretagent-128-mp3", "https://ice6.somafm.com/secretagent-128-mp3", "https://ice5.somafm.com/secretagent-128-mp3"], "home": "https://somafm.com/secretagent/", "now": {"url": "https://somafm.com/songs/secretagent.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-u80s", "name": "SomaFM Underground 80s (synthpop)", "urls": ["https://ice6.somafm.com/u80s-128-mp3", "https://ice2.somafm.com/u80s-128-mp3", "https://ice5.somafm.com/u80s-128-mp3"], "home": "https://somafm.com/u80s/", "now": {"url": "https://somafm.com/songs/u80s.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-indiepop", "name": "SomaFM Indie Pop Rocks!", "urls": ["https://ice6.somafm.com/indiepop-128-mp3", "https://ice2.somafm.com/indiepop-128-mp3", "https://ice5.somafm.com/indiepop-128-mp3"], "home": "https://somafm.com/indiepop/", "now": {"url": "https://somafm.com/songs/indiepop.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}], "radioCredit": {"text": "Each station plays from its own stream. SomaFM is listener-supported and free of ads:", "href": "https://somafm.com/", "link": "somafm.com"}, "musicVolume": 0.25, "updates": true, "radioDefault": "house-nation-uk-house", "fxVolume": 0.5, "resumeKey": "96eb04e3100fa700", "build": "15720658fdaa"}};
+const CONFIG = {"title": "Wow Jewels", "art": {"width": 1920, "height": 1080, "portrait": {"width": 1080, "height": 1920}}, "loop": 12, "film": {"global": "Game"}, "smooth": true, "game": {"keys": {"Space": "go", "Enter": "go", "KeyS": "meat"}, "background": "#1a1208", "moves": true, "fullscreen": true, "volume": 0.8, "pause": true, "home": true, "settings": true, "resume": "rules.js", "radio": [{"id": "house-nation-uk-house", "name": "House Nation UK (house)", "urls": ["https://streaming.radio.co/s06bd9d805/listen"], "home": "https://housenationuk.com/", "now": {"url": "https://public.radio.co/stations/s06bd9d805/status", "path": "current_track.title"}}, {"id": "sunshine-live-house", "name": "sunshine live: House", "urls": ["https://stream.sunshine-live.de/house/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "sunshine-live-classic-vocal-house", "name": "sunshine live: Classic & Vocal House", "urls": ["https://stream.sunshine-live.de/vocalhouse/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "rm-fm-house", "name": "rm.fm House", "urls": ["https://house-high.rautemusik.fm/"], "home": "https://www.rm.fm/house"}, {"id": "technolovers-funky-house", "name": "Technolovers Funky House", "urls": ["https://stream.technolovers.fm/funky-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-deep-house", "name": "Technolovers Deep House", "urls": ["https://stream.technolovers.fm/deep-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-ibiza-house", "name": "Technolovers Ibiza House", "urls": ["https://stream.technolovers.fm/ibiza-house"], "home": "https://technolovers.fm/"}, {"id": "somafm-beatblender", "name": "SomaFM Beat Blender (deep house)", "urls": ["https://ice2.somafm.com/beatblender-128-mp3", "https://ice6.somafm.com/beatblender-128-mp3", "https://ice5.somafm.com/beatblender-128-mp3"], "home": "https://somafm.com/beatblender/", "now": {"url": "https://somafm.com/songs/beatblender.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-thetrip", "name": "SomaFM The Trip (progressive house)", "urls": ["https://ice2.somafm.com/thetrip-128-mp3", "https://ice6.somafm.com/thetrip-128-mp3", "https://ice5.somafm.com/thetrip-128-mp3"], "home": "https://somafm.com/thetrip/", "now": {"url": "https://somafm.com/songs/thetrip.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-groovesalad", "name": "SomaFM Groove Salad (downtempo)", "urls": ["https://ice2.somafm.com/groovesalad-128-mp3", "https://ice6.somafm.com/groovesalad-128-mp3", "https://ice5.somafm.com/groovesalad-128-mp3"], "home": "https://somafm.com/groovesalad/", "now": {"url": "https://somafm.com/songs/groovesalad.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-fluid", "name": "SomaFM Fluid (instrumental hip hop)", "urls": ["https://ice2.somafm.com/fluid-128-mp3", "https://ice6.somafm.com/fluid-128-mp3", "https://ice5.somafm.com/fluid-128-mp3"], "home": "https://somafm.com/fluid/", "now": {"url": "https://somafm.com/songs/fluid.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-spacestation", "name": "SomaFM Space Station Soma (space electronic)", "urls": ["https://ice2.somafm.com/spacestation-128-mp3", "https://ice6.somafm.com/spacestation-128-mp3", "https://ice5.somafm.com/spacestation-128-mp3"], "home": "https://somafm.com/spacestation/", "now": {"url": "https://somafm.com/songs/spacestation.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-secretagent", "name": "SomaFM Secret Agent (spy lounge)", "urls": ["https://ice2.somafm.com/secretagent-128-mp3", "https://ice6.somafm.com/secretagent-128-mp3", "https://ice5.somafm.com/secretagent-128-mp3"], "home": "https://somafm.com/secretagent/", "now": {"url": "https://somafm.com/songs/secretagent.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-u80s", "name": "SomaFM Underground 80s (synthpop)", "urls": ["https://ice6.somafm.com/u80s-128-mp3", "https://ice2.somafm.com/u80s-128-mp3", "https://ice5.somafm.com/u80s-128-mp3"], "home": "https://somafm.com/u80s/", "now": {"url": "https://somafm.com/songs/u80s.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-indiepop", "name": "SomaFM Indie Pop Rocks!", "urls": ["https://ice6.somafm.com/indiepop-128-mp3", "https://ice2.somafm.com/indiepop-128-mp3", "https://ice5.somafm.com/indiepop-128-mp3"], "home": "https://somafm.com/indiepop/", "now": {"url": "https://somafm.com/songs/indiepop.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}], "radioCredit": {"text": "Each station plays from its own stream. SomaFM is listener-supported and free of ads:", "href": "https://somafm.com/", "link": "somafm.com"}, "musicVolume": 0.25, "updates": true, "radioDefault": "rm-fm-house", "fxVolume": 0.5, "scores": {"url": "", "key": "69bc23bb06cb3f62"}, "resumeKey": "69bc23bb06cb3f62", "build": "138b4cf43a3d"}};
 const GAME = CONFIG.game === true ? {} : CONFIG.game;
 // the picture's size: the config's, or its portrait size while the window is taller than it is wide
 const sizeNow = () => (CONFIG.art.portrait && window.innerHeight > window.innerWidth ? CONFIG.art.portrait : CONFIG.art);
@@ -4116,8 +4135,8 @@ function tune(choice) {
   listen();
 }
 // With "settings" a gear among the corner buttons opens a card: the effects' volume, the music's, and the radio.
-// The game is paused while it is open, where the page can pause it.
-let setPaused = false;
+// The game is paused while it is open, where the page can pause it and a game is going on.
+let setPaused = false, openCard = () => {};
 if (GAME.settings) {
   const gear = $('gear'), card = $('settings'), fx = $('fx'), mu = $('mu'), station = $('station');
   gear.hidden = false;
@@ -4131,13 +4150,13 @@ if (GAME.settings) {
   fx.addEventListener('input', () => { choose('fx', fx.value / 100); if (A.out) A.out.gain.value = fxLevel(); });
   mu.addEventListener('input', () => { choose('music', mu.value / 100); level(); });
   station.addEventListener('change', () => { choose('station', station.value); tune(station.value); });
-  const open = on => {
+  openCard = on => {
     card.hidden = !on; gear.setAttribute('aria-expanded', String(on));
-    if (on && GAME.pause && !C.paused) { pause(true); setPaused = true; }
+    if (on && GAME.pause && !C.paused && (!game || !game.playing || game.playing(now()))) { pause(true); setPaused = true; }
     else if (!on && setPaused) { setPaused = false; pause(false); }
   };
-  gear.addEventListener('click', () => { open(card.hidden); gear.blur(); });
-  card.addEventListener('submit', e => { e.preventDefault(); open(false); });
+  gear.addEventListener('click', () => { openCard(card.hidden); gear.blur(); });
+  card.addEventListener('submit', e => { e.preventDefault(); openCard(false); });
   $('veil').addEventListener('pointerdown', () => { card.hidden = true; setPaused = false; gear.setAttribute('aria-expanded', 'false'); });
   // a station chosen before, or the game's own, is tuned in at the first press, which is when a browser lets
   // sound start, and nothing is fetched before then
@@ -4147,6 +4166,91 @@ if (GAME.settings) {
     SET.station = stationOf(GAME.radioDefault || '') ? GAME.radioDefault : ''; station.value = SET.station;
   }
   if (SET.station !== '') R.later = true;
+}
+// With "scores" in the game entry, { url }, and "settings", the game's best scores are kept by a server,
+// film-studio's player/scores.js, which checks each one by playing the game again from what was pressed. The
+// settings card has a tab for the best. When a game is over, as the game's result(t) says, { game, score, level },
+// the card opens on that tab and offers to post it under a name, which is kept in the browser, and then says where
+// it came. A game that asks a name of its own, for a board it keeps, asks first, and the card comes after with
+// that name. The card is put away when the next game begins, and the tab still offers the last game until it is
+// posted or another is over.
+const P = { seen: -1, run: null, id: null, mine: null, due: false };
+if (GAME.settings && GAME.scores && GAME.scores.url) {
+  const card = $('settings'), says = $('scores-says'), field = $('post-name'), go = $('post-go');
+  const api = GAME.scores.url.replace(/\/$/, '');
+  $('tabs').hidden = false; $('set-head').hidden = true;
+  field.value = store.get('name') || '';
+  const commas = v => Number(v).toLocaleString('en-US');
+  const nth = k => k + (k % 100 >= 11 && k % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][k % 10] || 'th');
+  const say = text => { says.textContent = text; };
+  function list() {
+    fetch(api + '/scores', { cache: 'no-store' }).then(r => r.json()).then(b => {
+      $('best').replaceChildren(...(b.best || []).map(s => {
+        const li = document.createElement('li'), v = document.createElement('span');
+        li.textContent = s.name; v.textContent = commas(s.score); li.append(v);
+        if (s.id === P.mine) li.className = 'mine';
+        return li;
+      }));
+      $('best-none').hidden = !!(b.best && b.best.length);
+    }).catch(() => say('The scores cannot be reached just now.'));
+  }
+  // the name and the button to post show while a game over waits to be posted
+  const offer = () => {
+    const on = !!P.run && !P.id;
+    $('post').hidden = !on; go.hidden = !on; go.disabled = false;
+    if (on) say('Your game came to ' + commas(P.run.claim.score) + '.');
+  };
+  const tab = which => {
+    $('set-panel').hidden = which !== 'set'; $('best-panel').hidden = which !== 'best';
+    $('tab-set').setAttribute('aria-selected', String(which === 'set')); $('tab-best').setAttribute('aria-selected', String(which === 'best'));
+    if (which === 'best') { offer(); list(); }
+  };
+  $('tab-set').addEventListener('click', () => tab('set'));
+  $('tab-best').addEventListener('click', () => tab('best'));
+  // the best are fetched again each time the card opens on them
+  $('gear').addEventListener('click', () => { if (!card.hidden && !$('best-panel').hidden) tab('best'); });
+  // where the check of a posted game has come to, asked again until it is done
+  function watch(id, tries = 0) {
+    fetch(api + '/runs/' + id, { cache: 'no-store' }).then(r => r.json()).then(b => {
+      if (b.state === 'checking') { say('Checking your game… ' + Math.round(b.done * 100) + '%'); setTimeout(() => watch(id), 400); return; }
+      P.run = null;
+      if (b.state === 'checked') { P.mine = id; say('You came ' + nth(b.rank) + ' of ' + commas(b.of) + '.'); list(); }
+      else say('This game could not be checked, so it was not posted.');
+    }).catch(() => { if (tries < 20) setTimeout(() => watch(id, tries + 1), 1500); else say('The scores cannot be reached just now.'); });
+  }
+  // A game is posted as what was pressed and when up to its end, with what it came to, for the server to play
+  // again. Plain text asks the server nothing first.
+  function post() {
+    if (!P.run || P.id) return;
+    const name = field.value.replace(/\s+/g, ' ').trim();
+    if (!name) { field.focus(); return; }
+    store.set('name', name);
+    go.disabled = true; say('Posting…');
+    const run = P.run;
+    fetch(api + '/runs', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ name, key: GAME.scores.key, ends: run.ends, claim: run.claim, events: run.events }) })
+      .then(r => r.json().then(b => [r.status, b])).then(([status, b]) => {
+        if (status === 409) { go.disabled = false; say('This page is out of date. Reload it to post scores.'); return; }
+        if (!b.id) throw new Error(b.error);
+        P.id = b.id; offer(); field.blur(); watch(b.id);
+      }).catch(() => { go.disabled = false; say('The scores cannot be reached just now. Try again in a moment.'); });
+  }
+  go.addEventListener('click', post);
+  field.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); post(); } });
+  // A game over is looked for four times a second, which is often enough, since a game stays over a while.
+  setInterval(() => {
+    if (!game || !game.result || C.fixed != null) return;
+    const t = now(), r = game.result(t);
+    if (r && r.game !== P.seen) {
+      P.seen = r.game;
+      if (r.score > 0) {
+        P.run = { ends: t, claim: r, events: pressed.filter(e => e.t <= t && (e.type === 'press' || e.type === 'release')).map(e => [e.t, e.type, e.key]) };
+        P.id = null; P.due = true;
+      }
+    }
+    // and when a new game was begun instead, the tab keeps it
+    if (P.due && !asking) { P.due = false; field.value = store.get('name') || field.value; if (!(game.playing && game.playing(t))) { tab('best'); openCard(true); } }
+    else if (!r && !card.hidden && !C.paused && document.activeElement !== field && game.playing && game.playing(t)) openCard(false);
+  }, 250);
 }
 document.addEventListener('keydown', e => {
   if (asking) { if (e.code === 'Escape') asking(null); return; }

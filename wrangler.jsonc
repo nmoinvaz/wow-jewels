@@ -1,0 +1,26 @@
+// the scores server for Wow Jewels, written by film-studio's player/build.py
+{
+  "name": "wow-jewels",
+  "main": "scores/index.js",
+  "compatibility_date": "2026-06-01",
+  "workers_dev": true,
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "BOARD",
+        "class_name": "Board"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": [
+        "Board"
+      ]
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}
