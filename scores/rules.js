@@ -103,9 +103,9 @@
   // more. A row made back to back with the last, within BACK steps of it, gives a quarter more for each row of
   // the run before it, up to twice. Past the tenth level the clock runs faster again, so that the quickest hand
   // is beaten in the end.
-  // Spy mode comes on so many steps into a game and every so many after, and stays on so many: while it is on,
-  // the picture shows the rows a jewel could make.
-  const SPY_FIRST = HZ * 45, SPY_EVERY = HZ * 60, SPY_FOR = HZ * 12;
+  // Spy mode comes on when no row has been made for so many steps, of the game or since the last spying, and stays
+  // on so many, or until a row is made: while it is on, the picture shows the rows a jewel could make.
+  const SPY_AFTER = HZ * 10, SPY_FOR = HZ * 12;
   // how many steps the pace of time won back is a mean over, for the picture of how likely the game is to be lost
   const PACE = HZ * 20;
   const TIME = HZ * 90, drain = level => 1 + 0.08 * (level - 1) + 0.004 * Math.max(0, level - 10) ** 2, BACK = HZ * 3;
@@ -187,7 +187,7 @@
     const blank = () => Array.from({ length: CELLS }, () => 0);
     const init = () => {
       const S = { phase: 'title', n: 0, t: 0, seed: 20261012, board: [], drop: blank(), mode: 'still', k: 0, a: -1, b: -1, back: 0, gone: [], want: '', sel: -1, hint: -1, idle: 0,
-        score: 0, level: 1, into: 0, chain: 0, left: 0, games: 0, time: TIME, shown: TIME, why: '', wow: { said: -1e6, run: 0, n: -1e6, count: 0, len: 0, cells: [] }, wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, picard: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_FIRST, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 }, pops: [], ev: [] };
+        score: 0, level: 1, into: 0, chain: 0, left: 0, games: 0, time: TIME, shown: TIME, why: '', wow: { said: -1e6, run: 0, n: -1e6, count: 0, len: 0, cells: [] }, wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, picard: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_AFTER, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 }, pops: [], ev: [] };
       S.board = deal(S);
       S.left = moves(S.board).length;
       return S;
@@ -195,10 +195,10 @@
     function begin(S) {
       // the tray is dealt from the moment the game was asked for, so no two games are alike
       S.seed = ((S.n + 1) * 48271 + S.games * 9973 + 12345) % 2147483647 || 1;
-      Object.assign(S, { phase: 'play', t: 0, mode: 'fall', k: 0, a: -1, b: -1, back: 0, gone: [], want: '', sel: -1, hint: -1, idle: 0, score: 0, level: 1, into: 0, chain: 0, pops: [], time: TIME, shown: TIME, why: '', wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, picard: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_FIRST, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 } });
+      Object.assign(S, { phase: 'play', t: 0, mode: 'fall', k: 0, a: -1, b: -1, back: 0, gone: [], want: '', sel: -1, hint: -1, idle: 0, score: 0, level: 1, into: 0, chain: 0, pops: [], time: TIME, shown: TIME, why: '', wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, picard: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_AFTER, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 } });
       S.games++;
       S.spice = S.n + MASK_FIRST;
-      S.spying = S.n + SPY_FIRST;
+      S.spying = S.n + SPY_AFTER;
       S.picard = S.n - PICARD_REST + PICARD_FIRST;
       S.ready = S.n;
       S.rested = S.n;
@@ -269,6 +269,8 @@
       say(S, 'redeem');
       return true;
     }
+    // A row made puts spy mode away, if it is on, and the wait for it begins again.
+    const scored = S => { if (S.n - S.spy < SPY_FOR) S.spy = S.n - SPY_FOR; S.spying = S.n + SPY_AFTER; };
     // Tommy comes up amazed, if no one else is up
     const amazed = S => { if (S.n > S.hush && S.n - S.schnikes >= SCHNIKES_REST) { S.schnikes = S.n; S.hush = S.n + SCHNIKES_UP; say(S, 'schnikes'); } };
     // The rows go: their worth is scored, and Eddy or a guest may say so.
@@ -278,6 +280,7 @@
       // `run` is how many rows have come back to back, this one with them
       S.run = S.n - S.last <= BACK ? S.run + 1 : 1;
       S.last = S.n;
+      scored(S);
       // a quick change counts for the rows it makes itself, and rows back to back for all of them
       const quick = S.chain === 1 && S.quick ? QUICK_PAYS : 1, streak = 1 + STREAK_PAYS * Math.min(S.run - 1, STREAK_MOST);
       for (const cells of found) {
@@ -361,6 +364,7 @@
       while (S.pops.length > 8) S.pops.shift();
       S.fan = { n: S.n, at: pea, kind, cells: [...gone] };
       S.run = 1; S.last = S.n;
+      scored(S);
       Object.assign(S, { mode: 'clear', k: 0, gone: [...gone], chain: 0 });
       broken(S, S.gone);
       say(S, 'fan');
@@ -516,8 +520,8 @@
       S.ran = S.time;
       S.shown += (S.time - S.shown) * 0.07;
       if (S.time > 0 && S.time < HZ * 10 && Math.ceil(S.time / HZ) !== Math.ceil(was / HZ)) say(S, 'tick', Math.ceil(S.time / HZ));
-      // spy mode, when its time comes
-      if (S.n >= S.spying) { S.spy = S.n; S.spying = S.n + SPY_EVERY; say(S, 'spy'); }
+      // spy mode, when no row has been made for a while
+      if (S.n >= S.spying) { S.spy = S.n; S.spying = S.n + SPY_FOR + SPY_AFTER; say(S, 'spy'); }
       // the townie's shout, when the clock is getting low or the next level is near, and no one else is up
       const low = S.time < CHEER_UNDER && S.time > CHEER_OVER, near = S.cheered !== S.level && S.into >= CHEER_NEAR * need(S.level);
       if (S.mode !== 'mask' && (low || near) && S.n > S.hush && S.n - S.cheer >= CHEER_REST) { S.cheer = S.n; S.hush = S.n + CHEER_UP; if (near) S.cheered = S.level; say(S, 'cheer'); }
