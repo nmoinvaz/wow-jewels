@@ -31,7 +31,7 @@
   .full.pause svg { stroke-width: 2.6; stroke-linecap: butt; stroke-linejoin: round; }
   /* the settings: a gear among the corner buttons, and a card under them with the volumes and the radio */
   .full.gear svg { stroke-width: 1.5; }
-  .settings { position: fixed; top: calc(56px + env(safe-area-inset-top, 0px)); right: calc(8px + env(safe-area-inset-right, 0px)); box-sizing: border-box; width: min(300px, calc(100% - 16px)); display: grid; gap: 10px; margin: 0; padding: 14px; border-radius: 10px; background: var(--note-ground); color: var(--note); font: 14px/1.35 ui-sans-serif, system-ui, sans-serif; touch-action: manipulation; }
+  .settings { position: fixed; top: calc(56px + env(safe-area-inset-top, 0px)); right: calc(8px + env(safe-area-inset-right, 0px)); box-sizing: border-box; width: min(380px, calc(100% - 16px)); display: grid; gap: 10px; margin: 0; padding: 14px; border-radius: 10px; background: var(--note-ground); color: var(--note); font: 14px/1.35 ui-sans-serif, system-ui, sans-serif; touch-action: manipulation; }
   .settings[hidden] { display: none; }
   .settings b { font-size: 15px; }
   .settings label { display: grid; grid-template-columns: 64px 1fr; align-items: center; gap: 10px; }
@@ -39,6 +39,7 @@
   .settings select { width: 100%; min-width: 0; padding: 6px 8px; border: 1px solid var(--note); border-radius: 6px; background: #fffdf6; color: #17110a; font: inherit; }
   .settings p { margin: 0; font-size: 13px; opacity: 0.9; }
   .settings p:empty { display: none; }
+  .settings #radio-song { font-style: italic; }
   .settings a { color: var(--focus); }
   .settings button { padding: 8px 16px; border: 0; border-radius: 6px; background: var(--focus); color: #17110a; font: inherit; font-weight: 600; cursor: pointer; }
   .settings :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
@@ -68,7 +69,7 @@
 <div class="veil" id="veil" hidden><b>Paused</b><span id="veil-how"></span></div>
 <button class="full pause" id="pause" type="button" aria-label="Pause" aria-pressed="false" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path class="out" d="M5.2 3v10M10.8 3v10"/><path class="in" d="M5 3l8 5-8 5z"/></svg></button>
 <button class="full gear" id="gear" type="button" aria-label="Settings" aria-expanded="false" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="2.3"/><path d="M8 1.6v2.1M8 12.3v2.1M1.6 8h2.1M12.3 8h2.1M3.5 3.5L5 5M11 11l1.5 1.5M3.5 12.5L5 11M11 5l1.5-1.5"/></svg></button>
-<form class="settings" id="settings" autocomplete="off" hidden><b>Settings</b><label>Effects <input type="range" id="fx" min="0" max="100" step="1"></label><label>Music <input type="range" id="mu" min="0" max="100" step="1"></label><label>Station <select id="station"><option value="">Off</option></select></label><p id="radio-says"></p><p id="radio-credit"></p><button type="submit">Done</button></form>
+<form class="settings" id="settings" autocomplete="off" hidden><b>Settings</b><label>Effects <input type="range" id="fx" min="0" max="100" step="1"></label><label>Music <input type="range" id="mu" min="0" max="100" step="1"></label><label>Station <select id="station"><option value="">Off</option></select></label><p id="radio-says"></p><p id="radio-song"></p><p id="radio-credit"></p><button type="submit">Done</button></form>
 <button class="full" id="full" type="button" aria-label="Full screen" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path class="out" d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/><path class="in" d="M6 2v4H2M14 6h-4V2M10 14v-4h4M2 10h4v4"/></svg></button>
 <form class="ask" id="ask" autocomplete="off" hidden><label id="ask-label" for="ask-text"></label><div><input id="ask-text" type="text" enterkeyhint="done" autocapitalize="words" spellcheck="false"><button type="submit">OK</button></div></form>
 <div class="home" id="home" hidden><p id="home-says"></p><div><button type="button" class="yes" id="home-yes">Show me how</button><button type="button" id="home-no">Not now</button></div></div>
@@ -3616,7 +3617,7 @@ window.__FILM__ = Game;
 <script>
 'use strict';
 // A generic game page: the game draws from the page's clock, and is told what is pressed and let go.
-const CONFIG = {"title": "Wow Jewels", "art": {"width": 1920, "height": 1080, "portrait": {"width": 1080, "height": 1920}}, "loop": 12, "film": {"global": "Game"}, "smooth": true, "game": {"keys": {"Space": "go", "Enter": "go", "KeyS": "meat"}, "background": "#1a1208", "moves": true, "fullscreen": true, "volume": 0.8, "pause": true, "home": true, "settings": true, "resume": "rules.js", "radio": [{"name": "House Nation UK (house)", "urls": ["https://streaming.radio.co/s06bd9d805/listen"], "home": "https://housenationuk.com/"}, {"name": "sunshine live: House", "urls": ["https://stream.sunshine-live.de/house/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"name": "sunshine live: Classic & Vocal House", "urls": ["https://stream.sunshine-live.de/vocalhouse/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"name": "rm.fm House", "urls": ["https://house-high.rautemusik.fm/"], "home": "https://www.rm.fm/house"}, {"name": "Technolovers Funky House", "urls": ["https://stream.technolovers.fm/funky-house"], "home": "https://technolovers.fm/"}, {"name": "Technolovers Deep House", "urls": ["https://stream.technolovers.fm/deep-house"], "home": "https://technolovers.fm/"}, {"name": "Technolovers Ibiza House", "urls": ["https://stream.technolovers.fm/ibiza-house"], "home": "https://technolovers.fm/"}, {"name": "SomaFM Beat Blender (deep house)", "urls": ["https://ice2.somafm.com/beatblender-128-mp3", "https://ice6.somafm.com/beatblender-128-mp3", "https://ice5.somafm.com/beatblender-128-mp3"], "home": "https://somafm.com/beatblender/"}, {"name": "SomaFM The Trip (progressive house)", "urls": ["https://ice2.somafm.com/thetrip-128-mp3", "https://ice6.somafm.com/thetrip-128-mp3", "https://ice5.somafm.com/thetrip-128-mp3"], "home": "https://somafm.com/thetrip/"}, {"name": "SomaFM Groove Salad (downtempo)", "urls": ["https://ice2.somafm.com/groovesalad-128-mp3", "https://ice6.somafm.com/groovesalad-128-mp3", "https://ice5.somafm.com/groovesalad-128-mp3"], "home": "https://somafm.com/groovesalad/"}, {"name": "SomaFM Fluid (instrumental hip hop)", "urls": ["https://ice2.somafm.com/fluid-128-mp3", "https://ice6.somafm.com/fluid-128-mp3", "https://ice5.somafm.com/fluid-128-mp3"], "home": "https://somafm.com/fluid/"}, {"name": "SomaFM Space Station Soma (space electronic)", "urls": ["https://ice2.somafm.com/spacestation-128-mp3", "https://ice6.somafm.com/spacestation-128-mp3", "https://ice5.somafm.com/spacestation-128-mp3"], "home": "https://somafm.com/spacestation/"}, {"name": "SomaFM Secret Agent (spy lounge)", "urls": ["https://ice2.somafm.com/secretagent-128-mp3", "https://ice6.somafm.com/secretagent-128-mp3", "https://ice5.somafm.com/secretagent-128-mp3"], "home": "https://somafm.com/secretagent/"}, {"name": "SomaFM Underground 80s (synthpop)", "urls": ["https://ice6.somafm.com/u80s-128-mp3", "https://ice2.somafm.com/u80s-128-mp3", "https://ice5.somafm.com/u80s-128-mp3"], "home": "https://somafm.com/u80s/"}, {"name": "SomaFM Indie Pop Rocks!", "urls": ["https://ice6.somafm.com/indiepop-128-mp3", "https://ice2.somafm.com/indiepop-128-mp3", "https://ice5.somafm.com/indiepop-128-mp3"], "home": "https://somafm.com/indiepop/"}], "radioCredit": {"text": "Each station plays from its own stream. SomaFM is listener-supported and free of ads:", "href": "https://somafm.com/", "link": "somafm.com"}, "resumeKey": "889cadc3118b9151"}};
+const CONFIG = {"title": "Wow Jewels", "art": {"width": 1920, "height": 1080, "portrait": {"width": 1080, "height": 1920}}, "loop": 12, "film": {"global": "Game"}, "smooth": true, "game": {"keys": {"Space": "go", "Enter": "go", "KeyS": "meat"}, "background": "#1a1208", "moves": true, "fullscreen": true, "volume": 0.8, "pause": true, "home": true, "settings": true, "resume": "rules.js", "radio": [{"name": "House Nation UK (house)", "urls": ["https://streaming.radio.co/s06bd9d805/listen"], "home": "https://housenationuk.com/", "now": {"url": "https://public.radio.co/stations/s06bd9d805/status", "path": "current_track.title"}}, {"name": "sunshine live: House", "urls": ["https://stream.sunshine-live.de/house/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"name": "sunshine live: Classic & Vocal House", "urls": ["https://stream.sunshine-live.de/vocalhouse/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"name": "rm.fm House", "urls": ["https://house-high.rautemusik.fm/"], "home": "https://www.rm.fm/house"}, {"name": "Technolovers Funky House", "urls": ["https://stream.technolovers.fm/funky-house"], "home": "https://technolovers.fm/"}, {"name": "Technolovers Deep House", "urls": ["https://stream.technolovers.fm/deep-house"], "home": "https://technolovers.fm/"}, {"name": "Technolovers Ibiza House", "urls": ["https://stream.technolovers.fm/ibiza-house"], "home": "https://technolovers.fm/"}, {"name": "SomaFM Beat Blender (deep house)", "urls": ["https://ice2.somafm.com/beatblender-128-mp3", "https://ice6.somafm.com/beatblender-128-mp3", "https://ice5.somafm.com/beatblender-128-mp3"], "home": "https://somafm.com/beatblender/", "now": {"url": "https://somafm.com/songs/beatblender.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"name": "SomaFM The Trip (progressive house)", "urls": ["https://ice2.somafm.com/thetrip-128-mp3", "https://ice6.somafm.com/thetrip-128-mp3", "https://ice5.somafm.com/thetrip-128-mp3"], "home": "https://somafm.com/thetrip/", "now": {"url": "https://somafm.com/songs/thetrip.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"name": "SomaFM Groove Salad (downtempo)", "urls": ["https://ice2.somafm.com/groovesalad-128-mp3", "https://ice6.somafm.com/groovesalad-128-mp3", "https://ice5.somafm.com/groovesalad-128-mp3"], "home": "https://somafm.com/groovesalad/", "now": {"url": "https://somafm.com/songs/groovesalad.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"name": "SomaFM Fluid (instrumental hip hop)", "urls": ["https://ice2.somafm.com/fluid-128-mp3", "https://ice6.somafm.com/fluid-128-mp3", "https://ice5.somafm.com/fluid-128-mp3"], "home": "https://somafm.com/fluid/", "now": {"url": "https://somafm.com/songs/fluid.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"name": "SomaFM Space Station Soma (space electronic)", "urls": ["https://ice2.somafm.com/spacestation-128-mp3", "https://ice6.somafm.com/spacestation-128-mp3", "https://ice5.somafm.com/spacestation-128-mp3"], "home": "https://somafm.com/spacestation/", "now": {"url": "https://somafm.com/songs/spacestation.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"name": "SomaFM Secret Agent (spy lounge)", "urls": ["https://ice2.somafm.com/secretagent-128-mp3", "https://ice6.somafm.com/secretagent-128-mp3", "https://ice5.somafm.com/secretagent-128-mp3"], "home": "https://somafm.com/secretagent/", "now": {"url": "https://somafm.com/songs/secretagent.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"name": "SomaFM Underground 80s (synthpop)", "urls": ["https://ice6.somafm.com/u80s-128-mp3", "https://ice2.somafm.com/u80s-128-mp3", "https://ice5.somafm.com/u80s-128-mp3"], "home": "https://somafm.com/u80s/", "now": {"url": "https://somafm.com/songs/u80s.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"name": "SomaFM Indie Pop Rocks!", "urls": ["https://ice6.somafm.com/indiepop-128-mp3", "https://ice2.somafm.com/indiepop-128-mp3", "https://ice5.somafm.com/indiepop-128-mp3"], "home": "https://somafm.com/indiepop/", "now": {"url": "https://somafm.com/songs/indiepop.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}], "radioCredit": {"text": "Each station plays from its own stream. SomaFM is listener-supported and free of ads:", "href": "https://somafm.com/", "link": "somafm.com"}, "resumeKey": "889cadc3118b9151"}};
 const GAME = CONFIG.game === true ? {} : CONFIG.game;
 // the picture's size: the config's, or its portrait size while the window is taller than it is wide
 const sizeNow = () => (CONFIG.art.portrait && window.innerHeight > window.innerWidth ? CONFIG.art.portrait : CONFIG.art);
@@ -3888,7 +3889,7 @@ if (GAME.pause) {
 // phone too, which takes no volume from a page's audio element itself. It stops while the game is paused. A
 // station that cannot be played from the page, as one that may not reach other sites, or one the station turns
 // away, says so, with a link to hear it in another tab.
-const R = { el: null, gain: null, tries: 0, failed: false };
+const R = { el: null, gain: null, tries: 0, failed: false, song: '', asking: null };
 // whether the settings card is open: the game stands still then, but the radio and the page's sound go on
 const carding = () => !!GAME.settings && !$('settings').hidden;
 function level() {
@@ -3899,6 +3900,23 @@ function radioSays(text, link) {
   const p = $('radio-says');
   p.textContent = text;
   if (link) { const a = document.createElement('a'); a.href = link.href; a.target = '_blank'; a.rel = 'noopener'; a.textContent = link.text; p.append(' ', a); }
+}
+// A station may say what it is playing. Its `now` is { url, path, find, show }: the JSON to read, the dotted path
+// to the song in it, in a list the element whose `find.key` holds `find.has`, and how to write the song when it
+// is more than a line of text, as "{artist} \u2013 {title}". It is asked while the station plays, every so often.
+function nowPlaying() {
+  clearTimeout(R.asking);
+  const choice = SET.station, st = (GAME.radio || [])[+choice], ask = st && st.now;
+  if (!ask || choice === '' || R.failed || !R.el || R.el.paused) { $('radio-song').textContent = ''; return; }
+  const stop = new AbortController(), late = setTimeout(() => stop.abort(), 6000);
+  fetch(ask.url, { cache: 'no-store', signal: stop.signal }).then(r => (r.ok ? r.json() : null)).then(j => {
+    let v = j;
+    for (const k of (ask.path || '').split('.').filter(Boolean)) v = v == null ? v : v[k];
+    if (Array.isArray(v) && ask.find) v = v.find(e => String((e || {})[ask.find.key] || '').includes(ask.find.has));
+    const song = v == null ? '' : typeof v === 'string' ? v : (ask.show || '{artist} \u2013 {title}').replace(/\{(\w+)\}/g, (m, k) => v[k] || '').replace(/^[\s\u2013-]+|[\s\u2013-]+$/g, '');
+    if (SET.station === choice) $('radio-song').textContent = song ? 'Now playing: ' + song : '';
+  }).catch(() => {}).finally(() => clearTimeout(late));
+  R.asking = setTimeout(nowPlaying, 20000);
 }
 function listen() {
   if (!R.el || SET.station === '' || (C.paused && !carding())) return;
@@ -3919,12 +3937,14 @@ function tune(choice) {
   if (!R.el) {
     R.el = new Audio(); R.el.crossOrigin = 'anonymous'; R.el.preload = 'none';
     R.el.addEventListener('error', () => { if (SET.station !== '') failed(); });
-    R.el.addEventListener('playing', () => { const st = GAME.radio[+SET.station]; if (st) radioSays('Playing ' + st.name + '.'); });
+    R.el.addEventListener('playing', () => { const st = GAME.radio[+SET.station]; if (st) radioSays('Playing ' + st.name + '.'); nowPlaying(); });
+    R.el.addEventListener('pause', () => { clearTimeout(R.asking); });
     if (A.ctx && A.ctx.createMediaElementSource) {
       try { R.gain = A.ctx.createGain(); A.ctx.createMediaElementSource(R.el).connect(R.gain); R.gain.connect(A.ctx.destination); } catch (e) { R.gain = null; }
     }
   }
   level();
+  $('radio-song').textContent = ''; clearTimeout(R.asking);
   if (choice === '') { R.el.pause(); R.el.removeAttribute('src'); R.el.load(); radioSays(''); return; }
   const st = GAME.radio[+choice];
   radioSays('Tuning in to ' + st.name + '\u2026');
