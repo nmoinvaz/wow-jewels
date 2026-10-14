@@ -69,9 +69,10 @@ export class Board extends DurableObject {
     let run;
     try { run = JSON.parse(text); } catch (e) { return json({ error: 'not json' }, 400); }
     if (!run || run.key !== SETUP.key) return json({ error: 'other rules' }, 409);
-    const name = String(run.name || '').replace(/[\u0000-\u001f\u007f-\u009f]/g, '').replace(/\s+/g, ' ').trim().slice(0, MOST.name);
-    const claim = run.claim || {}, events = run.events, ends = run.ends, whole = v => Number.isInteger(v) && v >= 0;
-    if (!name || !whole(claim.game) || !whole(claim.score) || !whole(claim.level)) return json({ error: 'no name or result' }, 400);
+    // a name is letters and digits only, from the plain alphabet
+    const name = run.name, claim = run.claim || {}, events = run.events, ends = run.ends, whole = v => Number.isInteger(v) && v >= 0;
+    if (typeof name !== 'string' || !new RegExp(`^[A-Za-z0-9]{1,${MOST.name}}$`).test(name)) return json({ error: 'name' }, 400);
+    if (!whole(claim.game) || !whole(claim.score) || !whole(claim.level)) return json({ error: 'no result' }, 400);
     if (!(ends > 0 && ends <= MOST.seconds) || !Array.isArray(events) || events.length > MOST.events) return json({ error: 'too long a game' }, 400);
     // each event a time no earlier than the last and no later than the end, a press or a release, and a key
     let last = 0;

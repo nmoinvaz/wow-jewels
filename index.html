@@ -2449,24 +2449,27 @@ if (typeof module === 'object' && module.exports) module.exports = Harry;
 
 </script>
 <script>
-// Wow Jewels: the Church Lady, Dana Carvey's Enid Strict, who comes up by turns with Happy at a row of four or
-// more and says well, isn't that special, of the special jewel it leaves. She is drawn in the same manner as the
-// other speakers: a face modelled true and the rest turned to Klimt's ornament. A grey wig of tight curls,
-// cat-eye glasses, a purple dress suit over a high white collar, and a string of pearls. She looks sideways
-// under lowered lids with one brow up, and her mouth is pursed. The disc behind her is a rose window. Only her
-// head and shoulders show, so there are no hands to draw. It is all about (0, 0) at the middle of her face.
+// Wow Jewels: the Church Lady, Enid Strict, who comes up by turns with Happy at a row of four or more and says
+// well, isn't that special, of the special jewel it leaves. She is Dana Carvey dressed up, and drawn so: a man's
+// face under the wig and the paint, long, with a square jaw and chin, high cheekbones, a strong nose, heavy brows
+// and the shadow of a shave, made up with round rouge and lipstick drawn past the lips. A grey wig of tight
+// curls, cat-eye glasses, a purple dress suit over a high white collar, and a string of pearls. She looks
+// sideways under lowered lids with one brow up, and her mouth is pursed. The disc behind her is a rose window. It
+// is drawn in the same manner as the other speakers: a face modelled true and the rest turned to Klimt's
+// ornament. Only her head and shoulders show, so there are no hands to draw. It is all about (0, 0) at the
+// middle of her face.
 const Church = (function () {
   'use strict';
   const TAU = Math.PI * 2;
-  const C = { skin: '#f0d2bc', lit: '#fbe8da', shade: '#d4a890', deep: '#b8897a', line: '#8a5e50', hair: '#c9c8cf', hairLit: '#eeedf2', hairShade: '#9696a2', strand: '#77768a', brow: '#7a707a', frame: '#3a2236', jewel: '#fdf6ff', lid: '#a58cc0', iris: '#6a5a48', lip: '#b8586e', lipDeep: '#86364c', lipLit: '#e08c9e', mouth: '#3c0e18', rouge: 'rgba(222,110,130,0.36)', suit: '#6c3f92', suitLit: '#9068b4', suitDeep: '#4a286a', collar: '#f8f4ec', lace: '#c9bfae', pearl: '#f6f0e4', pearlShade: '#bdb2a0', blue: '#2f4692', blueLit: '#4f72c2', ruby: '#b3263a', ink: '#1e1712' };
+  const C = { skin: '#f0d2bc', lit: '#fbe8da', shade: '#d4a890', deep: '#b8897a', line: '#8a5e50', hair: '#c9c8cf', hairLit: '#eeedf2', hairShade: '#9696a2', strand: '#77768a', brow: '#7a707a', frame: '#3a2236', jewel: '#fdf6ff', lid: '#a58cc0', iris: '#6a5a48', lip: '#b8586e', lipDeep: '#86364c', lipLit: '#e08c9e', mouth: '#3c0e18', rouge: 'rgba(222,110,130,0.36)', suit: '#6c3f92', suitLit: '#9068b4', suitDeep: '#4a286a', collar: '#f8f4ec', lace: '#c9bfae', pearl: '#f6f0e4', pearlShade: '#bdb2a0', blue: '#2f4692', blueLit: '#4f72c2', ruby: '#b3263a', ink: '#1e1712', shave: 'rgba(96,104,126,0.13)', hollow: 'rgba(184,137,122,0.16)' };
   // what she takes up about (0, 0): from the top of the disc to the foot of the suit
   const BOX = { x: -102, y: -106, w: 204, h: 248 };
   const path = (g, draw) => { g.beginPath(); draw(g); g.closePath(); };
   const fill = (g, c, draw) => { path(g, draw); g.fillStyle = c; g.fill(); };
   const stroke = (g, w, c, draw) => { g.strokeStyle = c; g.lineWidth = w; g.lineCap = 'round'; g.lineJoin = 'round'; g.beginPath(); draw(g); g.stroke(); };
   const ell = (g, x, y, rx, ry, c, turn = 0) => { g.fillStyle = c; g.beginPath(); g.ellipse(x, y, rx, ry, turn, 0, TAU); g.fill(); };
-  // her face: a long oval, a little narrower at the jaw
-  const face = g => { g.moveTo(-30, -34); g.bezierCurveTo(-34, -4, -30, 28, -17, 46); g.bezierCurveTo(-9, 56, 9, 56, 17, 46); g.bezierCurveTo(30, 28, 34, -4, 30, -34); g.bezierCurveTo(27, -58, -27, -58, -30, -34); };
+  // his face: long, with the corners of a man's jaw and a square chin
+  const face = g => { g.moveTo(-31, -36); g.bezierCurveTo(-35, -8, -34, 18, -29, 36); g.bezierCurveTo(-25, 48, -15, 58, -6, 60); g.quadraticCurveTo(0, 61.5, 6, 60); g.bezierCurveTo(15, 58, 25, 48, 29, 36); g.bezierCurveTo(34, 18, 35, -8, 31, -36); g.bezierCurveTo(28, -60, -28, -60, -31, -36); };
   // one lens of her glasses: wide, and swept up to a point at its outer corner
   const lens = (q, s) => { q.moveTo(s * 3.5, -6); q.quadraticCurveTo(s * 4, -15, s * 12, -16.5); q.quadraticCurveTo(s * 24, -18, s * 33, -24); q.quadraticCurveTo(s * 32, -6, s * 24, 1); q.quadraticCurveTo(s * 13, 6, s * 6, 1); q.quadraticCurveTo(s * 3, -2, s * 3.5, -6); };
   // the upper rim alone, which is the heavy part of the frame
@@ -2520,7 +2523,7 @@ const Church = (function () {
     fill(g, C.collar, q => { q.moveTo(-20, 52); q.lineTo(-4, 104); q.lineTo(-6, 142); q.lineTo(6, 142); q.lineTo(4, 104); q.lineTo(20, 52); });
     for (let k = 0; k < 4; k++) ell(g, 0, 78 + k * 16, 1.8, 1.8, C.pearlShade);
     // her neck, with the high collar round it: a frill of lace, scalloped along its top
-    fill(g, C.shade, q => { q.moveTo(-15, 38); q.lineTo(-16, 52); q.lineTo(16, 52); q.lineTo(15, 38); });
+    fill(g, C.shade, q => { q.moveTo(-19, 36); q.lineTo(-20, 54); q.lineTo(20, 54); q.lineTo(19, 36); });
     fill(g, C.collar, q => { q.moveTo(-21, 48); q.quadraticCurveTo(0, 56, 21, 48); q.lineTo(22, 64); q.quadraticCurveTo(0, 72, -22, 64); });
     for (let k = -4; k <= 4; k++) { const x = k * 5, y = 48 + k * k * 0.1 + (Math.abs(k) < 4 ? 1.6 : 0.6); ell(g, x, y - 1, 3.1, 2.4, C.collar); g.strokeStyle = C.lace; g.lineWidth = 0.8; g.beginPath(); g.arc(x, y - 1, 2.8, Math.PI, TAU); g.stroke(); }
     stroke(g, 0.8, C.lace, q => { q.moveTo(-21, 56); q.quadraticCurveTo(0, 63, 21, 56); q.moveTo(-21, 60); q.quadraticCurveTo(0, 67, 21, 60); });
@@ -2529,25 +2532,39 @@ const Church = (function () {
     for (let k = -7; k <= 7; k++) { const u = k / 7, x = u * 27, y = 70 + (1 - u * u) * 11; ell(g, x, y, 2.8, 2.8, C.pearlShade); ell(g, x - 0.3, y - 0.3, 2.3, 2.3, C.pearl); ell(g, x - 0.9, y - 1, 0.8, 0.8, '#ffffff'); }
     // her wig behind her, short and round
     g.fillStyle = C.hairShade; g.fill(K.blob([[-46, 18], [-58, -2], [-64, -30], [-58, -58], [-40, -80], [-14, -90], [14, -90], [40, -80], [58, -58], [64, -30], [58, -2], [46, 18], [28, 4], [-28, 4]]));
-    // her face, lit from the upper left
-    const skin = g.createLinearGradient(-34, 0, 34, 0);
+    // the face, lit from the upper left
+    const skin = g.createLinearGradient(-35, 0, 35, 0);
     for (const [u, c] of [[0, C.lit], [0.4, C.skin], [0.74, C.skin], [1, C.shade]]) skin.addColorStop(u, c);
     fill(g, skin, face);
     g.save();
     path(g, face); g.clip();
-    fill(g, C.shade, q => { q.moveTo(35, -6); q.bezierCurveTo(35, 22, 27, 38, 10, 54); q.bezierCurveTo(21, 36, 26, 16, 26, -6); });
-    // rouge high on each cheek, round as she puts it on
-    ell(g, -19, 15, 8, 6.5, C.rouge); ell(g, 20, 15, 7.5, 6.5, C.rouge);
-    ell(g, -17, 7, 6, 4, 'rgba(255,244,230,0.5)', -0.3);
-    // the lines from her nose to her mouth, and under it a soft fold of chin
-    stroke(g, 0.9, 'rgba(150,100,84,0.55)', q => { q.moveTo(-9, 12); q.quadraticCurveTo(-13, 20, -12, 28); q.moveTo(9, 12); q.quadraticCurveTo(13, 20, 12, 28); });
-    stroke(g, 0.9, 'rgba(150,100,84,0.45)', q => { q.moveTo(-8, 43); q.quadraticCurveTo(0, 46, 8, 43); });
+    fill(g, C.shade, q => { q.moveTo(36, -8); q.bezierCurveTo(36, 20, 33, 40, 12, 62); q.bezierCurveTo(24, 44, 27, 18, 27, -8); });
+    // the shadow of a shave under the paint, along the jaw, on the chin and over the lip
+    const shave = g.createLinearGradient(0, 26, 0, 46);
+    shave.addColorStop(0, 'rgba(96,104,126,0)'); shave.addColorStop(1, C.shave);
+    fill(g, shave, q => { q.moveTo(-30, 30); q.bezierCurveTo(-24, 34, -14, 38, -10, 36); q.quadraticCurveTo(0, 42, 10, 36); q.bezierCurveTo(14, 38, 24, 34, 30, 30); q.lineTo(30, 64); q.lineTo(-30, 64); });
+    ell(g, 0, 25, 8, 2.6, 'rgba(96,104,126,0.06)');
+    // the hollow under each high cheekbone, the line of the jaw's corner, and the brow's ridge
+    for (const sd of [-1, 1]) {
+      fill(g, C.hollow, q => { q.moveTo(sd * 31, 8); q.quadraticCurveTo(sd * 22, 18, sd * 20, 30); q.quadraticCurveTo(sd * 27, 24, sd * 33, 18); });
+      stroke(g, 1, 'rgba(150,100,84,0.5)', q => { q.moveTo(sd * 27, 30); q.quadraticCurveTo(sd * 26, 42, sd * 18, 50); });
+    }
+    fill(g, 'rgba(184,137,122,0.35)', q => { q.moveTo(-30, -24); q.quadraticCurveTo(-16, -30, -4, -18); q.quadraticCurveTo(0, -15, 4, -18); q.quadraticCurveTo(16, -30, 30, -24); q.lineTo(30, -21); q.quadraticCurveTo(16, -26, 4, -15); q.quadraticCurveTo(0, -12, -4, -15); q.quadraticCurveTo(-16, -26, -30, -21); });
+    // rouge put on in round spots high on the cheeks, as a costume's is
+    ell(g, -19, 11, 7.5, 7, C.rouge); ell(g, 20, 11, 7, 7, C.rouge);
+    ell(g, -17, 4, 6, 3.5, 'rgba(255,244,230,0.5)', -0.3);
+    // the deep lines from the nose to the mouth, and the cleft of the chin
+    stroke(g, 1.1, 'rgba(150,100,84,0.6)', q => { q.moveTo(-10, 16); q.quadraticCurveTo(-15, 25, -14, 36); q.moveTo(10, 16); q.quadraticCurveTo(15, 25, 14, 36); });
+    stroke(g, 1, 'rgba(150,100,84,0.5)', q => { q.moveTo(-6, 51); q.quadraticCurveTo(0, 53.5, 6, 51); q.moveTo(0, 54); q.lineTo(0, 58); });
     g.restore();
-    stroke(g, 1.1, 'rgba(120,76,60,0.8)', q => { q.moveTo(-32, -18); q.bezierCurveTo(-33, 4, -29, 28, -17, 46); q.bezierCurveTo(-9, 56, 9, 56, 17, 46); q.bezierCurveTo(29, 28, 33, 4, 32, -18); });
-    // her nose, long and straight, a little lifted at its end
-    fill(g, C.shade, q => { q.moveTo(2, -8); q.bezierCurveTo(6, 2, 8, 9, 6.5, 13); q.quadraticCurveTo(0, 16, -6.5, 13); q.quadraticCurveTo(-8, 10, -4, 8); q.quadraticCurveTo(1, 11, 3, 8); q.quadraticCurveTo(3, 0, 0, -8); });
-    ell(g, -2, 4, 2.4, 5.5, C.lit, 0.2);
-    stroke(g, 1.1, C.line, q => { q.moveTo(-6.5, 11); q.quadraticCurveTo(-7, 14.5, -3, 15); q.moveTo(6.5, 11); q.quadraticCurveTo(7, 14.5, 3, 15); });
+    stroke(g, 1.1, 'rgba(120,76,60,0.8)', q => { q.moveTo(-33, -18); q.bezierCurveTo(-34, 6, -33, 22, -29, 36); q.bezierCurveTo(-25, 48, -15, 58, -6, 60); q.quadraticCurveTo(0, 61.5, 6, 60); q.bezierCurveTo(15, 58, 25, 48, 29, 36); q.bezierCurveTo(33, 22, 34, 6, 33, -18); });
+    // the nose: long, with a high bridge and a full end
+    stroke(g, 1.6, 'rgba(184,137,122,0.7)', q => { q.moveTo(3.5, -9); q.bezierCurveTo(6, 0, 8, 8, 8.5, 13); });
+    ell(g, -1.5, 3, 2.3, 7.5, C.lit, 0.08);
+    for (const sd of [-1, 1]) ell(g, sd * 6.8, 17, 3.8, 3.2, C.shade);
+    ell(g, 0, 16.5, 6, 4.6, C.skin); ell(g, -1.2, 15, 2.6, 1.8, C.lit);
+    for (const sd of [-1, 1]) ell(g, sd * 3.4, 19.4, 1.9, 1.1, C.line, sd * 0.3);
+    stroke(g, 1.1, C.line, q => { q.moveTo(-9.5, 15); q.quadraticCurveTo(-10.5, 19, -6, 20); q.moveTo(9.5, 15); q.quadraticCurveTo(10.5, 19, 6, 20); });
     // her curls, row on row over the top of her head and down to her ears
     CURLS.forEach(([x, y, r], i) => curl(g, K, x, y, r, i));
   }
@@ -2558,7 +2575,9 @@ const Church = (function () {
       const x = s * 16, y = -8;
       // one brow level and pinched, the other raised high in an arch, and both up a little with the word
       const up = s > 0 ? 6 : 0;
-      stroke(g, 2, C.brow, q => { q.moveTo(s * 6, -24 - open * 1.2 - up * 0.4); q.quadraticCurveTo(s * 18, -31 - open * 2 - up * 1.4, s * 30, -27 - open * 1.2 - up * 0.8); });
+      stroke(g, 3.2, C.brow, q => { q.moveTo(s * 5, -23 - open * 1.2 - up * 0.4); q.quadraticCurveTo(s * 17, -30 - open * 2 - up * 1.4, s * 30, -26 - open * 1.2 - up * 0.8); });
+      // the lines at the eye's outer corner
+      stroke(g, 0.8, 'rgba(150,100,84,0.6)', q => { q.moveTo(s * 26, -6); q.lineTo(s * 30, -8); q.moveTo(s * 26, -4); q.lineTo(s * 30, -3.5); q.moveTo(s * 25.5, -2); q.lineTo(s * 29, 0.5); });
       // the glass, a little bright, and her eye behind it under a lavender lid that comes down over half of it,
       // looking off to her left
       fill(g, 'rgba(255,255,255,0.2)', q => lens(q, s));
@@ -2575,7 +2594,9 @@ const Church = (function () {
     }
     stroke(g, 2.6, C.frame, q => { q.moveTo(-4, -10); q.quadraticCurveTo(0, -12.5, 4, -10); });
     // her mouth: pursed small and prim, with the fine lines of it round it, and a small round o on each word
-    const w = 7.5 - open * 1.5, d = 0.4 + open * 7, y = 27 - open * 1;
+    const w = 8 - open * 1.5, d = 0.4 + open * 7, y = 32 - open * 1;
+    // the lipstick, drawn a little past the lips all round
+    fill(g, 'rgba(184,88,110,0.5)', q => { q.ellipse(0, y + 1 + d * 0.5, w + 3.2, 4.8 + d * 0.55, 0, 0, Math.PI * 2); });
     const lips = q => { q.moveTo(-w - 1.5, y + 0.6); q.bezierCurveTo(-w * 0.6, y - 3.4, -2.5, y - 4, 0, y - 2.6); q.bezierCurveTo(2.5, y - 4, w * 0.6, y - 3.4, w + 1.5, y + 0.6); q.bezierCurveTo(w * 0.7, y + d + 5, -w * 0.7, y + d + 5, -w - 1.5, y + 0.6); };
     const gap = q => { q.moveTo(-w + 1.5, y + 0.6); q.quadraticCurveTo(0, y - 0.4 - open, w - 1.5, y + 0.6); q.bezierCurveTo(w * 0.6, y + 0.6 + d * 1.2, -w * 0.6, y + 0.6 + d * 1.2, -w + 1.5, y + 0.6); };
     fill(g, C.lip, lips);
@@ -2931,7 +2952,7 @@ const Game = (function () {
     const ROLLS = [1, 2, 3].map(n => bubble(B2W, B4H, (g, x, y) => { for (let k = 0; k < n; k++) label(g, k < 2 ? 'BUELLER?...' : 'BUELLER?', x - 84 + k * 9, y - 20 + k * 31, 25, { space: 1.2, color: k === n - 1 ? INK : C.grey }); }));
 
     // ---------- the board of top scores, kept in the browser ----------
-    // Each is { id, s: the score, l: the level, d: when, n: the name }. A game is known by the tray it ended on
+    // Each is { id, s: the score, l: the level, d: when, n: the name, w: true once it is on the world's board }. A game is known by the tray it ended on
     // and its score, so one that is drawn again, as when a phone is turned, is not written twice.
     let board = (env.store && env.store.get('scores')) || [], kept = '';
     if (!Array.isArray(board)) board = [];
@@ -2950,17 +2971,45 @@ const Game = (function () {
       // the first score to make the board is asked a name
       if (!entry.n && board.includes(entry) && env.ask) env.ask({ label: 'A top score! Your name for the board:', max: NAME, value: String(env.store.get('name') || '').slice(0, NAME) }).then(name => { if (name) { entry.n = name.slice(0, NAME); save(); env.store.set('name', entry.n); } });
     }
-    // the board's rows from y down, the game just played picked out
+    // The page says when a game over at t that it posted was kept on the world's board, and the game's own board
+    // marks it.
+    function posted(t, kept) {
+      const e = kept && board.find(x => x.id === idOf(world.at(t)));
+      if (e && !e.w) { e.w = true; save(); }
+    }
+    // whether a score is on the world's board: a small gold globe if it is, a faint ring if it was kept only here
+    function globe(g, x, y, on) {
+      g.lineWidth = 1.3; g.strokeStyle = on ? INK : 'rgba(110,80,40,0.45)';
+      g.beginPath(); g.arc(x, y, 5.5, 0, TAU);
+      if (on) { g.fillStyle = C.goldLight; g.fill(); }
+      g.stroke();
+      if (!on) return;
+      g.lineWidth = 0.9; g.beginPath(); g.ellipse(x, y, 2.4, 5.5, 0, 0, TAU); g.moveTo(x - 5.5, y); g.lineTo(x + 5.5, y); g.stroke();
+    }
+    // the board's rows from y down, the game just played picked out, and with world scores a key to the marks
+    const KEY = 22;
     function scores(g, cx, y, w, mine) {
       label(g, 'TOP SCORES', cx, y, 13, { align: 'center', color: C.red, space: 2.5 });
       board.forEach((e, i) => {
         const yy = y + 27 + i * 25, x0 = cx - w / 2, x1 = cx + w / 2, me = e.id === mine;
         if (me) { rect(g, x0 - 8, yy - 18, w + 16, 24, C.gold); rect(g, x0 - 8, yy - 18, 4, 24, C.red); }
+        if (env.scores) globe(g, x0 + 30, yy - 5.5, !!e.w);
         label(g, `${i + 1}`, x0 + 6, yy, 17, { color: me ? INK : C.umber });
-        label(g, (e.n || '—').toUpperCase(), x0 + 32, yy, 15, { space: 1 });
+        label(g, (e.n || '—').toUpperCase(), x0 + (env.scores ? 44 : 32), yy, 15, { space: 1 });
         label(g, commas(e.s), x1 - 76, yy, 19, { align: 'right' });
         if (e.l) label(g, `LEVEL ${e.l}`, x1 - 2, yy, 11.5, { align: 'right', color: C.umber, space: 1.2 });
       });
+      if (!env.scores || !board.length) return;
+      // the key, measured so that its two marks and their words sit together in the middle
+      const yk = y + 27 + board.length * 25 + 2, a = 'ON THE WORLD BOARD', b = 'ONLY HERE';
+      g.font = `bold 10.5px ${FACE}`;
+      if ('letterSpacing' in g) g.letterSpacing = '1.2px';
+      const wa = g.measureText(a).width, wb = g.measureText(b).width;
+      if ('letterSpacing' in g) g.letterSpacing = '0px';
+      let x = cx - (wa + wb + 56) / 2;
+      globe(g, x + 6, yk - 4, true); label(g, a, x + 17, yk, 10.5, { color: C.umber, space: 1.2 });
+      x += 17 + wa + 22;
+      globe(g, x + 6, yk - 4, false); label(g, b, x + 17, yk, 10.5, { color: C.umber, space: 1.2 });
     }
 
     // ---------- what is written ----------
@@ -3027,7 +3076,7 @@ const Game = (function () {
     // the card over the tray, before a game and after one, with the board of scores on it
     function card(g, now) {
       const first = now.phase === 'title', rows = board.length, tap = env.touch ? 'TAP' : 'CLICK';
-      const w = tall ? 440 : 410, h = (first ? 196 : 180) + (rows ? 46 + rows * 25 : 0), cx = BX + BW / 2, y0 = BY + BW / 2 - h / 2;
+      const w = tall ? 440 : 410, h = (first ? 196 : 180) + (rows ? 46 + rows * 25 + (env.scores ? KEY : 0) : 0), cx = BX + BW / 2, y0 = BY + BW / 2 - h / 2;
       rect(g, cx - w / 2 + 6, y0 + 8, w, h, 'rgba(20,12,4,0.5)');
       panel(g, cx - w / 2, y0, w, h);
       const line = (s, y, size, o = {}) => label(g, s, cx, y0 + y, size, { align: 'center', ...o });
@@ -3045,7 +3094,7 @@ const Game = (function () {
         line(place === 0 ? 'The best score yet' : place > 0 ? `${['', 'Second', 'Third', 'Fourth', 'Fifth'][place]} on the board` : rows ? 'Not on the board this time' : '', 116, 17, { weight: '500', color: C.umber });
         y = 150;
       }
-      if (rows) { scores(g, cx, y0 + y, w - 96, first ? '' : idOf(now)); y += 46 + rows * 25; }
+      if (rows) { scores(g, cx, y0 + y, w - 96, first ? '' : idOf(now)); y += 46 + rows * 25 + (env.scores ? KEY : 0); }
       if (first) line(`${tap} TO PLAY`, y + 10, 30, { color: C.red, space: 3 });
       else if (now.t > R.AGAIN) line(`${tap} TO PLAY AGAIN`, y + 8, 26, { color: C.red, space: 3 });
     }
@@ -3780,7 +3829,7 @@ const Game = (function () {
     const playing = t => world.at(t).phase === 'play';
     // what the last game came to, once it is over, for the page to post to the scores
     const result = t => R.result(world.at(t));
-    return { draw, input, sounds, world, playing, result, painting: 0, get board() { return board; } };
+    return { draw, input, sounds, world, playing, result, posted, painting: 0, get board() { return board; } };
   }
   return { create };
 })();
@@ -3792,7 +3841,7 @@ window.__FILM__ = Game;
 <script>
 'use strict';
 // A generic game page: the game draws from the page's clock, and is told what is pressed and let go.
-const CONFIG = {"title": "Wow Jewels", "art": {"width": 1920, "height": 1080, "portrait": {"width": 1080, "height": 1920}}, "loop": 12, "film": {"global": "Game"}, "smooth": true, "game": {"keys": {"Space": "go", "Enter": "go", "KeyS": "meat"}, "background": "#1a1208", "moves": true, "fullscreen": true, "volume": 0.8, "pause": true, "home": true, "settings": true, "resume": "rules.js", "radio": [{"id": "house-nation-uk-house", "name": "House Nation UK (house)", "urls": ["https://streaming.radio.co/s06bd9d805/listen"], "home": "https://housenationuk.com/", "now": {"url": "https://public.radio.co/stations/s06bd9d805/status", "path": "current_track.title"}}, {"id": "sunshine-live-house", "name": "sunshine live: House", "urls": ["https://stream.sunshine-live.de/house/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "sunshine-live-classic-vocal-house", "name": "sunshine live: Classic & Vocal House", "urls": ["https://stream.sunshine-live.de/vocalhouse/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "rm-fm-house", "name": "rm.fm House", "urls": ["https://house-high.rautemusik.fm/"], "home": "https://www.rm.fm/house"}, {"id": "technolovers-funky-house", "name": "Technolovers Funky House", "urls": ["https://stream.technolovers.fm/funky-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-deep-house", "name": "Technolovers Deep House", "urls": ["https://stream.technolovers.fm/deep-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-ibiza-house", "name": "Technolovers Ibiza House", "urls": ["https://stream.technolovers.fm/ibiza-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-house", "name": "Technolovers House", "urls": ["https://stream.technolovers.fm/house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-afro-house", "name": "Technolovers Afro House", "urls": ["https://stream.technolovers.fm/afro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-bass-house", "name": "Technolovers Bass House", "urls": ["https://stream.technolovers.fm/bass-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-dirty-house", "name": "Technolovers Dirty House", "urls": ["https://stream.technolovers.fm/dirty-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-electro-house", "name": "Technolovers Electro House", "urls": ["https://stream.technolovers.fm/electro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-future-house", "name": "Technolovers Future House", "urls": ["https://stream.technolovers.fm/future-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-latin-house", "name": "Technolovers Latin House", "urls": ["https://stream.technolovers.fm/latinhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tech-house", "name": "Technolovers Tech House", "urls": ["https://stream.technolovers.fm/techhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tropical-house", "name": "Technolovers Tropical House", "urls": ["https://stream.technolovers.fm/tropical-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-melodic-house-techno", "name": "Technolovers Melodic House & Techno", "urls": ["https://stream.technolovers.fm/melodic-house-techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-techno", "name": "Technolovers Techno", "urls": ["https://stream.technolovers.fm/techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-trance", "name": "Technolovers Trance", "urls": ["https://stream.technolovers.fm/trance"], "home": "https://technolovers.fm/"}, {"id": "technolovers-lounge", "name": "Technolovers Lounge", "urls": ["https://stream.technolovers.fm/lounge"], "home": "https://technolovers.fm/"}, {"id": "somafm-beatblender", "name": "SomaFM Beat Blender (deep house)", "urls": ["https://ice2.somafm.com/beatblender-128-mp3", "https://ice6.somafm.com/beatblender-128-mp3", "https://ice5.somafm.com/beatblender-128-mp3"], "home": "https://somafm.com/beatblender/", "now": {"url": "https://somafm.com/songs/beatblender.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-thetrip", "name": "SomaFM The Trip (progressive house)", "urls": ["https://ice2.somafm.com/thetrip-128-mp3", "https://ice6.somafm.com/thetrip-128-mp3", "https://ice5.somafm.com/thetrip-128-mp3"], "home": "https://somafm.com/thetrip/", "now": {"url": "https://somafm.com/songs/thetrip.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-groovesalad", "name": "SomaFM Groove Salad (downtempo)", "urls": ["https://ice2.somafm.com/groovesalad-128-mp3", "https://ice6.somafm.com/groovesalad-128-mp3", "https://ice5.somafm.com/groovesalad-128-mp3"], "home": "https://somafm.com/groovesalad/", "now": {"url": "https://somafm.com/songs/groovesalad.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-fluid", "name": "SomaFM Fluid (instrumental hip hop)", "urls": ["https://ice2.somafm.com/fluid-128-mp3", "https://ice6.somafm.com/fluid-128-mp3", "https://ice5.somafm.com/fluid-128-mp3"], "home": "https://somafm.com/fluid/", "now": {"url": "https://somafm.com/songs/fluid.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-spacestation", "name": "SomaFM Space Station Soma (space electronic)", "urls": ["https://ice2.somafm.com/spacestation-128-mp3", "https://ice6.somafm.com/spacestation-128-mp3", "https://ice5.somafm.com/spacestation-128-mp3"], "home": "https://somafm.com/spacestation/", "now": {"url": "https://somafm.com/songs/spacestation.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-secretagent", "name": "SomaFM Secret Agent (spy lounge)", "urls": ["https://ice2.somafm.com/secretagent-128-mp3", "https://ice6.somafm.com/secretagent-128-mp3", "https://ice5.somafm.com/secretagent-128-mp3"], "home": "https://somafm.com/secretagent/", "now": {"url": "https://somafm.com/songs/secretagent.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-u80s", "name": "SomaFM Underground 80s (synthpop)", "urls": ["https://ice6.somafm.com/u80s-128-mp3", "https://ice2.somafm.com/u80s-128-mp3", "https://ice5.somafm.com/u80s-128-mp3"], "home": "https://somafm.com/u80s/", "now": {"url": "https://somafm.com/songs/u80s.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-indiepop", "name": "SomaFM Indie Pop Rocks!", "urls": ["https://ice6.somafm.com/indiepop-128-mp3", "https://ice2.somafm.com/indiepop-128-mp3", "https://ice5.somafm.com/indiepop-128-mp3"], "home": "https://somafm.com/indiepop/", "now": {"url": "https://somafm.com/songs/indiepop.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}], "radioCredit": {"text": "Each station plays from its own stream. SomaFM is listener-supported and free of ads:", "href": "https://somafm.com/", "link": "somafm.com"}, "musicVolume": 0.25, "updates": true, "radioDefault": "rm-fm-house", "fxVolume": 0.5, "scores": {"url": "", "key": "69bc23bb06cb3f62"}, "resumeKey": "69bc23bb06cb3f62", "build": "f3ed3a979a50"}};
+const CONFIG = {"title": "Wow Jewels", "art": {"width": 1920, "height": 1080, "portrait": {"width": 1080, "height": 1920}}, "loop": 12, "film": {"global": "Game"}, "smooth": true, "game": {"keys": {"Space": "go", "Enter": "go", "KeyS": "meat"}, "background": "#1a1208", "moves": true, "fullscreen": true, "volume": 0.8, "pause": true, "home": true, "settings": true, "resume": "rules.js", "radio": [{"id": "house-nation-uk-house", "name": "House Nation UK (house)", "urls": ["https://streaming.radio.co/s06bd9d805/listen"], "home": "https://housenationuk.com/", "now": {"url": "https://public.radio.co/stations/s06bd9d805/status", "path": "current_track.title"}}, {"id": "sunshine-live-house", "name": "sunshine live: House", "urls": ["https://stream.sunshine-live.de/house/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "sunshine-live-classic-vocal-house", "name": "sunshine live: Classic & Vocal House", "urls": ["https://stream.sunshine-live.de/vocalhouse/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "rm-fm-house", "name": "rm.fm House", "urls": ["https://house-high.rautemusik.fm/"], "home": "https://www.rm.fm/house"}, {"id": "technolovers-funky-house", "name": "Technolovers Funky House", "urls": ["https://stream.technolovers.fm/funky-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-deep-house", "name": "Technolovers Deep House", "urls": ["https://stream.technolovers.fm/deep-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-ibiza-house", "name": "Technolovers Ibiza House", "urls": ["https://stream.technolovers.fm/ibiza-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-house", "name": "Technolovers House", "urls": ["https://stream.technolovers.fm/house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-afro-house", "name": "Technolovers Afro House", "urls": ["https://stream.technolovers.fm/afro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-bass-house", "name": "Technolovers Bass House", "urls": ["https://stream.technolovers.fm/bass-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-dirty-house", "name": "Technolovers Dirty House", "urls": ["https://stream.technolovers.fm/dirty-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-electro-house", "name": "Technolovers Electro House", "urls": ["https://stream.technolovers.fm/electro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-future-house", "name": "Technolovers Future House", "urls": ["https://stream.technolovers.fm/future-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-latin-house", "name": "Technolovers Latin House", "urls": ["https://stream.technolovers.fm/latinhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tech-house", "name": "Technolovers Tech House", "urls": ["https://stream.technolovers.fm/techhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tropical-house", "name": "Technolovers Tropical House", "urls": ["https://stream.technolovers.fm/tropical-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-melodic-house-techno", "name": "Technolovers Melodic House & Techno", "urls": ["https://stream.technolovers.fm/melodic-house-techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-techno", "name": "Technolovers Techno", "urls": ["https://stream.technolovers.fm/techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-trance", "name": "Technolovers Trance", "urls": ["https://stream.technolovers.fm/trance"], "home": "https://technolovers.fm/"}, {"id": "technolovers-lounge", "name": "Technolovers Lounge", "urls": ["https://stream.technolovers.fm/lounge"], "home": "https://technolovers.fm/"}, {"id": "somafm-beatblender", "name": "SomaFM Beat Blender (deep house)", "urls": ["https://ice2.somafm.com/beatblender-128-mp3", "https://ice6.somafm.com/beatblender-128-mp3", "https://ice5.somafm.com/beatblender-128-mp3"], "home": "https://somafm.com/beatblender/", "now": {"url": "https://somafm.com/songs/beatblender.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-thetrip", "name": "SomaFM The Trip (progressive house)", "urls": ["https://ice2.somafm.com/thetrip-128-mp3", "https://ice6.somafm.com/thetrip-128-mp3", "https://ice5.somafm.com/thetrip-128-mp3"], "home": "https://somafm.com/thetrip/", "now": {"url": "https://somafm.com/songs/thetrip.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-groovesalad", "name": "SomaFM Groove Salad (downtempo)", "urls": ["https://ice2.somafm.com/groovesalad-128-mp3", "https://ice6.somafm.com/groovesalad-128-mp3", "https://ice5.somafm.com/groovesalad-128-mp3"], "home": "https://somafm.com/groovesalad/", "now": {"url": "https://somafm.com/songs/groovesalad.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-fluid", "name": "SomaFM Fluid (instrumental hip hop)", "urls": ["https://ice2.somafm.com/fluid-128-mp3", "https://ice6.somafm.com/fluid-128-mp3", "https://ice5.somafm.com/fluid-128-mp3"], "home": "https://somafm.com/fluid/", "now": {"url": "https://somafm.com/songs/fluid.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-spacestation", "name": "SomaFM Space Station Soma (space electronic)", "urls": ["https://ice2.somafm.com/spacestation-128-mp3", "https://ice6.somafm.com/spacestation-128-mp3", "https://ice5.somafm.com/spacestation-128-mp3"], "home": "https://somafm.com/spacestation/", "now": {"url": "https://somafm.com/songs/spacestation.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-secretagent", "name": "SomaFM Secret Agent (spy lounge)", "urls": ["https://ice2.somafm.com/secretagent-128-mp3", "https://ice6.somafm.com/secretagent-128-mp3", "https://ice5.somafm.com/secretagent-128-mp3"], "home": "https://somafm.com/secretagent/", "now": {"url": "https://somafm.com/songs/secretagent.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-u80s", "name": "SomaFM Underground 80s (synthpop)", "urls": ["https://ice6.somafm.com/u80s-128-mp3", "https://ice2.somafm.com/u80s-128-mp3", "https://ice5.somafm.com/u80s-128-mp3"], "home": "https://somafm.com/u80s/", "now": {"url": "https://somafm.com/songs/u80s.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-indiepop", "name": "SomaFM Indie Pop Rocks!", "urls": ["https://ice6.somafm.com/indiepop-128-mp3", "https://ice2.somafm.com/indiepop-128-mp3", "https://ice5.somafm.com/indiepop-128-mp3"], "home": "https://somafm.com/indiepop/", "now": {"url": "https://somafm.com/songs/indiepop.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}], "radioCredit": {"text": "Each station plays from its own stream. SomaFM is listener-supported and free of ads:", "href": "https://somafm.com/", "link": "somafm.com"}, "musicVolume": 0.25, "updates": true, "radioDefault": "rm-fm-house", "fxVolume": 0.5, "scores": {"url": "", "key": "69bc23bb06cb3f62"}, "resumeKey": "69bc23bb06cb3f62", "build": "028befdf8d26"}};
 const GAME = CONFIG.game === true ? {} : CONFIG.game;
 // the picture's size: the config's, or its portrait size while the window is taller than it is wide
 const sizeNow = () => (CONFIG.art.portrait && window.innerHeight > window.innerWidth ? CONFIG.art.portrait : CONFIG.art);
@@ -3861,9 +3910,10 @@ function start(size) {
   W = size.width; H = size.height;
   art = mk(W, H); ag = art.getContext('2d');
   try {
-    // touch says the page is on a touch screen, so the game can say tap where it would name a key
-    const touch = matchMedia('(pointer: coarse)').matches;
-    game = window.__FILM__.create({ makeCanvas: mk, Path2D: window.Path2D, width: W, height: H, store, touch, ask });
+    // touch says the page is on a touch screen, so the game can say tap where it would name a key, and scores
+    // that the page posts a game's scores to the world's board
+    const touch = matchMedia('(pointer: coarse)').matches, scores = !!(GAME.settings && GAME.scores && GAME.scores.url);
+    game = window.__FILM__.create({ makeCanvas: mk, Path2D: window.Path2D, width: W, height: H, store, touch, ask, scores });
     if (game.input) for (const e of pressed) game.input(e);
   } catch (e) {
     game = null;
@@ -4179,7 +4229,12 @@ if (GAME.settings && GAME.scores && GAME.scores.url) {
   const card = $('settings'), says = $('scores-says'), field = $('post-name'), go = $('post-go');
   const api = GAME.scores.url.replace(/\/$/, '');
   $('tabs').hidden = false; $('set-head').hidden = true;
-  field.value = store.get('name') || '';
+  // A name for the world's board is letters and digits only, and anything else is left out as it is typed. It is
+  // kept apart from the game's own, which may have more in it, and starts as that.
+  const plain = v => String(v || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 16);
+  const named = () => plain(store.get('world name') || store.get('name'));
+  field.value = named();
+  field.addEventListener('input', () => { const v = plain(field.value); if (v !== field.value) field.value = v; });
   const commas = v => Number(v).toLocaleString('en-US');
   const nth = k => k + (k % 100 >= 11 && k % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][k % 10] || 'th');
   const say = text => { says.textContent = text; };
@@ -4209,29 +4264,32 @@ if (GAME.settings && GAME.scores && GAME.scores.url) {
   $('tab-best').addEventListener('click', () => tab('best'));
   // the best are fetched again each time the card opens on them
   $('gear').addEventListener('click', () => { if (!card.hidden && !$('best-panel').hidden) tab('best'); });
-  // where the check of a posted game has come to, asked again until it is done
-  function watch(id, tries = 0) {
+  // Where the check of a posted game has come to, asked again until it is done. The game is told how it went
+  // by posted(t, kept), with the time its game was over, for a board of its own to show it.
+  function watch(id, ends, tries = 0) {
     fetch(api + '/runs/' + id, { cache: 'no-store' }).then(r => r.json()).then(b => {
-      if (b.state === 'checking') { say('Checking your game… ' + Math.round(b.done * 100) + '%'); setTimeout(() => watch(id), 400); return; }
+      if (b.state === 'checking') { say('Checking your game… ' + Math.round(b.done * 100) + '%'); setTimeout(() => watch(id, ends), 400); return; }
       P.run = null;
-      if (b.state === 'checked') { P.mine = id; say('You came ' + nth(b.rank) + ' of ' + commas(b.of) + '.'); list(); }
-      else say('This game could not be checked, so it was not posted.');
-    }).catch(() => { if (tries < 20) setTimeout(() => watch(id, tries + 1), 1500); else say('The scores cannot be reached just now.'); });
+      if (game && game.posted) game.posted(ends, b.state === 'checked');
+      if (b.state === 'checked') { P.mine = id; say('You came ' + nth(b.rank) + ' of ' + commas(b.of) + ' on the world board.'); list(); }
+      else say('This game could not be checked, so it is not on the world board.');
+    }).catch(() => { if (tries < 20) setTimeout(() => watch(id, ends, tries + 1), 1500); else say('The scores cannot be reached just now.'); });
   }
   // A game is posted as what was pressed and when up to its end, with what it came to, for the server to play
   // again. Plain text asks the server nothing first.
   function post() {
     if (!P.run || P.id) return;
-    const name = field.value.replace(/\s+/g, ' ').trim();
-    if (!name) { field.focus(); return; }
-    store.set('name', name);
+    const name = plain(field.value);
+    if (!name) { field.focus(); say('A name is letters and numbers.'); return; }
+    store.set('world name', name);
     go.disabled = true; say('Posting…');
     const run = P.run;
     fetch(api + '/runs', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ name, key: GAME.scores.key, ends: run.ends, claim: run.claim, events: run.events }) })
       .then(r => r.json().then(b => [r.status, b])).then(([status, b]) => {
         if (status === 409) { go.disabled = false; say('This page is out of date. Reload it to post scores.'); return; }
+        if (b.error === 'name') { go.disabled = false; say('A name is letters and numbers.'); return; }
         if (!b.id) throw new Error(b.error);
-        P.id = b.id; offer(); field.blur(); watch(b.id);
+        P.id = b.id; offer(); field.blur(); watch(b.id, run.ends);
       }).catch(() => { go.disabled = false; say('The scores cannot be reached just now. Try again in a moment.'); });
   }
   go.addEventListener('click', post);
@@ -4248,7 +4306,7 @@ if (GAME.settings && GAME.scores && GAME.scores.url) {
       }
     }
     // and when a new game was begun instead, the tab keeps it
-    if (P.due && !asking) { P.due = false; field.value = store.get('name') || field.value; if (!(game.playing && game.playing(t))) { tab('best'); openCard(true); } }
+    if (P.due && !asking) { P.due = false; field.value = named() || field.value; if (!(game.playing && game.playing(t))) { tab('best'); openCard(true); } }
     else if (!r && !card.hidden && !C.paused && document.activeElement !== field && game.playing && game.playing(t)) openCard(false);
   }, 250);
 }
