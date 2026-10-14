@@ -11,11 +11,12 @@
 // falls in by luck. A player who does nothing for a while is called for, as a teacher calls a roll, and the first
 // row made after that is told it has redeemed itself. When the clock is getting low, or the next level is near,
 // a townie shouts you can do it. Now and then, as a jewel turns into another kind, as a replicator makes a thing,
-// Captain Picard asks for his tea.
+// Captain Picard asks for his tea, and the jewel it makes wears Starfleet's badge.
 //
 // A row of four leaves a striped jewel where it was, which takes its whole row or column with it when it goes. A
 // row of five or more leaves a peacock, which is no kind: changed with a neighbour, it takes every jewel of the
-// neighbour's kind.
+// neighbour's kind. A jewel with Starfleet's badge on it, which Picard's replicator makes, takes its row and its
+// column both when it goes.
 //
 // A row is worth more for a change made quickly after the tray comes to rest, for rows that come back to back,
 // for being of the kind wanted just then, which changes every half minute, and for having the gilded jewel in
@@ -63,8 +64,8 @@
   // are worth, so it is always worth having.
   const MEAT_SHARE = 0.1, MEAT_MIN = 1000, MEAT_REST = HZ * 600, MEAT_BACK = 1.5;
   // The peacock is the kind after the last. A jewel is plain, or striped across, when it takes its row, or
-  // striped down, when it takes its column.
-  const PEACOCK = KINDS, PLAIN = 0, ACROSS = 1, DOWN = 2;
+  // striped down, when it takes its column, or wears the badge, when it takes both.
+  const PEACOCK = KINDS, PLAIN = 0, ACROSS = 1, DOWN = 2, BADGE = 3;
   // Tommy says holy schnikes when a striped jewel goes off, at so long a cascade and when a peacock is used,
   // though not within so many steps of the last time; and the steps he stays for it
   const SCHNIKES = 4, SCHNIKES_REST = HZ * 45, SCHNIKES_UP = 184;
@@ -209,17 +210,20 @@
       S.drop = S.board.map((k, i) => N + (N - 1 - rowOf(i)) * 0.6);
       say(S, 'deal');
     }
-    // Every striped jewel among those going takes its row or its column with it, and any striped jewel in that
-    // takes its own. A peacock is not taken: it stays until it is used. What comes back is each stripe that went.
+    // Every striped jewel among those going takes its row or its column with it, a badge both, and any striped
+    // jewel or badge in that takes its own. A peacock is not taken: it stays until it is used. What comes back is
+    // each line that went.
     function burst(S, gone) {
       const lines = [], queue = [...gone];
       while (queue.length) {
         const i = queue.pop(), mark = S.spec[i];
         if (!mark || lines.some(l => l.at === i)) continue;
-        lines.push({ n: S.n, at: i, dir: mark });
-        for (let k = 0; k < N; k++) {
-          const j = mark === ACROSS ? rowOf(i) * N + k : k * N + colOf(i);
-          if (S.board[j] !== PEACOCK && !gone.has(j)) { gone.add(j); queue.push(j); }
+        for (const dir of mark === BADGE ? [ACROSS, DOWN] : [mark]) {
+          lines.push({ n: S.n, at: i, dir });
+          for (let k = 0; k < N; k++) {
+            const j = dir === ACROSS ? rowOf(i) * N + k : k * N + colOf(i);
+            if (S.board[j] !== PEACOCK && !gone.has(j)) { gone.add(j); queue.push(j); }
+          }
         }
       }
       if (lines.length) { S.lines = S.lines.concat(lines).slice(-6); say(S, 'stripe', lines.length); }
@@ -460,8 +464,9 @@
         S.left = left;
         if (S.hint === i) S.hint = -1;
         say(S, 'turn');
-        // Picard asks the replicator for his tea, if no one else is up and he has not lately
-        if (S.n > S.hush && S.n - S.picard >= PICARD_REST) { S.picard = S.n; S.hush = S.n + PICARD_UP; say(S, 'picard'); }
+        // Picard asks the replicator for his tea, if no one else is up and he has not lately, and the jewel it makes
+        // wears the badge
+        if (S.n > S.hush && S.n - S.picard >= PICARD_REST) { S.spec[i] = BADGE; S.picard = S.n; S.hush = S.n + PICARD_UP; say(S, 'picard'); }
         break;
       }
       S.shift = Math.round(HZ * (TURN[0] + (TURN[1] - TURN[0]) * rnd(S)) / (1 + 0.06 * (S.level - 1)));
@@ -574,5 +579,5 @@
   // what a game came to once it is over, for a page to post and a server to check by playing it again, or null
   // while one is going
   const result = S => (S.phase === 'over' ? { game: S.games, score: S.score, level: S.level } : null);
-  return { create, result, rows, moves, beside, through, need, above, drain, N, CELLS, KINDS, PEACOCK, ACROSS, DOWN, HZ, SWAP, CLEAR, FALL, HINT, AGAIN, WOW, WOW_GAP, TIME, BORAT, BORAT_IN, BORAT_UP, TOMMY_UP, HAPPY_UP, CHURCH_UP, PICARD_UP, VAL_UP, MASK_UP, MASK_LANDS, URKEL_UP, ROLL_UP, REDEEM_UP, CHEER_UP, SCHNIKES_UP, BLAST, BACK, MEAT_MIN, MEAT_REST, WANT_FOR, GILT_FOR, MARK, ALARM, ALARM_UP, TURNING, SPY_FOR };
+  return { create, result, rows, moves, beside, through, need, above, drain, N, CELLS, KINDS, PEACOCK, ACROSS, DOWN, BADGE, HZ, SWAP, CLEAR, FALL, HINT, AGAIN, WOW, WOW_GAP, TIME, BORAT, BORAT_IN, BORAT_UP, TOMMY_UP, HAPPY_UP, CHURCH_UP, PICARD_UP, VAL_UP, MASK_UP, MASK_LANDS, URKEL_UP, ROLL_UP, REDEEM_UP, CHEER_UP, SCHNIKES_UP, BLAST, BACK, MEAT_MIN, MEAT_REST, WANT_FOR, GILT_FOR, MARK, ALARM, ALARM_UP, TURNING, SPY_FOR };
 });
