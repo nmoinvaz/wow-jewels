@@ -89,6 +89,9 @@
 const VOICES = "borat tommy happy val mask urkel bueller schnikes cheer redeem church picard\n";
 </script>
 <script>
+const MOUTHS = "{\"wow\":{\"fps\":30,\"open\":[0.0,0.12,0.21,0.44,0.52,0.62,0.85,0.95,0.96,0.89,0.81,0.76,0.7,0.57,0.47,0.32],\"round\":[0.0,0.14,0.21,0.12,0.35,0.47,0.39,0.31,0.3,0.3,0.34,0.42,0.51,0.62,0.34,0.32],\"wide\":[0.0,0.0,0.0,0.45,0.25,0.14,0.07,0.04,0.02,0.01,0.01,0.0,0.0,0.0,0.45,0.25]},\"borat\":{\"fps\":30,\"open\":[0.0,0.0,0.11,0.16,0.21,0.33,0.45,0.57,0.63,0.6,0.56,0.53,0.64,0.62,0.59,0.51,0.45,0.39,0.34,0.32,0.33,0.44,0.61,0.69,0.8,0.87,0.8,0.78,0.74,0.72,0.66,0.67,0.73,0.77,0.76,0.79,0.8,0.77,0.73,0.63,0.57,0.54,0.52,0.51,0.5,0.49,0.58,0.68,0.69,0.66,0.59,0.54,0.49,0.39],\"round\":[0.0,0.0,0.45,0.25,0.14,0.07,0.04,0.02,0.01,0.01,0.0,0.14,0.08,0.04,0.02,0.01,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.43,0.68,0.83,0.9,0.5,0.27,0.15,0.08,0.05,0.03,0.01,0.01],\"wide\":[0.0,0.0,0.0,0.4,0.67,0.82,0.9,0.95,0.97,0.98,0.99,0.55,0.75,0.86,0.92,0.96,0.98,0.99,0.99,0.73,0.85,0.92,0.96,0.98,0.99,0.99,1.0,1.0,1.0,1.0,1.0,1.0,0.94,0.63,0.8,0.89,0.94,0.97,0.98,0.99,0.99,1.0,0.55,0.3,0.17,0.09,0.5,0.73,0.85,0.92,0.95,0.97,0.99,0.99]},\"tommy\":{\"fps\":30,\"open\":[0.0,0.0,0.58,0.88,0.93,0.96,0.72,0.83,0.78,0.66,0.49,0.57,0.66,0.69,0.67,0.68,0.53,0.27,0.13,0.07,0.03,0.02,0.01,0.16,0.29,0.31,0.28,0.14,0.63,0.89,0.97,0.94,0.64,0.37,0.27,0.34,0.65,0.58,0.58,0.65,0.63,0.6,0.52,0.48,0.46,0.43,0.6,0.6,0.67,0.68,0.63,0.61,0.62,0.61,0.6,0.57,0.29],\"round\":[0.0,0.0,0.0,0.0,0.0,0.0,0.14,0.07,0.04,0.02,0.01,0.01,0.31,0.17,0.1,0.05,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.02,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.14,0.07,0.04,0.02,0.01,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.14,0.07,0.04,0.02,0.01,0.11,0.06,0.03,0.02,0.01,0.01,0.01],\"wide\":[0.0,0.0,0.45,0.25,0.14,0.52,0.29,0.61,0.33,0.63,0.35,0.64,0.35,0.64,0.8,0.89,0.94,0.94,0.94,0.94,0.94,0.94,0.94,0.97,0.98,0.99,0.99,0.99,1.0,1.0,0.63,0.8,0.44,0.24,0.58,0.77,0.87,0.48,0.26,0.6,0.78,0.88,0.71,0.66,0.81,0.45,0.62,0.79,0.88,0.94,0.52,0.41,0.23,0.12,0.07,0.49,0.49]},\"happy\":{\"fps\":30,\"open\":[0.0,0.0,0.16,0.19,0.28,0.27,0.24,0.2,0.1,0.05,0.19,0.27,0.48,0.62,0.63,0.62,0.68,0.75,0.87,0.94,0.96,0.97,0.83,0.41,0.21,0.3,0.62,0.72,0.56,0.53,0.54,0.61,0.6,0.57,0.52,0.53,0.41,0.3,0.15,0.08,0.04,0.02,0.13,0.07,0.34,0.47,0.29,0.29,0.54,0.64,0.49,0.6,0.59,0.52,0.52,0.47,0.72,0.55,0.55,0.56,0.64,0.38,0.19,0.32,0.68,0.44,0.36,0.71,0.87,0.85,0.71,0.46,0.23,0.11,0.06,0.26,0.31,0.31,0.16,0.08,0.04,0.02,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.3,0.15,0.3,0.74,0.92,0.9,0.76,0.38,0.19,0.1,0.27,0.13,0.07,0.34,0.64,0.63,0.38,0.19,0.09,0.05,0.49,0.24,0.12,0.27,0.53,0.58,0.29,0.14,0.17,0.38,0.38,0.46,0.56,0.55,0.57,0.53,0.45,0.39,0.43,0.31],\"round\":[0.0,0.0,0.0,0.0,0.0,0.0,0.14,0.21,0.21,0.21,0.25,0.27,0.15,0.08,0.05,0.02,0.01,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.14,0.07,0.04,0.02,0.01,0.14,0.08,0.04,0.02,0.01,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.14,0.07,0.04,0.02,0.01,0.14,0.08,0.18,0.1,0.05,0.03,0.15,0.15,0.08,0.05,0.03,0.01,0.01,0.0,0.0,0.0,0.14,0.14,0.14,0.14,0.07,0.04,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.02,0.15,0.15,0.08,0.04,0.02,0.01,0.01,0.01,0.01,0.01,0.14,0.14,0.14,0.21,0.12,0.06,0.17,0.17,0.17,0.17,0.09,0.09,0.09,0.05,0.03,0.02,0.02,0.02,0.14,0.09,0.05,0.03,0.01,0.03,0.04,0.07,0.18,0.23,0.13,0.21],\"wide\":[0.0,0.0,0.45,0.64,0.65,0.65,0.35,0.2,0.2,0.2,0.11,0.06,0.48,0.72,0.84,0.91,0.92,0.9,0.94,0.96,0.96,0.98,0.93,0.93,0.93,0.51,0.73,0.85,0.85,0.92,0.51,0.73,0.85,0.92,0.95,0.98,0.88,0.93,0.93,0.93,0.93,0.93,0.96,0.96,0.98,0.99,0.58,0.77,0.68,0.57,0.31,0.62,0.79,0.89,0.94,0.52,0.73,0.4,0.67,0.82,0.9,0.5,0.5,0.72,0.85,0.92,0.95,0.89,0.88,0.91,0.87,0.48,0.48,0.48,0.48,0.71,0.84,0.91,0.91,0.91,0.91,0.91,0.91,0.91,0.91,0.91,0.91,0.91,0.91,0.91,0.5,0.5,0.66,0.75,0.85,0.79,0.62,0.62,0.62,0.62,0.34,0.34,0.34,0.19,0.53,0.59,0.33,0.33,0.33,0.33,0.63,0.63,0.63,0.76,0.7,0.52,0.52,0.52,0.28,0.16,0.51,0.73,0.85,0.47,0.26,0.14,0.08,0.04,0.47,0.26]},\"val\":{\"fps\":30,\"open\":[0.21,0.39,0.48,0.65,0.65,0.73,0.72,0.69,0.65,0.7,0.63,0.76,0.56,0.42,0.35,0.53,0.71,0.54,0.67,0.81,0.84,0.82,0.82,0.9,0.88,0.75,0.65,0.55,0.66,0.7],\"round\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.14,0.21,0.25,0.14,0.08,0.18,0.1,0.05,0.1,0.12,0.07,0.12,0.24,0.13,0.07,0.04,0.02,0.01],\"wide\":[0.45,0.7,0.66,0.56,0.76,0.87,0.93,0.86,0.92,0.62,0.79,0.88,0.49,0.27,0.15,0.13,0.17,0.09,0.1,0.06,0.03,0.02,0.01,0.01,0.0,0.45,0.7,0.83,0.91,0.59]},\"mask\":{\"fps\":30,\"open\":[0.0,0.35,0.73,0.89,0.97,0.94,0.89,0.81,0.52,0.26,0.13,0.06,0.03,0.02,0.01,0.0,0.0,0.0,0.42,0.62,0.68,0.75,0.7,0.35,0.28,0.2,0.22,0.11,0.18,0.18,0.17,0.09,0.04,0.02,0.01,0.01,0.0,0.0,0.0,0.28,0.73,0.93,0.94,0.98,0.93,0.8,0.48,0.24,0.12,0.06,0.28,0.47,0.57,0.61,0.57,0.39,0.38,0.62,0.73,0.77,0.58,0.29,0.57,0.63,0.31,0.68,0.83,0.87,0.86,0.81,0.75,0.7,0.7,0.68,0.62,0.58,0.51,0.46,0.35],\"round\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.14,0.07,0.07,0.04,0.02,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],\"wide\":[0.0,0.02,0.01,0.04,0.08,0.04,0.07,0.05,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.03,0.11,0.06,0.07,0.04,0.02,0.02,0.46,0.25,0.59,0.59,0.77,0.88,0.93,0.93,0.93,0.93,0.93,0.93,0.93,0.93,0.93,0.79,0.45,0.27,0.16,0.15,0.53,0.74,0.86,0.86,0.86,0.86,0.65,0.42,0.34,0.33,0.31,0.3,0.2,0.27,0.6,0.78,0.56,0.56,0.33,0.63,0.63,0.8,0.77,0.88,0.93,0.96,0.98,0.99,0.99,0.98,0.95,0.95,0.97,0.53,0.74]},\"urkel\":{\"fps\":30,\"open\":[0.21,0.45,0.85,0.77,0.54,0.36,0.68,0.84,0.94,0.98,0.75,0.85,0.88,0.88,0.68,0.6,0.83,0.78,0.57,0.51,0.66,0.72,0.71,0.67,0.6,0.64,0.85,0.92,0.94,0.99,0.99,0.76,0.92,0.96,0.97,0.97,0.75,0.91,0.72],\"round\":[0.27,0.43,0.24,0.13,0.07,0.04,0.02,0.01,0.01,0.0,0.14,0.08,0.04,0.02,0.15,0.22,0.12,0.07,0.04,0.02,0.01,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.14,0.07,0.04,0.02,0.01,0.14,0.08,0.18],\"wide\":[0.0,0.0,0.45,0.7,0.83,0.91,0.95,0.97,0.98,0.61,0.34,0.64,0.8,0.89,0.49,0.27,0.6,0.78,0.88,0.93,0.96,0.98,0.66,0.81,0.47,0.38,0.53,0.68,0.83,0.9,0.95,0.52,0.74,0.86,0.92,0.96,0.53,0.63,0.34]},\"bueller\":{\"fps\":30,\"open\":[0.0,0.3,0.44,0.52,0.54,0.54,0.54,0.52,0.49,0.43,0.41,0.44,0.47,0.47,0.45,0.43,0.39],\"round\":[0.0,0.0,0.0,0.0,0.0,0.09,0.31,0.4,0.22,0.35,0.57,0.53,0.4,0.3,0.21,0.14,0.08],\"wide\":[0.0,0.04,0.23,0.18,0.1,0.05,0.03,0.02,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0]},\"schnikes\":{\"fps\":30,\"open\":[0.0,0.22,0.36,0.68,0.82,0.83,0.77,0.76,0.75,0.73,0.71,0.71,0.69,0.71,0.72,0.71,0.75,0.72,0.73,0.59,0.55,0.54,0.5,0.46,0.43,0.41,0.38,0.37,0.38,0.55,0.48,0.53,0.64,0.67,0.7,0.72,0.55,0.65,0.69,0.59,0.55,0.55,0.79,0.86,0.86,0.78,0.68,0.59,0.52,0.43,0.35,0.3,0.39,0.45,0.47,0.45,0.41,0.4,0.37,0.33,0.32,0.3,0.35,0.33,0.24,0.22,0.25],\"round\":[0.0,0.0,0.0,0.0,0.0,0.0,0.42,0.68,0.38,0.66,0.81,0.9,0.94,0.52,0.29,0.16,0.09,0.05,0.03,0.15,0.08,0.05,0.02,0.01,0.01,0.0,0.0,0.0,0.0,0.0,0.14,0.07,0.04,0.02,0.01,0.01,0.14,0.08,0.04,0.02,0.15,0.22,0.12,0.07,0.04,0.02,0.01,0.01,0.0,0.0,0.0,0.14,0.07,0.04,0.02,0.01,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],\"wide\":[0.0,0.45,0.7,0.83,0.91,0.95,0.52,0.29,0.61,0.33,0.18,0.1,0.06,0.48,0.71,0.84,0.91,0.95,0.97,0.54,0.32,0.63,0.79,0.89,0.94,0.97,0.98,0.99,0.99,1.0,0.55,0.75,0.86,0.92,0.96,0.98,0.54,0.75,0.86,0.92,0.51,0.28,0.15,0.08,0.13,0.41,0.67,0.82,0.9,0.95,0.97,0.53,0.74,0.86,0.92,0.96,0.98,0.99,0.99,1.0,1.0,0.99,0.99,1.0,0.89,0.86,0.84]},\"cheer\":{\"fps\":30,\"open\":[0.0,0.0,0.67,0.89,0.96,0.94,0.95,0.94,0.92,0.93,0.97,0.95,0.94,0.94,0.92,0.92,0.91,0.88,0.87,0.82,0.82,0.88,0.84,0.86,0.86,0.89,0.88,0.88,0.9,0.92,0.95,0.95,0.95,0.93,0.92,0.91],\"round\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],\"wide\":[0.0,0.0,0.45,0.25,0.23,0.24,0.24,0.13,0.07,0.04,0.02,0.12,0.07,0.14,0.14,0.12,0.15,0.08,0.05,0.06,0.03,0.09,0.15,0.14,0.11,0.51,0.73,0.41,0.38,0.43,0.46,0.55,0.59,0.68,0.72,0.65]},\"redeem\":{\"fps\":30,\"open\":[0.0,0.0,0.0,0.54,0.72,0.73,0.88,0.84,0.76,0.64,0.32,0.16,0.08,0.04,0.19,0.37,0.27,0.14,0.41,0.83,0.83,0.91,0.93,0.94,0.8,0.74,0.71,0.81,0.82,0.78,0.78,0.74,0.71,0.69,0.7,0.77,0.74,0.7,0.65,0.56,0.42,0.21,0.11,0.05,0.48,0.59,0.62,0.64,0.64,0.63,0.63,0.7,0.62,0.58,0.59,0.84,0.87,0.86,0.8,0.53,0.27,0.13,0.07,0.03,0.61,0.74,0.79,0.86,0.9,0.89,0.84,0.67,0.48,0.24,0.12,0.06,0.03,0.01,0.01,0.0,0.0],\"round\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.14,0.07,0.04,0.04,0.02,0.01,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.05,0.03,0.02,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],\"wide\":[0.0,0.0,0.0,0.05,0.13,0.17,0.54,0.75,0.86,0.92,0.92,0.92,0.92,0.92,0.51,0.61,0.74,0.74,0.86,0.92,0.96,0.98,0.99,0.99,0.55,0.75,0.86,0.92,0.96,0.53,0.74,0.55,0.52,0.47,0.71,0.39,0.21,0.13,0.24,0.35,0.42,0.42,0.42,0.42,0.23,0.32,0.33,0.38,0.42,0.44,0.44,0.69,0.83,0.91,0.8,0.72,0.84,0.91,0.95,0.97,0.97,0.97,0.97,0.97,0.99,0.54,0.3,0.61,0.79,0.88,0.94,0.96,0.98,0.98,0.98,0.98,0.98,0.98,0.98,0.98,0.98]},\"church\":{\"fps\":30,\"open\":[0.0,0.44,0.74,0.85,0.84,0.83,0.83,0.82,0.82,0.73,0.5,0.39,0.53,0.59,0.67,0.77,0.73,0.72,0.75,0.78,0.78,0.54,0.27,0.13,0.07,0.03,0.02,0.37,0.65,0.76,0.78,0.79,0.78,0.83,0.83,0.73,0.55],\"round\":[0.0,0.04,0.09,0.05,0.03,0.01,0.01,0.0,0.0,0.0,0.0,0.14,0.07,0.04,0.02,0.01,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],\"wide\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.27,0.6,0.78,0.88,0.48,0.27,0.15,0.12,0.38,0.61,0.63,0.58,0.54,0.51,0.53,0.53,0.53,0.53,0.53,0.53,0.35,0.54,0.62,0.65,0.66,0.62,0.62,0.62,0.65,0.7]},\"picard\":{\"fps\":30,\"open\":[0.18,0.28,0.57,0.68,0.61,0.54,0.5,0.48,0.43,0.31,0.15,0.08,0.04,0.02,0.01,0.0,0.0,0.0,0.0,0.0,0.0,0.49,0.75,0.73,0.7,0.66,0.58,0.42,0.46,0.61,0.64,0.62,0.59,0.58,0.55,0.53,0.42,0.61,0.8,0.8,0.75,0.62],\"round\":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.05,0.06,0.14,0.28,0.39,0.43,0.45,0.25,0.14,0.09,0.05,0.03,0.01,0.01,0.0,0.0,0.03,0.19,0.32,0.35,0.29],\"wide\":[0.06,0.48,0.35,0.37,0.47,0.51,0.58,0.63,0.67,0.82,0.82,0.82,0.82,0.82,0.82,0.82,0.82,0.82,0.82,0.82,0.82,0.45,0.25,0.14,0.07,0.04,0.02,0.01,0.01,0.0,0.0,0.0,0.0,0.02,0.12,0.16,0.09,0.05,0.03,0.01,0.01,0.0]}}";
+</script>
+<script>
 // Klimt: gold leaf, ornament and flowers on a 2D canvas, in the manner of Gustav Klimt's golden period and
 // his garden paintings. Everything is drawn in logical units (960 x 540) and scaled to the canvas.
 (function (root, factory) {
@@ -1541,7 +1544,9 @@ const Eddy = (function () {
   }
   // What moves, drawn over that each frame: his brows, his eyes and his mouth. `open` is how round his mouth is
   // with the wow, 0 to 1, and `wink` how far one eye is shut.
-  function over(g, open = 0, wink = 0) {
+  function over(g, say = 0, wink = 0) {
+    // how open the mouth is, 0 to 1, and how round and how wide, from a number or from { open, round, wide }
+    const open = typeof say === 'number' ? say : say.open || 0, round = say.round || 0, wide = say.wide || 0;
     // brows: dark and full, up with the wow
     for (const s of [-1, 1]) stroke(g, 3.2, C.hair, q => { q.moveTo(s * 25, -15 - open * 2); q.quadraticCurveTo(s * 15, -21 - open * 4, s * 6, -15.5 - open * 2); });
     for (const s of [-1, 1]) {
@@ -1557,6 +1562,8 @@ const Eddy = (function () {
       stroke(g, 1.7, C.hair, q => { q.moveTo(x - 8, y + 0.8); q.quadraticCurveTo(x, y - h * 1.5 + shut * 4.5, x + 8, y + 0.8); });
       stroke(g, 0.9, 'rgba(110,65,40,0.8)', q => { for (const k of [-1, 0, 1]) { q.moveTo(x + s * 9.5, y + 0.5 + k * 1.2); q.lineTo(x + s * (14 + shut * 1.5), y - 1 + k * 3.6); } });
     }
+    // the mouth narrower for oo and oh and wider for ee and eh, about its middle
+    g.save(); g.translate(0, 28); g.scale(1 + 0.3 * wide - 0.3 * round, 1 + 0.12 * round); g.translate(0, -28);
     if (open < 0.3) {
       // the grin: wide, its corners up into his cheeks, a full row of teeth
       const lips = q => { q.moveTo(-21, 22); q.quadraticCurveTo(0, 27, 21, 22); q.bezierCurveTo(17, 38, -17, 38, -21, 22); };
@@ -1579,6 +1586,7 @@ const Eddy = (function () {
       g.restore();
       stroke(g, 1.6, C.lip, q => q.ellipse(0, y, rx, ry, 0, 0, TAU));
     }
+    g.restore();
   }
   return { flat, over, BOX, C };
 })();
@@ -1665,7 +1673,9 @@ const Borat = (function () {
   }
   // what moves, drawn over that each frame: his brows and eyes, his mouth, and the moustache over it. `open`
   // is how far his mouth is open, 0 to 1.
-  function over(g, open = 0) {
+  function over(g, say = 0) {
+    // how open the mouth is, 0 to 1, and how round and how wide, from a number or from { open, round, wide }
+    const open = typeof say === 'number' ? say : say.open || 0, round = say.round || 0, wide = say.wide || 0;
     for (const s of [-1, 1]) {
       const x = s * 14, y = -9;
       // brows thick and high, eyes round and wide
@@ -1674,6 +1684,8 @@ const Borat = (function () {
       ell(g, x + 0.6, y + 0.2, 3.6, 3.6, '#3a2616'); ell(g, x + 0.6, y + 0.2, 1.8, 1.8, '#0d0907'); ell(g, x - 0.5, y - 1.1, 0.9, 0.9, '#ffffff');
       stroke(g, 1.5, C.hair, q => q.ellipse(x, y, 7.4, 5.2 + open * 0.8, 0, 0, TAU));
     }
+    // the mouth narrower for oo and oh and wider for ee and eh, about its middle
+    g.save(); g.translate(0, 30); g.scale(1 + 0.3 * wide - 0.3 * round, 1 + 0.12 * round); g.translate(0, -30);
     // the mouth: a broad grin under the moustache, opening with each word
     const d = 5 + open * 12, lips = q => { q.moveTo(-17, 26); q.quadraticCurveTo(0, 30, 17, 26); q.bezierCurveTo(14, 26 + d * 1.25, -14, 26 + d * 1.25, -17, 26); };
     fill(g, C.mouth, lips);
@@ -1684,6 +1696,7 @@ const Borat = (function () {
     stroke(g, 0.5, 'rgba(120,100,80,0.6)', q => { for (let k = -3; k <= 3; k++) { q.moveTo(k * 4.2, 25); q.lineTo(k * 4.2, 34); } });
     g.restore();
     stroke(g, 1.3, C.lip, q => { lips(q); q.closePath(); });
+    g.restore();
     // the moustache: thick and black, down past the corners of his mouth
     fill(g, C.hair, q => { q.moveTo(0, 17.5); q.bezierCurveTo(-8, 15, -20, 17, -25, 27); q.bezierCurveTo(-27, 32, -25, 36, -22, 37); q.bezierCurveTo(-20, 30, -12, 27, 0, 28); q.bezierCurveTo(12, 27, 20, 30, 22, 37); q.bezierCurveTo(25, 36, 27, 32, 25, 27); q.bezierCurveTo(20, 17, 8, 15, 0, 17.5); });
     stroke(g, 0.8, C.curl, q => { for (const s of [-1, 1]) for (let k = 0; k < 4; k++) { q.moveTo(s * (3 + k * 5), 19 + k * 0.6); q.lineTo(s * (5 + k * 5.2), 26 + k * 1.4); } });
@@ -1775,7 +1788,9 @@ const Tommy = (function () {
   }
   // what moves, drawn over that each frame: his brows, his eyes and his mouth. `open` is how far his mouth is
   // open with the word he is on, 0 to 1.
-  function over(g, open = 0) {
+  function over(g, say = 0) {
+    // how open the mouth is, 0 to 1, and how round and how wide, from a number or from { open, round, wide }
+    const open = typeof say === 'number' ? say : say.open || 0, round = say.round || 0, wide = say.wide || 0;
     // one brow up and one pulled down, as a man's are who has just been hit
     stroke(g, 3, C.brow, q => { q.moveTo(-27, -15); q.quadraticCurveTo(-17, -12, -7, -17); });
     stroke(g, 3, C.brow, q => { q.moveTo(7, -21); q.quadraticCurveTo(17, -27, 28, -21); });
@@ -1786,6 +1801,8 @@ const Tommy = (function () {
     ell(g, 16, -6, 3, 3, '#5a7fa6'); ell(g, 16, -6, 1.5, 1.5, '#0d0907'); ell(g, 15, -7.2, 0.8, 0.8, '#ffffff');
     stroke(g, 1.5, C.ink, q => q.ellipse(17, -7, 6.4, 4.6, 0, 0, TAU));
     stroke(g, 2.2, C.skin, q => { q.moveTo(10.6, -9.6); q.quadraticCurveTo(17, -12.4, 23.4, -9.6); });
+    // the mouth narrower for oo and oh and wider for ee and eh, about its middle
+    g.save(); g.translate(0, 28); g.scale(1 + 0.3 * wide - 0.3 * round, 1 + 0.12 * round); g.translate(0, -28);
     // his mouth: a wince, teeth set, opening a little with each word
     const d = 4 + open * 8, lips = q => { q.moveTo(-18, 26); q.quadraticCurveTo(0, 22, 18, 27); q.bezierCurveTo(15, 27 + d * 1.2, -15, 26 + d * 1.2, -18, 26); };
     fill(g, C.mouth, lips);
@@ -1797,6 +1814,7 @@ const Tommy = (function () {
     g.restore();
     stroke(g, 1.3, C.lip, q => { lips(q); q.closePath(); });
     stroke(g, 1.1, C.line, q => { q.moveTo(-21, 23); q.quadraticCurveTo(-24, 26, -21, 30); q.moveTo(21, 24); q.quadraticCurveTo(24, 27, 21, 31); });
+    g.restore();
   }
   return { flat, over, BOX, C };
 })();
@@ -1878,7 +1896,9 @@ const Happy = (function () {
   }
   // what moves, drawn over that each frame: his brows, his eyes and his mouth. `open` is how far his mouth is
   // open with the word he is on, 0 to 1.
-  function over(g, open = 0) {
+  function over(g, say = 0) {
+    // how open the mouth is, 0 to 1, and how round and how wide, from a number or from { open, round, wide }
+    const open = typeof say === 'number' ? say : say.open || 0, round = say.round || 0, wide = say.wide || 0;
     for (const s of [-1, 1]) {
       const x = s * 14, y = -8;
       // brows heavy and a little drawn, as a man's are who is willing a putt in
@@ -1888,6 +1908,8 @@ const Happy = (function () {
       stroke(g, 1.6, C.ink, q => { q.moveTo(x - 7.5, y + 1); q.quadraticCurveTo(x, y - 5 - open, x + 7.5, y + 1); });
       stroke(g, 1, C.line, q => { q.moveTo(x - 7, y + 1.4); q.quadraticCurveTo(x, y + 5, x + 7, y + 1.4); });
     }
+    // the mouth narrower for oo and oh and wider for ee and eh, about its middle
+    g.save(); g.translate(0, 28); g.scale(1 + 0.3 * wide - 0.3 * round, 1 + 0.12 * round); g.translate(0, -28);
     // his mouth: open on each word, and a set half-smile between them
     const w = 14 + open * 2, d = 3.5 + open * 10, lips = q => { q.moveTo(-w, 26); q.quadraticCurveTo(0, 23, w, 26); q.bezierCurveTo(w, 26 + d * 1.1, -w, 26 + d * 1.1, -w, 26); };
     fill(g, C.mouth, lips);
@@ -1899,6 +1921,7 @@ const Happy = (function () {
     g.restore();
     stroke(g, 1.4, C.lip, q => { lips(q); q.closePath(); });
     stroke(g, 1.2, C.line, q => { q.moveTo(-w - 3, 22); q.quadraticCurveTo(-w - 7, 30, -w - 3, 40); q.moveTo(w + 3, 22); q.quadraticCurveTo(w + 7, 30, w + 3, 40); });
+    g.restore();
   }
   return { flat, over, BOX, C };
 })();
@@ -1991,7 +2014,9 @@ const Val = (function () {
   }
   // what moves, drawn over that each frame: her brows, her eyes behind their frames, and her mouth. `open` is
   // how far her mouth is open with the word she is on, 0 to 1.
-  function over(g, open = 0) {
+  function over(g, say = 0) {
+    // how open the mouth is, 0 to 1, and how round and how wide, from a number or from { open, round, wide }
+    const open = typeof say === 'number' ? say : say.open || 0, round = say.round || 0, wide = say.wide || 0;
     for (const s of [-1, 1]) {
       const x = s * 16, y = -8.5;
       // brows fine and arched, over the frames, and up with the word
@@ -2010,6 +2035,8 @@ const Val = (function () {
       ell(g, s * 28.5, -21, 1.3, 1.3, '#e3c46a');
     }
     stroke(g, 3.4, C.frame, q => { q.moveTo(-4, -12); q.quadraticCurveTo(0, -14.5, 4, -12); });
+    // the mouth narrower for oo and oh and wider for ee and eh, about its middle
+    g.save(); g.translate(0, 28); g.scale(1 + 0.3 * wide - 0.3 * round, 1 + 0.12 * round); g.translate(0, -28);
     // her mouth: red lips with a bow in the upper one, round on each word, and a small smile between them
     const w = 12.5 - open * 2.5, d = 0.6 + open * 10.5, y = 26 - open * 1.5;
     const lips = q => { q.moveTo(-w - 1.5, y + 0.5); q.bezierCurveTo(-w * 0.5, y - 4.6, -3, y - 5.2, 0, y - 3.4); q.bezierCurveTo(3, y - 5.2, w * 0.5, y - 4.6, w + 1.5, y + 0.5); q.bezierCurveTo(w * 0.7, y + d + 6.5, -w * 0.7, y + d + 6.5, -w - 1.5, y + 0.5); };
@@ -2024,6 +2051,7 @@ const Val = (function () {
     stroke(g, 1, C.lipDeep, q => { lips(q); q.closePath(); });
     stroke(g, 0.9, C.lipDeep, q => { q.moveTo(-w + 1.5, y + 0.6); q.quadraticCurveTo(0, y - 0.6 - open, w - 1.5, y + 0.6); });
     stroke(g, 1.1, C.line, q => { q.moveTo(-w - 4, y - 3); q.quadraticCurveTo(-w - 6.5, y + 2, -w - 4, y + 8); q.moveTo(w + 4, y - 3); q.quadraticCurveTo(w + 6.5, y + 2, w + 4, y + 8); });
+    g.restore();
   }
   return { flat, over, BOX, C };
 })();
@@ -2125,7 +2153,9 @@ const Mask = (function () {
   // What moves, drawn over that each frame: his brows, his eyes, his cheeks and his mouth. `open` is how far his
   // mouth is open, 0 to 1. `act.puff` is how full his cheeks are with what he has swallowed, 0 to 1, his mouth
   // shut tight over it, and `act.pop` how far his eyes start from his head when it goes off.
-  function over(g, open = 0, act = {}) {
+  function over(g, say = 0, act = {}) {
+    // how open the mouth is, 0 to 1, and how round and how wide, from a number or from { open, round, wide }
+    const open = typeof say === 'number' ? say : say.open || 0, round = say.round || 0, wide = say.wide || 0;
     const puff = act.puff || 0, pop = act.pop || 0;
     // the cheeks, blown out past the sides of his face
     if (puff > 0.02) for (const s of [-1, 1]) {
@@ -2149,6 +2179,8 @@ const Mask = (function () {
       stroke(g, 1.2, C.line, q => { q.moveTo(-12, 24); q.lineTo(-9, 27); q.moveTo(12, 24); q.lineTo(9, 27); });
       return;
     }
+    // the mouth narrower for oo and oh and wider for ee and eh, about its middle
+    g.save(); g.translate(0, 26); g.scale(1 + 0.3 * wide - 0.3 * round, 1 + 0.12 * round); g.translate(0, -26);
     // his grin: wide as his face, all teeth, and open behind them on a word
     const w = 27 - open * 5, d = 9 + open * 13, y = 20 - open * 2;
     const lips = q => { q.moveTo(-w, y); q.quadraticCurveTo(0, y + 5 - open * 6, w, y); q.bezierCurveTo(w * 0.8, y + d * 1.5, -w * 0.8, y + d * 1.5, -w, y); };
@@ -2164,6 +2196,7 @@ const Mask = (function () {
     stroke(g, 2, C.line, q => { lips(q); q.closePath(); });
     // the creases a grin makes
     stroke(g, 1.4, C.line, q => { q.moveTo(-w - 3, y - 7); q.quadraticCurveTo(-w - 8, y + 2, -w - 3, y + 10); q.moveTo(w + 3, y - 7); q.quadraticCurveTo(w + 8, y + 2, w + 3, y + 10); });
+    g.restore();
   }
   return { flat, over, BOX, C };
 })();
@@ -2244,7 +2277,9 @@ const Urkel = (function () {
   }
   // what moves, drawn over that each frame: his brows, his eyes behind their glasses, and his mouth. `open` is
   // how far his mouth is open with the word he is on, 0 to 1.
-  function over(g, open = 0) {
+  function over(g, say = 0) {
+    // how open the mouth is, 0 to 1, and how round and how wide, from a number or from { open, round, wide }
+    const open = typeof say === 'number' ? say : say.open || 0, round = say.round || 0, wide = say.wide || 0;
     for (const s of [-1, 1]) {
       const x = s * 15.5, y = -9;
       // brows up and drawn together, as a boy's are who is sorry
@@ -2260,6 +2295,8 @@ const Urkel = (function () {
       stroke(g, 3, C.frame, q => { q.moveTo(s * 28.5, -11); q.lineTo(s * 34, -9); });
     }
     stroke(g, 3.4, C.frame, q => { q.moveTo(-3, -11); q.quadraticCurveTo(0, -13.5, 3, -11); });
+    // the mouth narrower for oo and oh and wider for ee and eh, about its middle
+    g.save(); g.translate(0, 30); g.scale(1 + 0.3 * wide - 0.3 * round, 1 + 0.12 * round); g.translate(0, -30);
     // his mouth: a wide sheepish smile with the teeth showing, open on each word
     const w = 15 + open, d = 4.5 + open * 9, y = 27;
     const lips = q => { q.moveTo(-w, y); q.quadraticCurveTo(0, y + 3.5 - open * 3, w, y); q.bezierCurveTo(w * 0.8, y + d * 1.3, -w * 0.8, y + d * 1.3, -w, y); };
@@ -2272,6 +2309,7 @@ const Urkel = (function () {
     g.restore();
     stroke(g, 1.5, C.lip, q => { lips(q); q.closePath(); });
     stroke(g, 1.2, C.line, q => { q.moveTo(-w - 3, y - 5); q.quadraticCurveTo(-w - 6.5, y + 1, -w - 3, y + 7); q.moveTo(w + 3, y - 5); q.quadraticCurveTo(w + 6.5, y + 1, w + 3, y + 7); });
+    g.restore();
   }
   return { flat, over, BOX, C };
 })();
@@ -2347,7 +2385,9 @@ const Teacher = (function () {
   }
   // what moves, drawn over that each frame: his brows, his eyes behind their glasses, and his mouth. `open` is
   // how far his mouth is open with the name he is on, 0 to 1, which with him is never far.
-  function over(g, open = 0) {
+  function over(g, say = 0) {
+    // how open the mouth is, 0 to 1, and how round and how wide, from a number or from { open, round, wide }
+    const open = typeof say === 'number' ? say : say.open || 0, round = say.round || 0, wide = say.wide || 0;
     for (const s of [-1, 1]) {
       const x = s * 15.5, y = -10;
       // brows level, and lids half down
@@ -2364,12 +2404,15 @@ const Teacher = (function () {
       stroke(g, 0.8, 'rgba(255,255,255,0.6)', q => { q.moveTo(x - 9, y - 6); q.lineTo(x - 4, y - 8); });
     }
     stroke(g, 2.4, C.frame, q => { q.moveTo(-3, -15); q.quadraticCurveTo(0, -17, 3, -15); });
+    // the mouth narrower for oo and oh and wider for ee and eh, about its middle
+    g.save(); g.translate(0, 31); g.scale(1 + 0.3 * wide - 0.3 * round, 1 + 0.12 * round); g.translate(0, -31);
     // his mouth: a level line turned down at its ends, which parts a little on the name
     const w = 13, d = 0.6 + open * 5, y = 31;
     const lips = q => { q.moveTo(-w, y + 1.5); q.quadraticCurveTo(0, y - 2, w, y + 1.5); q.quadraticCurveTo(0, y - 2 + d * 2, -w, y + 1.5); };
     fill(g, C.mouth, lips);
     stroke(g, 1.5, C.lip, q => { lips(q); q.closePath(); });
     stroke(g, 1.2, C.line, q => { q.moveTo(-w - 3, y - 3); q.quadraticCurveTo(-w - 6, y + 3, -w - 4, y + 9); q.moveTo(w + 3, y - 3); q.quadraticCurveTo(w + 6, y + 3, w + 4, y + 9); });
+    g.restore();
   }
   return { flat, over, BOX, C };
 })();
@@ -2443,7 +2486,9 @@ const Harry = (function () {
     stroke(g, 1.2, C.line, q => { q.moveTo(-9, 13); q.quadraticCurveTo(-9.5, 17, -4, 17.5); q.moveTo(9, 13); q.quadraticCurveTo(9.5, 17, 4, 17.5); });
   }
   // what moves: his brows, his eyes and his mouth. `open` is how far his mouth is open with the word, 0 to 1.
-  function over(g, open = 0) {
+  function over(g, say = 0) {
+    // how open the mouth is, 0 to 1, and how round and how wide, from a number or from { open, round, wide }
+    const open = typeof say === 'number' ? say : say.open || 0, round = say.round || 0, wide = say.wide || 0;
     for (const s of [-1, 1]) {
       const x = s * 14.5, y = -9;
       // brows up in the middle, as a man's are who means it kindly
@@ -2453,6 +2498,8 @@ const Harry = (function () {
       stroke(g, 1.5, C.ink, q => { q.moveTo(x - 7.5, y + 1); q.quadraticCurveTo(x, y - 5.6 - open, x + 7.5, y + 1); });
       stroke(g, 1, C.line, q => { q.moveTo(x - 7, y + 1.4); q.quadraticCurveTo(x, y + 5, x + 7, y + 1.4); });
     }
+    // the mouth narrower for oo and oh and wider for ee and eh, about its middle
+    g.save(); g.translate(0, 30); g.scale(1 + 0.3 * wide - 0.3 * round, 1 + 0.12 * round); g.translate(0, -30);
     // his mouth: a wide soft smile, open on each word
     const w = 15 + open, d = 4 + open * 10, y = 28;
     const lips = q => { q.moveTo(-w, y); q.quadraticCurveTo(0, y + 4 - open * 3, w, y); q.bezierCurveTo(w * 0.8, y + d * 1.25, -w * 0.8, y + d * 1.25, -w, y); };
@@ -2465,6 +2512,7 @@ const Harry = (function () {
     g.restore();
     stroke(g, 1.5, C.lip, q => { lips(q); q.closePath(); });
     stroke(g, 1.2, C.line, q => { q.moveTo(-w - 3, y - 5); q.quadraticCurveTo(-w - 6.5, y + 1, -w - 3, y + 7); q.moveTo(w + 3, y - 5); q.quadraticCurveTo(w + 6.5, y + 1, w + 3, y + 7); });
+    g.restore();
   }
   return { flat, over, BOX, C };
 })();
@@ -2593,7 +2641,9 @@ const Church = (function () {
   }
   // what moves, drawn over that each frame: her brows, her eyes behind her glasses, and her mouth. `open` is how
   // far her mouth is open with the word she is on, 0 to 1.
-  function over(g, open = 0) {
+  function over(g, say = 0) {
+    // how open the mouth is, 0 to 1, and how round and how wide, from a number or from { open, round, wide }
+    const open = typeof say === 'number' ? say : say.open || 0, round = say.round || 0, wide = say.wide || 0;
     for (const s of [-1, 1]) {
       const x = s * 16, y = -8;
       // one brow level and pinched, the other raised high in an arch, and both up a little with the word
@@ -2616,6 +2666,8 @@ const Church = (function () {
       stroke(g, 2.6, C.frame, q => { q.moveTo(s * 32.5, -23); q.lineTo(s * 37, -20); });
     }
     stroke(g, 2.6, C.frame, q => { q.moveTo(-4, -10); q.quadraticCurveTo(0, -12.5, 4, -10); });
+    // the mouth narrower for oo and oh and wider for ee and eh, about its middle
+    g.save(); g.translate(0, 33); g.scale(1 + 0.3 * wide - 0.3 * round, 1 + 0.12 * round); g.translate(0, -33);
     // her mouth: pursed small and prim, with the fine lines of it round it, and a small round o on each word
     const w = 8 - open * 1.5, d = 0.4 + open * 7, y = 32 - open * 1;
     // the lipstick, drawn a little past the lips all round
@@ -2631,6 +2683,7 @@ const Church = (function () {
     const pucker = 'rgba(140,84,74,' + (0.6 * (1 - open)).toFixed(2) + ')';
     stroke(g, 0.7, pucker, q => { for (const k of [-1, 0, 1]) { q.moveTo(k * 3.5, y - 5); q.lineTo(k * 4.2, y - 7.5); q.moveTo(k * 3.5, y + d + 5.5); q.lineTo(k * 4.2, y + d + 8); } });
     stroke(g, 1, C.line, q => { q.moveTo(-w - 3.5, y - 1.5); q.quadraticCurveTo(-w - 5, y + 2, -w - 3.5, y + 5); q.moveTo(w + 3.5, y - 1.5); q.quadraticCurveTo(w + 5, y + 2, w + 3.5, y + 5); });
+    g.restore();
   }
   return { flat, over, BOX, C };
 })();
@@ -2728,7 +2781,9 @@ const Picard = (function () {
   }
   // what moves, drawn over that each frame: his brows, his eyes, and his mouth. `open` is how far his mouth is open
   // with the word he is on, 0 to 1.
-  function over(g, open = 0) {
+  function over(g, say = 0) {
+    // how open the mouth is, 0 to 1, and how round and how wide, from a number or from { open, round, wide }
+    const open = typeof say === 'number' ? say : say.open || 0, round = say.round || 0, wide = say.wide || 0;
     for (const s of [-1, 1]) {
       const x = s * 15, y = -8;
       // brows grey and straight, low over the eyes, a little up with the word
@@ -2742,6 +2797,8 @@ const Picard = (function () {
       stroke(g, 2, C.ink, q => { q.moveTo(x - 7.5, y + 0.5); q.quadraticCurveTo(x, y - 3.6, x + 7.5, y + 0.5); });
       stroke(g, 0.9, C.line, q => { q.moveTo(x - 8, y - 3); q.quadraticCurveTo(x, y - 7, x + 8, y - 3); q.moveTo(x - 6, y + 2); q.quadraticCurveTo(x, y + 4.8, x + 6, y + 2); q.moveTo(x - 5, y + 4.5); q.quadraticCurveTo(x, y + 6.5, x + 5, y + 4.5); });
     }
+    // the mouth narrower for oo and oh and wider for ee and eh, about its middle
+    g.save(); g.translate(0, 30); g.scale(1 + 0.3 * wide - 0.3 * round, 1 + 0.12 * round); g.translate(0, -30);
     // his mouth: thin lips, set firm, opening on each word
     const w = 10.5 - open * 2, d = 0.4 + open * 8, y = 29 - open;
     const lips = q => { q.moveTo(-w - 1, y + 0.4); q.bezierCurveTo(-w * 0.5, y - 1.8, -2.5, y - 2, 0, y - 1.3); q.bezierCurveTo(2.5, y - 2, w * 0.5, y - 1.8, w + 1, y + 0.4); q.bezierCurveTo(w * 0.6, y + d + 2.6, -w * 0.6, y + d + 2.6, -w - 1, y + 0.4); };
@@ -2753,6 +2810,7 @@ const Picard = (function () {
     }
     stroke(g, 1, C.lipDeep, q => { lips(q); q.closePath(); });
     stroke(g, 1.1, C.lipDeep, q => { q.moveTo(-w + 1.5, y + 0.4); q.quadraticCurveTo(0, y - 0.4 - open, w - 1.5, y + 0.4); });
+    g.restore();
   }
   return { flat, over, BOX, C };
 })();
@@ -2919,7 +2977,9 @@ const Townie = (function () {
     stroke(g, 1.2, C.line, q => { q.moveTo(-9, 11); q.quadraticCurveTo(-9.5, 15, -4, 15.5); q.moveTo(9, 11); q.quadraticCurveTo(9.5, 15, 4, 15.5); });
   }
   // what moves: his brows, his eyes and his mouth. `open` is how far his mouth is open with the shout, 0 to 1.
-  function over(g, open = 0) {
+  function over(g, say = 0) {
+    // how open the mouth is, 0 to 1, and how round and how wide, from a number or from { open, round, wide }
+    const open = typeof say === 'number' ? say : say.open || 0, round = say.round || 0, wide = say.wide || 0;
     for (const s of [-1, 1]) {
       const x = s * 14, y = -9;
       stroke(g, 3.8, C.brow, q => { q.moveTo(s * 26, -22 - open * 2); q.quadraticCurveTo(s * 15, -27 - open * 3, s * 4, -22 - open * 2); });
@@ -2928,6 +2988,8 @@ const Townie = (function () {
       stroke(g, 1.6, C.ink, q => { q.moveTo(x - 7.5, y + 1); q.quadraticCurveTo(x, y - 6 - open, x + 7.5, y + 1); });
       stroke(g, 1, C.line, q => { q.moveTo(x - 7, y + 1.4); q.quadraticCurveTo(x, y + 5.2, x + 7, y + 1.4); });
     }
+    // the mouth narrower for oo and oh and wider for ee and eh, about its middle
+    g.save(); g.translate(0, 28); g.scale(1 + 0.3 * wide - 0.3 * round, 1 + 0.12 * round); g.translate(0, -28);
     // his mouth: wide with the shout, under a moustache that comes down past its corners
     const w = 13 + open * 3, d = 4 + open * 15, y = 25;
     const lips = q => { q.moveTo(-w, y); q.quadraticCurveTo(0, y - 2, w, y); q.bezierCurveTo(w * 0.85, y + d * 1.25, -w * 0.85, y + d * 1.25, -w, y); };
@@ -2940,6 +3002,7 @@ const Townie = (function () {
     g.restore();
     stroke(g, 1.4, C.lip, q => { lips(q); q.closePath(); });
     fill(g, C.hair, q => { q.moveTo(0, 17); q.bezierCurveTo(-8, 15, -17, 19, -w - 5, 27 + d * 0.3); q.bezierCurveTo(-w - 1, 24, -9, 22.5, 0, 23); q.bezierCurveTo(9, 22.5, w + 1, 24, w + 5, 27 + d * 0.3); q.bezierCurveTo(17, 19, 8, 15, 0, 17); });
+    g.restore();
   }
   return { flat, over, BOX, C };
 })();
@@ -3871,19 +3934,20 @@ const Game = (function () {
     // enough to be read, and the mouth opens on the beats of the line.
     function speakers(g, now, t) {
       const since = now.n - now.wow.said, on = (from, stay) => now.n - from >= 0 && now.n - from < stay;
+      const call = on(now.roll, ROLL_UP) ? clamp(Math.floor(((now.n - now.roll) / HZ - ROLL_SAYS + 0.05) / ROLL_EVERY), 0, 2) : 0;
       const calls = on(now.roll, ROLL_UP) ? Math.min(2, Math.floor(((now.n - now.roll) / HZ - ROLL_SAYS + 0.12) / ROLL_EVERY)) : 0;
-      const guest = on(now.mask, MASK_UP) ? { who: Mask, sheet: MASK, from: now.mask, stay: MASK_UP, says: MASK_SAYS, beats: MASK_BEATS, bubble: BUBBLE6, lean: 0.03, words: MASK_LANDS + 16 }
-        : on(now.schnikes, SCHNIKES_UP) ? { who: Tommy, sheet: TOMMY, from: now.schnikes, stay: SCHNIKES_UP, says: SCHNIKES_SAYS, beats: SCHNIKES_BEATS, bubble: BUBBLE8, lean: 0.05 }
-        : on(now.redeem, REDEEM_UP) ? { who: Harry, sheet: HARRY, from: now.redeem, stay: REDEEM_UP, says: REDEEM_SAYS, beats: REDEEM_BEATS, bubble: BUBBLE10, size: [B2W, B4H], lean: 0.03 }
-        : on(now.cheer, CHEER_UP) ? { who: Townie, sheet: TOWNIE, from: now.cheer, stay: CHEER_UP, says: CHEER_SAYS, beats: CHEER_BEATS, bubble: BUBBLE9, size: [BW_, BH_], lean: -0.04 }
-        : on(now.roll, ROLL_UP) ? { who: Teacher, sheet: TEACHER, from: now.roll, stay: ROLL_UP, says: ROLL_SAYS, beats: ROLL_BEATS, bubble: ROLLS[Math.max(0, calls)], size: [B2W, B4H], lean: 0.02, words: Math.round(ROLL_SAYS * HZ) - 6 }
-        : on(now.urkel, URKEL_UP) ? { who: Urkel, sheet: URKEL, from: now.urkel, stay: URKEL_UP, says: URKEL_SAYS, beats: URKEL_BEATS, bubble: BUBBLE7, size: [BW_, BH_], lean: -0.05 }
-        : on(now.tommy, TOMMY_UP) ? { who: Tommy, sheet: TOMMY, from: now.tommy, stay: TOMMY_UP, says: TOMMY_SAYS, beats: TOMMY_BEATS, bubble: BUBBLE3, lean: -0.04 }
-        : on(now.happy, HAPPY_UP) ? { who: Happy, sheet: HAPPY, from: now.happy, stay: HAPPY_UP, says: HAPPY_SAYS, beats: HAPPY_BEATS, bubble: BUBBLE4, size: [B4W, B4H], lean: -0.06 }
-        : on(now.picard, PICARD_UP) ? { who: Picard, sheet: PICARD, from: now.picard, stay: PICARD_UP, says: PICARD_SAYS, beats: PICARD_BEATS, bubble: BUBBLE12, size: [B2W, B4H], lean: -0.03 }
-        : on(now.church, CHURCH_UP) ? { who: Church, sheet: CHURCH, from: now.church, stay: CHURCH_UP, says: CHURCH_SAYS, beats: CHURCH_BEATS, bubble: BUBBLE11, lean: 0.07 }
-          : on(now.val, VAL_UP) ? { who: Val, sheet: VAL, from: now.val, stay: VAL_UP, says: VAL_SAYS, beats: VAL_BEATS, bubble: BUBBLE5, lean: 0.04 }
-          : on(now.borat, BORAT_UP) ? { who: Borat, sheet: BORAT, from: now.borat, stay: BORAT_UP, says: LATE, beats: BORAT_BEATS, bubble: BUBBLE2, lean: 0.05 } : null;
+      const guest = on(now.mask, MASK_UP) ? { who: Mask, line: 'mask', sheet: MASK, from: now.mask, stay: MASK_UP, says: MASK_SAYS, beats: MASK_BEATS, bubble: BUBBLE6, lean: 0.03, words: MASK_LANDS + 16 }
+        : on(now.schnikes, SCHNIKES_UP) ? { who: Tommy, sheet: TOMMY, from: now.schnikes, line: 'schnikes', stay: SCHNIKES_UP, says: SCHNIKES_SAYS, beats: SCHNIKES_BEATS, bubble: BUBBLE8, lean: 0.05 }
+        : on(now.redeem, REDEEM_UP) ? { who: Harry, line: 'redeem', sheet: HARRY, from: now.redeem, stay: REDEEM_UP, says: REDEEM_SAYS, beats: REDEEM_BEATS, bubble: BUBBLE10, size: [B2W, B4H], lean: 0.03 }
+        : on(now.cheer, CHEER_UP) ? { who: Townie, line: 'cheer', sheet: TOWNIE, from: now.cheer, stay: CHEER_UP, says: CHEER_SAYS, beats: CHEER_BEATS, bubble: BUBBLE9, size: [BW_, BH_], lean: -0.04 }
+        : on(now.roll, ROLL_UP) ? { who: Teacher, line: 'bueller', rate: 1 - 0.04 * call, sheet: TEACHER, from: now.roll, stay: ROLL_UP, says: ROLL_SAYS + call * ROLL_EVERY, beats: ROLL_BEATS.map(b => b - call * ROLL_EVERY), bubble: ROLLS[Math.max(0, calls)], size: [B2W, B4H], lean: 0.02, words: Math.round(ROLL_SAYS * HZ) - 6 }
+        : on(now.urkel, URKEL_UP) ? { who: Urkel, line: 'urkel', sheet: URKEL, from: now.urkel, stay: URKEL_UP, says: URKEL_SAYS, beats: URKEL_BEATS, bubble: BUBBLE7, size: [BW_, BH_], lean: -0.05 }
+        : on(now.tommy, TOMMY_UP) ? { who: Tommy, sheet: TOMMY, from: now.tommy, line: 'tommy', stay: TOMMY_UP, says: TOMMY_SAYS, beats: TOMMY_BEATS, bubble: BUBBLE3, lean: -0.04 }
+        : on(now.happy, HAPPY_UP) ? { who: Happy, line: 'happy', sheet: HAPPY, from: now.happy, stay: HAPPY_UP, says: HAPPY_SAYS, beats: HAPPY_BEATS, bubble: BUBBLE4, size: [B4W, B4H], lean: -0.06 }
+        : on(now.picard, PICARD_UP) ? { who: Picard, line: 'picard', sheet: PICARD, from: now.picard, stay: PICARD_UP, says: PICARD_SAYS, beats: PICARD_BEATS, bubble: BUBBLE12, size: [B2W, B4H], lean: -0.03 }
+        : on(now.church, CHURCH_UP) ? { who: Church, line: 'church', sheet: CHURCH, from: now.church, stay: CHURCH_UP, says: CHURCH_SAYS, beats: CHURCH_BEATS, bubble: BUBBLE11, lean: 0.07 }
+          : on(now.val, VAL_UP) ? { who: Val, line: 'val', sheet: VAL, from: now.val, stay: VAL_UP, says: VAL_SAYS, beats: VAL_BEATS, bubble: BUBBLE5, lean: 0.04 }
+          : on(now.borat, BORAT_UP) ? { who: Borat, line: 'borat', sheet: BORAT, from: now.borat, stay: BORAT_UP, says: LATE, beats: BORAT_BEATS, bubble: BUBBLE2, lean: 0.05 } : null;
       const eddy = !guest && since >= 0 && since < WOW, leave = ease(clamp((since - (WOW - 16)) / 16, 0, 1));
       const steps = guest ? now.n - guest.from : 0, gone = guest ? ease(clamp((steps - (guest.stay - 16)) / 16, 0, 1)) : 0;
       if (guest) {
@@ -3892,7 +3956,10 @@ const Game = (function () {
         g.translate(WX, WY - 2 * WK + (1 - shown) * 270 * WK - (act ? act.jolt * 8 : 0)); g.rotate(guest.lean + 0.02 * Math.sin(t * 5)); g.scale(WK, WK);
         if (guest.who === Borat) rays(g, -30, 3, back(clamp(steps / 12, 0, 1)), t);
         K.sprite(g, guest.sheet, guest.who.BOX.x, guest.who.BOX.y);
-        guest.who.over(g, Math.max(mouth(steps / HZ - guest.says, guest.beats), act ? act.open : 0), act || undefined);
+        // the mouth follows the line's own sound where it was measured, and the line's beats where it was not
+        const secs = steps / HZ - guest.says, said = lips(guest.line, secs, guest.rate);
+        const open = Math.max(said ? said.open : mouth(secs, guest.beats), act ? act.open : 0);
+        guest.who.over(g, said ? { open, round: said.round, wide: said.wide } : open, act || undefined);
         // the smoke that comes from The Mask's ears when it has gone off
         if (act) for (const s of [-1, 1]) for (let k = 0; k < 3; k++) {
           const u = (steps - BOOM - k * 7) / 42;
@@ -3906,8 +3973,9 @@ const Game = (function () {
         g.restore();
       } else if (eddy) {
         const shown = back(clamp(since / 13, 0, 1)) * (1 - leave);
-        // the word takes a third of a second, and the wink comes on its heels
-        const open = since < 22 ? Math.sin(Math.PI * since / 22) : 0, wink = ease(clamp((since - 20) / 6, 0, 1)) * (1 - ease(clamp((since - 62) / 8, 0, 1)));
+        // the word, as its sound goes, sped up a little for each late wow, and the wink on its heels
+        const said = lips('wow', since / HZ - LATE, 1 + 0.04 * Math.min(now.wow.run - 1, 7));
+        const open = said ? said : since < 22 ? Math.sin(Math.PI * since / 22) : 0, wink = ease(clamp((since - 20) / 6, 0, 1)) * (1 - ease(clamp((since - 62) / 8, 0, 1)));
         g.save();
         g.translate(WX, WY + (1 - shown) * 262 * WK);
         g.rotate(-0.07 + 0.02 * Math.sin(t * 5) + 0.06 * (1 - clamp(since / 12, 0, 1)));
@@ -4148,6 +4216,17 @@ const Game = (function () {
     const CHEER_SAYS = 0.2, CHEER_BEATS = [0.1, 0.2, 0.36, 0.46, 0.66, 0.76, 0.96, 1.06];
     const URKEL_SAYS = 0.25, URKEL_BEATS = [0.06, 0.24, 0.42, 0.72, 0.84, 0.98, 1.1];
     const HAPPY_SAYS = 0.3, HAPPY_BEATS = [0.12, 0.35, 0.44, 0.69, 0.88, 1.0, 1.09, 1.49, 1.61, 1.85, 2.0, 2.12, 2.25, 2.49, 2.99, 3.11, 3.32, 3.44, 3.66, 3.82, 3.97, 4.11, 4.26];
+    // How each speaker's mouth goes with his line, measured from the line's own sound by film-studio's mouth.py, as
+    // the Gold Gondola film's singer's was: how open, how round and how wide, so many times a second. A line played
+    // faster or slower is read so too, and the mouth is a frame ahead of the sound, as it is in life. A line the
+    // browser says for want of a recording has no measure, and its mouth goes by its beats.
+    const LIPS = typeof MOUTHS === 'undefined' ? {} : JSON.parse(MOUTHS);
+    function lips(name, secs, rate = 1) {
+      const m = LIPS[name];
+      if (!m || (name !== 'wow' && !REAL.includes(name))) return null;
+      const i = Math.round((secs * rate + 0.033) * m.fps);
+      return i < 0 || i >= m.open.length ? { open: 0, round: 0, wide: 0 } : { open: m.open[i], round: m.round[i], wide: m.wide[i] };
+    }
     // how far a mouth is open, 0 to 1, `secs` into a line whose beats are these
     const mouth = (secs, beats) => Math.max(0.1, ...beats.map(b => 1 - Math.abs(secs - b) / 0.085));
     const LATE = 0.1, HEARD = { deal: 0.5, pick: 0.35, swap: 0.4, no: 0.5, level: 0.65, over: 0.6, tick: 0.45 };
@@ -4221,7 +4300,7 @@ window.__FILM__ = Game;
 <script>
 'use strict';
 // A generic game page: the game draws from the page's clock, and is told what is pressed and let go.
-const CONFIG = {"title": "Wow Jewels", "art": {"width": 1920, "height": 1080, "portrait": {"width": 1080, "height": 1920}}, "loop": 12, "film": {"global": "Game"}, "smooth": true, "game": {"keys": {"Space": "go", "Enter": "go", "KeyS": "meat"}, "background": "#1a1208", "moves": true, "fullscreen": true, "volume": 0.8, "pause": true, "home": true, "settings": true, "resume": "rules.js", "radio": [{"id": "house-nation-uk-house", "name": "House Nation UK (house)", "urls": ["https://streaming.radio.co/s06bd9d805/listen"], "home": "https://housenationuk.com/", "now": {"url": "https://public.radio.co/stations/s06bd9d805/status", "path": "current_track.title"}}, {"id": "sunshine-live-house", "name": "sunshine live: House", "urls": ["https://stream.sunshine-live.de/house/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "sunshine-live-classic-vocal-house", "name": "sunshine live: Classic & Vocal House", "urls": ["https://stream.sunshine-live.de/vocalhouse/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "rm-fm-house", "name": "rm.fm House", "urls": ["https://house-high.rautemusik.fm/"], "home": "https://www.rm.fm/house"}, {"id": "technolovers-funky-house", "name": "Technolovers Funky House", "urls": ["https://stream.technolovers.fm/funky-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-deep-house", "name": "Technolovers Deep House", "urls": ["https://stream.technolovers.fm/deep-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-ibiza-house", "name": "Technolovers Ibiza House", "urls": ["https://stream.technolovers.fm/ibiza-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-house", "name": "Technolovers House", "urls": ["https://stream.technolovers.fm/house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-afro-house", "name": "Technolovers Afro House", "urls": ["https://stream.technolovers.fm/afro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-bass-house", "name": "Technolovers Bass House", "urls": ["https://stream.technolovers.fm/bass-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-dirty-house", "name": "Technolovers Dirty House", "urls": ["https://stream.technolovers.fm/dirty-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-electro-house", "name": "Technolovers Electro House", "urls": ["https://stream.technolovers.fm/electro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-future-house", "name": "Technolovers Future House", "urls": ["https://stream.technolovers.fm/future-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-latin-house", "name": "Technolovers Latin House", "urls": ["https://stream.technolovers.fm/latinhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tech-house", "name": "Technolovers Tech House", "urls": ["https://stream.technolovers.fm/techhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tropical-house", "name": "Technolovers Tropical House", "urls": ["https://stream.technolovers.fm/tropical-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-melodic-house-techno", "name": "Technolovers Melodic House & Techno", "urls": ["https://stream.technolovers.fm/melodic-house-techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-techno", "name": "Technolovers Techno", "urls": ["https://stream.technolovers.fm/techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-trance", "name": "Technolovers Trance", "urls": ["https://stream.technolovers.fm/trance"], "home": "https://technolovers.fm/"}, {"id": "technolovers-lounge", "name": "Technolovers Lounge", "urls": ["https://stream.technolovers.fm/lounge"], "home": "https://technolovers.fm/"}, {"id": "somafm-beatblender", "name": "SomaFM Beat Blender (deep house)", "urls": ["https://ice2.somafm.com/beatblender-128-mp3", "https://ice6.somafm.com/beatblender-128-mp3", "https://ice5.somafm.com/beatblender-128-mp3"], "home": "https://somafm.com/beatblender/", "now": {"url": "https://somafm.com/songs/beatblender.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-thetrip", "name": "SomaFM The Trip (progressive house)", "urls": ["https://ice2.somafm.com/thetrip-128-mp3", "https://ice6.somafm.com/thetrip-128-mp3", "https://ice5.somafm.com/thetrip-128-mp3"], "home": "https://somafm.com/thetrip/", "now": {"url": "https://somafm.com/songs/thetrip.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-groovesalad", "name": "SomaFM Groove Salad (downtempo)", "urls": ["https://ice2.somafm.com/groovesalad-128-mp3", "https://ice6.somafm.com/groovesalad-128-mp3", "https://ice5.somafm.com/groovesalad-128-mp3"], "home": "https://somafm.com/groovesalad/", "now": {"url": "https://somafm.com/songs/groovesalad.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-fluid", "name": "SomaFM Fluid (instrumental hip hop)", "urls": ["https://ice2.somafm.com/fluid-128-mp3", "https://ice6.somafm.com/fluid-128-mp3", "https://ice5.somafm.com/fluid-128-mp3"], "home": "https://somafm.com/fluid/", "now": {"url": "https://somafm.com/songs/fluid.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-spacestation", "name": "SomaFM Space Station Soma (space electronic)", "urls": ["https://ice2.somafm.com/spacestation-128-mp3", "https://ice6.somafm.com/spacestation-128-mp3", "https://ice5.somafm.com/spacestation-128-mp3"], "home": "https://somafm.com/spacestation/", "now": {"url": "https://somafm.com/songs/spacestation.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-secretagent", "name": "SomaFM Secret Agent (spy lounge)", "urls": ["https://ice2.somafm.com/secretagent-128-mp3", "https://ice6.somafm.com/secretagent-128-mp3", "https://ice5.somafm.com/secretagent-128-mp3"], "home": "https://somafm.com/secretagent/", "now": {"url": "https://somafm.com/songs/secretagent.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-u80s", "name": "SomaFM Underground 80s (synthpop)", "urls": ["https://ice6.somafm.com/u80s-128-mp3", "https://ice2.somafm.com/u80s-128-mp3", "https://ice5.somafm.com/u80s-128-mp3"], "home": "https://somafm.com/u80s/", "now": {"url": "https://somafm.com/songs/u80s.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-indiepop", "name": "SomaFM Indie Pop Rocks!", "urls": ["https://ice6.somafm.com/indiepop-128-mp3", "https://ice2.somafm.com/indiepop-128-mp3", "https://ice5.somafm.com/indiepop-128-mp3"], "home": "https://somafm.com/indiepop/", "now": {"url": "https://somafm.com/songs/indiepop.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}], "radioCredit": {"text": "Each station plays from its own stream. SomaFM is listener-supported and free of ads:", "href": "https://somafm.com/", "link": "somafm.com"}, "musicVolume": 0.25, "updates": true, "radioDefault": "technolovers-electro-house", "fxVolume": 0.5, "scores": {"url": "", "key": "1ba9dc01f74e8ba2"}, "resumeKey": "1ba9dc01f74e8ba2", "build": "6268db04bf28"}};
+const CONFIG = {"title": "Wow Jewels", "art": {"width": 1920, "height": 1080, "portrait": {"width": 1080, "height": 1920}}, "loop": 12, "film": {"global": "Game"}, "smooth": true, "game": {"keys": {"Space": "go", "Enter": "go", "KeyS": "meat"}, "background": "#1a1208", "moves": true, "fullscreen": true, "volume": 0.8, "pause": true, "home": true, "settings": true, "resume": "rules.js", "radio": [{"id": "house-nation-uk-house", "name": "House Nation UK (house)", "urls": ["https://streaming.radio.co/s06bd9d805/listen"], "home": "https://housenationuk.com/", "now": {"url": "https://public.radio.co/stations/s06bd9d805/status", "path": "current_track.title"}}, {"id": "sunshine-live-house", "name": "sunshine live: House", "urls": ["https://stream.sunshine-live.de/house/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "sunshine-live-classic-vocal-house", "name": "sunshine live: Classic & Vocal House", "urls": ["https://stream.sunshine-live.de/vocalhouse/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "rm-fm-house", "name": "rm.fm House", "urls": ["https://house-high.rautemusik.fm/"], "home": "https://www.rm.fm/house"}, {"id": "technolovers-funky-house", "name": "Technolovers Funky House", "urls": ["https://stream.technolovers.fm/funky-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-deep-house", "name": "Technolovers Deep House", "urls": ["https://stream.technolovers.fm/deep-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-ibiza-house", "name": "Technolovers Ibiza House", "urls": ["https://stream.technolovers.fm/ibiza-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-house", "name": "Technolovers House", "urls": ["https://stream.technolovers.fm/house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-afro-house", "name": "Technolovers Afro House", "urls": ["https://stream.technolovers.fm/afro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-bass-house", "name": "Technolovers Bass House", "urls": ["https://stream.technolovers.fm/bass-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-dirty-house", "name": "Technolovers Dirty House", "urls": ["https://stream.technolovers.fm/dirty-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-electro-house", "name": "Technolovers Electro House", "urls": ["https://stream.technolovers.fm/electro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-future-house", "name": "Technolovers Future House", "urls": ["https://stream.technolovers.fm/future-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-latin-house", "name": "Technolovers Latin House", "urls": ["https://stream.technolovers.fm/latinhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tech-house", "name": "Technolovers Tech House", "urls": ["https://stream.technolovers.fm/techhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tropical-house", "name": "Technolovers Tropical House", "urls": ["https://stream.technolovers.fm/tropical-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-melodic-house-techno", "name": "Technolovers Melodic House & Techno", "urls": ["https://stream.technolovers.fm/melodic-house-techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-techno", "name": "Technolovers Techno", "urls": ["https://stream.technolovers.fm/techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-trance", "name": "Technolovers Trance", "urls": ["https://stream.technolovers.fm/trance"], "home": "https://technolovers.fm/"}, {"id": "technolovers-lounge", "name": "Technolovers Lounge", "urls": ["https://stream.technolovers.fm/lounge"], "home": "https://technolovers.fm/"}, {"id": "somafm-beatblender", "name": "SomaFM Beat Blender (deep house)", "urls": ["https://ice2.somafm.com/beatblender-128-mp3", "https://ice6.somafm.com/beatblender-128-mp3", "https://ice5.somafm.com/beatblender-128-mp3"], "home": "https://somafm.com/beatblender/", "now": {"url": "https://somafm.com/songs/beatblender.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-thetrip", "name": "SomaFM The Trip (progressive house)", "urls": ["https://ice2.somafm.com/thetrip-128-mp3", "https://ice6.somafm.com/thetrip-128-mp3", "https://ice5.somafm.com/thetrip-128-mp3"], "home": "https://somafm.com/thetrip/", "now": {"url": "https://somafm.com/songs/thetrip.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-groovesalad", "name": "SomaFM Groove Salad (downtempo)", "urls": ["https://ice2.somafm.com/groovesalad-128-mp3", "https://ice6.somafm.com/groovesalad-128-mp3", "https://ice5.somafm.com/groovesalad-128-mp3"], "home": "https://somafm.com/groovesalad/", "now": {"url": "https://somafm.com/songs/groovesalad.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-fluid", "name": "SomaFM Fluid (instrumental hip hop)", "urls": ["https://ice2.somafm.com/fluid-128-mp3", "https://ice6.somafm.com/fluid-128-mp3", "https://ice5.somafm.com/fluid-128-mp3"], "home": "https://somafm.com/fluid/", "now": {"url": "https://somafm.com/songs/fluid.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-spacestation", "name": "SomaFM Space Station Soma (space electronic)", "urls": ["https://ice2.somafm.com/spacestation-128-mp3", "https://ice6.somafm.com/spacestation-128-mp3", "https://ice5.somafm.com/spacestation-128-mp3"], "home": "https://somafm.com/spacestation/", "now": {"url": "https://somafm.com/songs/spacestation.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-secretagent", "name": "SomaFM Secret Agent (spy lounge)", "urls": ["https://ice2.somafm.com/secretagent-128-mp3", "https://ice6.somafm.com/secretagent-128-mp3", "https://ice5.somafm.com/secretagent-128-mp3"], "home": "https://somafm.com/secretagent/", "now": {"url": "https://somafm.com/songs/secretagent.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-u80s", "name": "SomaFM Underground 80s (synthpop)", "urls": ["https://ice6.somafm.com/u80s-128-mp3", "https://ice2.somafm.com/u80s-128-mp3", "https://ice5.somafm.com/u80s-128-mp3"], "home": "https://somafm.com/u80s/", "now": {"url": "https://somafm.com/songs/u80s.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-indiepop", "name": "SomaFM Indie Pop Rocks!", "urls": ["https://ice6.somafm.com/indiepop-128-mp3", "https://ice2.somafm.com/indiepop-128-mp3", "https://ice5.somafm.com/indiepop-128-mp3"], "home": "https://somafm.com/indiepop/", "now": {"url": "https://somafm.com/songs/indiepop.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}], "radioCredit": {"text": "Each station plays from its own stream. SomaFM is listener-supported and free of ads:", "href": "https://somafm.com/", "link": "somafm.com"}, "musicVolume": 0.25, "updates": true, "radioDefault": "technolovers-electro-house", "fxVolume": 0.5, "scores": {"url": "", "key": "1ba9dc01f74e8ba2"}, "resumeKey": "1ba9dc01f74e8ba2", "build": "da4319bd1440"}};
 const GAME = CONFIG.game === true ? {} : CONFIG.game;
 // the picture's size: the config's, or its portrait size while the window is taller than it is wide
 const sizeNow = () => (CONFIG.art.portrait && window.innerHeight > window.innerWidth ? CONFIG.art.portrait : CONFIG.art);
