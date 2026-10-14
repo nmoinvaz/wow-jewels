@@ -3886,8 +3886,8 @@ if (GAME.pause) {
 // With "radio" in the game entry, a list of { name, urls, home }, the settings offer the stations. A stream is
 // played by an audio element whose sound goes through the page's own sound, so that its volume can be set on a
 // phone too, which takes no volume from a page's audio element itself. It stops while the game is paused. A
-// station that cannot be played, as on a page that may not reach other sites, says so, with a link to hear it
-// in another tab.
+// station that cannot be played from the page, as one that may not reach other sites, or one the station turns
+// away, says so, with a link to hear it in another tab.
 const R = { el: null, gain: null, tries: 0, failed: false };
 // whether the settings card is open: the game stands still then, but the radio and the page's sound go on
 const carding = () => !!GAME.settings && !$('settings').hidden;
@@ -3911,8 +3911,7 @@ function failed() {
   // the next of the station's servers, and when there are none left, a word and a link
   if (++R.tries < st.urls.length) { R.el.src = st.urls[R.tries]; listen(); return; }
   R.failed = true;
-  const framed = window.top !== window;
-  radioSays(framed ? st.name + ' cannot play inside this page, which may not reach other sites.' : st.name + ' cannot be played just now.', st.home && { href: st.home, text: 'Listen in a new tab' });
+  radioSays(st.name + ' cannot be played from this page.', st.home && { href: st.home, text: 'Listen in a new tab' });
 }
 function tune(choice) {
   SET.station = choice; store.set('settings', SET);
