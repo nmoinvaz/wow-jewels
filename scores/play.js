@@ -26,12 +26,15 @@
   // does. Events from before that step are counted in it already.
   function world(o) {
     const hz = o.hz || 60, keep = o.keep || hz, events = [], kept = [];
+    // how many steps have been taken, and how many times the world went back to a kept state, for a page to watch
+    const stats = { steps: 0, restarts: 0 };
     let state = null, held = {}, n = 0, ei = 0;
     const stepOf = t => Math.max(0, Math.floor(t * hz + 1e-9));
     function restart(to) {
       // the last kept state at or before step `to`
       while (kept.length > 1 && kept[kept.length - 1].n > to) kept.pop();
       const k = kept[kept.length - 1];
+      stats.restarts++;
       state = copy(k.state); held = copy(k.held); n = k.n; ei = k.ei;
     }
     kept.push(o.from ? copy(o.from) : { n: 0, ei: 0, held: {}, state: copy(o.init()) });
@@ -57,13 +60,13 @@
         }
         // a key let go in the step it went down still counts as hit in it
         o.step(state, held, hit, n);
-        n++;
+        n++; stats.steps++;
         if (n % keep === 0 && kept[kept.length - 1].n < n) kept.push({ n, ei, held: copy(held), state: copy(state) });
       }
       return state;
     }
     const save = () => ({ n, ei, held: copy(held), state: copy(state) });
-    return { input, at, save, hz, events };
+    return { input, at, save, hz, events, stats };
   }
 
   // pad({ stick: { x, y, w, h, dead, reach }, buttons: [{ key, x, y, w, h }] }): the places on the picture, in
