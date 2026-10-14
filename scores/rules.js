@@ -10,7 +10,8 @@
 // takes the jewels round it. Urkel comes up at what was not meant: a change that makes nothing, or a row that
 // falls in by luck. A player who does nothing for a while is called for, as a teacher calls a roll, and the first
 // row made after that is told it has redeemed itself. When the clock is getting low, or the next level is near,
-// a townie shouts you can do it.
+// a townie shouts you can do it. Now and then, as a jewel turns into another kind, as a replicator makes a thing,
+// Captain Picard asks for his tea.
 //
 // A row of four leaves a striped jewel where it was, which takes its whole row or column with it when it goes. A
 // row of five or more leaves a peacock, which is no kind: changed with a neighbour, it takes every jewel of the
@@ -89,6 +90,9 @@
   const HAPPY_UP = 304;
   // the steps the Church Lady stays, who comes up by turns with Happy at a row of four or more
   const CHURCH_UP = 160;
+  // Picard comes up as a jewel turns into another kind, though not within so many steps of a game's start nor of his
+  // last visit; and the steps he stays
+  const PICARD_FIRST = HZ * 50, PICARD_REST = HZ * 120, PICARD_UP = 180;
   // the score at each multiple of which an alarm goes off, and the steps it rings and lights everything up
   const ALARM = 1000, ALARM_UP = 110;
   // How often the new jewels are dealt again when they would end the game: often, since it is the clock that
@@ -183,7 +187,7 @@
     const blank = () => Array.from({ length: CELLS }, () => 0);
     const init = () => {
       const S = { phase: 'title', n: 0, t: 0, seed: 20261012, board: [], drop: blank(), mode: 'still', k: 0, a: -1, b: -1, back: 0, gone: [], want: '', sel: -1, hint: -1, idle: 0,
-        score: 0, level: 1, into: 0, chain: 0, left: 0, games: 0, time: TIME, shown: TIME, why: '', wow: { said: -1e6, run: 0, n: -1e6, count: 0, len: 0, cells: [] }, wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_FIRST, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 }, pops: [], ev: [] };
+        score: 0, level: 1, into: 0, chain: 0, left: 0, games: 0, time: TIME, shown: TIME, why: '', wow: { said: -1e6, run: 0, n: -1e6, count: 0, len: 0, cells: [] }, wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, picard: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_FIRST, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 }, pops: [], ev: [] };
       S.board = deal(S);
       S.left = moves(S.board).length;
       return S;
@@ -191,10 +195,11 @@
     function begin(S) {
       // the tray is dealt from the moment the game was asked for, so no two games are alike
       S.seed = ((S.n + 1) * 48271 + S.games * 9973 + 12345) % 2147483647 || 1;
-      Object.assign(S, { phase: 'play', t: 0, mode: 'fall', k: 0, a: -1, b: -1, back: 0, gone: [], want: '', sel: -1, hint: -1, idle: 0, score: 0, level: 1, into: 0, chain: 0, pops: [], time: TIME, shown: TIME, why: '', wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_FIRST, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 } });
+      Object.assign(S, { phase: 'play', t: 0, mode: 'fall', k: 0, a: -1, b: -1, back: 0, gone: [], want: '', sel: -1, hint: -1, idle: 0, score: 0, level: 1, into: 0, chain: 0, pops: [], time: TIME, shown: TIME, why: '', wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, picard: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_FIRST, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 } });
       S.games++;
       S.spice = S.n + MASK_FIRST;
       S.spying = S.n + SPY_FIRST;
+      S.picard = S.n - PICARD_REST + PICARD_FIRST;
       S.ready = S.n;
       S.rested = S.n;
       S.wanted = { kind: Math.floor(rnd(S) * KINDS), n: S.n };
@@ -241,7 +246,7 @@
       S.gild = Math.round(HZ * (GILD[0] + (GILD[1] - GILD[0]) * rnd(S)));
     }
     // A tap on whoever is up pays a little, once for each time someone comes up.
-    const STAYS = { tommy: TOMMY_UP, happy: HAPPY_UP, church: CHURCH_UP, val: VAL_UP, borat: BORAT_UP, mask: MASK_UP, urkel: URKEL_UP, roll: ROLL_UP, schnikes: SCHNIKES_UP, redeem: REDEEM_UP, cheer: CHEER_UP };
+    const STAYS = { tommy: TOMMY_UP, happy: HAPPY_UP, church: CHURCH_UP, picard: PICARD_UP, val: VAL_UP, borat: BORAT_UP, mask: MASK_UP, urkel: URKEL_UP, roll: ROLL_UP, schnikes: SCHNIKES_UP, redeem: REDEEM_UP, cheer: CHEER_UP };
     function tip(S) {
       let up = S.n - S.wow.said < WOW ? S.wow.said : -1;
       for (const who in STAYS) if (S.n - S[who] >= 0 && S.n - S[who] < STAYS[who]) up = Math.max(up, S[who]);
@@ -451,6 +456,8 @@
         S.left = left;
         if (S.hint === i) S.hint = -1;
         say(S, 'turn');
+        // Picard asks the replicator for his tea, if no one else is up and he has not lately
+        if (S.n > S.hush && S.n - S.picard >= PICARD_REST) { S.picard = S.n; S.hush = S.n + PICARD_UP; say(S, 'picard'); }
         break;
       }
       S.shift = Math.round(HZ * (TURN[0] + (TURN[1] - TURN[0]) * rnd(S)) / (1 + 0.06 * (S.level - 1)));
@@ -563,5 +570,5 @@
   // what a game came to once it is over, for a page to post and a server to check by playing it again, or null
   // while one is going
   const result = S => (S.phase === 'over' ? { game: S.games, score: S.score, level: S.level } : null);
-  return { create, result, rows, moves, beside, through, need, above, drain, N, CELLS, KINDS, PEACOCK, ACROSS, DOWN, HZ, SWAP, CLEAR, FALL, HINT, AGAIN, WOW, WOW_GAP, TIME, BORAT, BORAT_IN, BORAT_UP, TOMMY_UP, HAPPY_UP, CHURCH_UP, VAL_UP, MASK_UP, MASK_LANDS, URKEL_UP, ROLL_UP, REDEEM_UP, CHEER_UP, SCHNIKES_UP, BLAST, BACK, MEAT_MIN, MEAT_REST, WANT_FOR, GILT_FOR, MARK, ALARM, ALARM_UP, TURNING, SPY_FOR };
+  return { create, result, rows, moves, beside, through, need, above, drain, N, CELLS, KINDS, PEACOCK, ACROSS, DOWN, HZ, SWAP, CLEAR, FALL, HINT, AGAIN, WOW, WOW_GAP, TIME, BORAT, BORAT_IN, BORAT_UP, TOMMY_UP, HAPPY_UP, CHURCH_UP, PICARD_UP, VAL_UP, MASK_UP, MASK_LANDS, URKEL_UP, ROLL_UP, REDEEM_UP, CHEER_UP, SCHNIKES_UP, BLAST, BACK, MEAT_MIN, MEAT_REST, WANT_FOR, GILT_FOR, MARK, ALARM, ALARM_UP, TURNING, SPY_FOR };
 });
