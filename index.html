@@ -43,7 +43,7 @@
   .settings a { color: var(--focus); }
   .settings button { padding: 8px 16px; border: 0; border-radius: 6px; background: var(--focus); color: #17110a; font: inherit; font-weight: 600; cursor: pointer; }
   .settings :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
-  /* with "scores" a cup among the corner buttons opens a card like the settings' with the world's best */
+  /* with "scores" a cup among the corner buttons, which has the game show the world's best */
   .full.cup svg { stroke-width: 1.4; stroke-linejoin: round; }
   .settings .panel[hidden], .settings label[hidden], .settings button[hidden] { display: none; }
   .settings .panel { display: grid; gap: 10px; }
@@ -91,7 +91,6 @@
 <button class="full gear" id="gear" type="button" aria-label="Settings" aria-expanded="false" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="2.3"/><path d="M8 1.6v2.1M8 12.3v2.1M1.6 8h2.1M12.3 8h2.1M3.5 3.5L5 5M11 11l1.5 1.5M3.5 12.5L5 11M11 5l1.5-1.5"/></svg></button>
 <form class="settings" id="settings" autocomplete="off" hidden><b id="set-head">Sounds</b><div class="panel" id="set-panel"><label>Effects <input type="range" id="fx" min="0" max="100" step="1"></label><label>Music <input type="range" id="mu" min="0" max="100" step="1"></label><label>Station <select id="station"><option value="">Off</option></select></label><p id="radio-says"></p><p id="radio-song"></p><p id="radio-credit"></p></div><label class="check"><input type="checkbox" id="speed"> Speed stats</label><button type="submit">Done</button></form>
 <button class="full cup" id="cup" type="button" aria-label="Best scores" aria-expanded="false" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.6 2.4h6.8v3.4a3.4 3.4 0 0 1-6.8 0z"/><path d="M4.6 3.6H2.5v.8a2.5 2.5 0 0 0 2.6 2.5M11.4 3.6h2.1v.8a2.5 2.5 0 0 1-2.6 2.5M8 9.2v2.4M5.4 13.6h5.2M6.3 11.6h3.4v2"/></svg></button>
-<form class="settings" id="scores" autocomplete="off" hidden><b>World’s best</b><ol id="best"></ol><p id="best-none" hidden>No scores yet.</p><p id="scores-says"></p><label id="post" hidden>Name <input id="post-name" type="text" maxlength="16" enterkeyhint="send" autocapitalize="words" spellcheck="false"></label><button type="button" id="post-go" hidden>Post my score</button><button type="submit">Done</button></form>
 <button class="full next" id="next" type="button" aria-label="Next station" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.2 3.6l5.2 4.4-5.2 4.4zM8.4 3.6l5.2 4.4-5.2 4.4z"/></svg></button>
 <p class="tuned" id="tuned" hidden aria-live="polite"></p>
 <button class="full" id="full" type="button" aria-label="Full screen" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path class="out" d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/><path class="in" d="M6 2v4H2M14 6h-4V2M10 14v-4h4M2 10h4v4"/></svg></button>
@@ -3109,6 +3108,14 @@ const Game = (function () {
       g.moveTo(x + r, y); g.lineTo(x + w - r, y); g.quadraticCurveTo(x + w, y, x + w, y + r); g.lineTo(x + w, y + h - r); g.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
       g.lineTo(x + r, y + h); g.quadraticCurveTo(x, y + h, x, y + h - r); g.lineTo(x, y + r); g.quadraticCurveTo(x, y, x + r, y); g.closePath();
     }
+    // how wide a label would be
+    function width(g, s, size, space) {
+      g.font = `bold ${size}px ${FACE}`;
+      if ('letterSpacing' in g) g.letterSpacing = `${space}px`;
+      const w = g.measureText(s).width;
+      if ('letterSpacing' in g) g.letterSpacing = '0px';
+      return w;
+    }
     function label(g, s, x, y, size, o = {}) {
       g.font = `${o.weight || 'bold'} ${size}px ${FACE}`;
       g.textAlign = o.align || 'left'; g.textBaseline = 'alphabetic';
@@ -3328,11 +3335,30 @@ const Game = (function () {
       // the first score to make the board is asked a name
       if (!entry.n && board.includes(entry) && env.ask) env.ask({ label: 'A top score! Your name for the board:', max: NAME, value: String(env.store.get('name') || '').slice(0, NAME) }).then(name => { if (name) { entry.n = name.slice(0, NAME); save(); env.store.set('name', entry.n); } });
     }
-    // The page says when a game over at t that it posted was kept on the world's board, and the game's own board
-    // marks it.
-    function posted(t, kept) {
-      const e = kept && board.find(x => x.id === idOf(world.at(t)));
+    // The page says how a game over at t that it posted went on the world's board: 'checking', { rank, of } once
+    // it is kept, or false. The game's own board marks a game kept there, and the card at a game's end says it.
+    let placed = null;
+    function posted(t, how) {
+      const id = idOf(world.at(t));
+      placed = { id, how };
+      const e = how && how.rank && board.find(x => x.id === id);
       if (e && !e.w) { e.w = true; save(); }
+    }
+    const nth = k => k + (k % 100 >= 11 && k % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][k % 10] || 'th');
+    // The world's best, as the page fetches them for its cup, with the player's own, or null when they are put away.
+    let best = null, bestMine = '';
+    const showBest = (rows, mine) => { best = rows ? rows.map(r => ({ id: r.id, s: r.score, l: r.level, n: r.name })) : null; bestMine = mine || ''; };
+    // The world's best over the tray, darkened under them: a panel like the one at a game's end, its title, the rows
+    // with the player's own picked out, and how to go back.
+    function bestCard(g) {
+      const rows = best.slice(0, 10), w = tall ? 440 : 410, h = 136 + (rows.length ? 18 + rows.length * 25 : 24), cx = BX + BW / 2, y0 = BY + BW / 2 - h / 2;
+      g.fillStyle = 'rgba(12,8,4,0.5)'; g.fillRect(BX, BY, BW, BW);
+      rect(g, cx - w / 2 + 6, y0 + 8, w, h, 'rgba(20,12,4,0.5)');
+      panel(g, cx - w / 2, y0, w, h);
+      label(g, 'THE WORLD\u2019S BEST', cx, y0 + 52, 29, { align: 'center', space: 3 });
+      if (rows.length) scores(g, cx, y0 + 60, w - 96, bestMine, rows, false, '');
+      else label(g, 'No scores yet.', cx, y0 + 92, 18, { align: 'center', weight: '500', color: C.umber });
+      label(g, `${env.touch ? 'TAP' : 'CLICK'} TO GO BACK`, cx, y0 + h - 24, 22, { align: 'center', color: C.red, space: 3 });
     }
     // whether a score is on the world's board: a small gold globe if it is, a faint ring if it was kept only here
     function globe(g, x, y, on) {
@@ -3453,20 +3479,26 @@ const Game = (function () {
     }
     // the board's rows from y down, the game just played picked out, and with world scores a key to the marks
     const KEY = 22;
-    function scores(g, cx, y, w, mine) {
-      label(g, 'TOP SCORES', cx, y, 13, { align: 'center', color: C.red, space: 2.5 });
-      board.forEach((e, i) => {
+    function scores(g, cx, y, w, mine, rows = board, marks = env.scores, title = 'TOP SCORES') {
+      if (title) label(g, title, cx, y, 13, { align: 'center', color: C.red, space: 2.5 });
+      rows.forEach((e, i) => {
         const yy = y + 27 + i * 25, x0 = cx - w / 2, x1 = cx + w / 2, me = e.id === mine;
         if (me) { rect(g, x0 - 8, yy - 18, w + 16, 24, C.gold); rect(g, x0 - 8, yy - 18, 4, 24, C.red); }
-        if (env.scores) globe(g, x0 + 30, yy - 5.5, !!e.w);
+        if (marks) globe(g, x0 + 30, yy - 5.5, !!e.w);
         label(g, `${i + 1}`, x0 + 6, yy, 17, { color: me ? INK : C.umber });
-        label(g, (e.n || '—').toUpperCase(), x0 + (env.scores ? 44 : 32), yy, 15, { space: 1 });
+        // the name in the room left before the score: smaller when it is long, and cut short when even that
+        // will not do
+        const nx = x0 + (marks ? 44 : 32), sw = width(g, commas(e.s), 19, 0), room = x1 - 76 - sw - 10 - nx;
+        let name = (e.n || '—').toUpperCase(), size = 15;
+        while (size > 10 && width(g, name, size, 1) > room) size -= 0.5;
+        while (name.length > 2 && width(g, name, size, 1) > room) name = name.slice(0, -2) + '\u2026';
+        label(g, name, nx, yy, size, { space: 1 });
         label(g, commas(e.s), x1 - 76, yy, 19, { align: 'right' });
         if (e.l) label(g, `LEVEL ${e.l}`, x1 - 2, yy, 11.5, { align: 'right', color: C.umber, space: 1.2 });
       });
-      if (!env.scores || !board.length) return;
+      if (!marks || !rows.length) return;
       // the key, measured so that its two marks and their words sit together in the middle
-      const yk = y + 27 + board.length * 25 + 2, a = 'ON THE WORLD BOARD', b = 'ONLY HERE';
+      const yk = y + 27 + rows.length * 25 + 2, a = 'ON THE WORLD BOARD', b = 'ONLY HERE';
       g.font = `bold 10.5px ${FACE}`;
       if ('letterSpacing' in g) g.letterSpacing = '1.2px';
       const wa = g.measureText(a).width, wb = g.measureText(b).width;
@@ -3541,7 +3573,8 @@ const Game = (function () {
     // the card over the tray, before a game and after one, with the board of scores on it
     function card(g, now) {
       const first = now.phase === 'title', rows = board.length, tap = env.touch ? 'TAP' : 'CLICK';
-      const w = tall ? 440 : 410, h = (first ? 196 : 180) + (rows ? 46 + rows * 25 + (env.scores ? KEY : 0) : 0), cx = BX + BW / 2, y0 = BY + BW / 2 - h / 2;
+      const world = !first && env.scores ? 24 : 0;
+      const w = tall ? 440 : 410, h = (first ? 196 : 180) + world + (rows ? 46 + rows * 25 + (env.scores ? KEY : 0) : 0), cx = BX + BW / 2, y0 = BY + BW / 2 - h / 2;
       rect(g, cx - w / 2 + 6, y0 + 8, w, h, 'rgba(20,12,4,0.5)');
       panel(g, cx - w / 2, y0, w, h);
       const line = (s, y, size, o = {}) => label(g, s, cx, y0 + y, size, { align: 'center', ...o });
@@ -3558,6 +3591,12 @@ const Game = (function () {
         line(`You scored ${commas(now.score)}`, 90, 25, { weight: '500' });
         line(place === 0 ? 'The best score yet' : place > 0 ? `${['', 'Second', 'Third', 'Fourth', 'Fifth'][place]} on the board` : rows ? 'Not on the board this time' : '', 116, 17, { weight: '500', color: C.umber });
         y = 150;
+        // how the game did on the world's board, when it goes there
+        if (world) {
+          const how = placed && placed.id === idOf(now) ? placed.how : null;
+          line(how === 'checking' ? 'Checking it for the world board\u2026' : how && how.rank ? `${nth(how.rank)} of ${commas(how.of)} in the world` : how === false ? 'Not on the world board' : '', 140, 17, { weight: '600', color: C.red });
+          y += world;
+        }
       }
       if (rows) { scores(g, cx, y0 + y, w - 96, first ? '' : idOf(now)); y += 46 + rows * 25 + (env.scores ? KEY : 0); }
       if (first) line(`${tap} TO PLAY`, y + 10, 30, { color: C.red, space: 3 });
@@ -4204,6 +4243,7 @@ const Game = (function () {
       risen(ctx, now);
       if (rings >= 0) rung(ctx, now, rings, t);
       if (now.phase !== 'play') card(ctx, now);
+      if (best) bestCard(ctx);
     }
 
     // ---------- fingers ----------
@@ -4328,7 +4368,7 @@ const Game = (function () {
     const result = t => R.result(world.at(t));
     // the page says where a mouse rests over the picture, for spy mode to look at the jewel under it
     const hover = p => { spot = p ? cellAt(p.x / S, p.y / S) : -1; };
-    return { draw, input, sounds, world, playing, result, posted, hover, painting: 0, get board() { return board; } };
+    return { draw, input, sounds, world, playing, result, posted, showBest, hover, painting: 0, get board() { return board; } };
   }
   return { create };
 })();
@@ -4340,7 +4380,7 @@ window.__FILM__ = Game;
 <script>
 'use strict';
 // A generic game page: the game draws from the page's clock, and is told what is pressed and let go.
-const CONFIG = {"title": "Wow Jewels", "art": {"width": 1920, "height": 1080, "portrait": {"width": 1080, "height": 1920}}, "loop": 12, "film": {"global": "Game"}, "smooth": true, "game": {"keys": {"Space": "go", "Enter": "go", "KeyS": "meat"}, "background": "#1a1208", "moves": true, "fullscreen": true, "volume": 0.8, "pause": true, "home": true, "settings": true, "resume": "rules.js", "radio": [{"id": "house-nation-uk-house", "name": "House Nation UK (house)", "urls": ["https://streaming.radio.co/s06bd9d805/listen"], "home": "https://housenationuk.com/", "now": {"url": "https://public.radio.co/stations/s06bd9d805/status", "path": "current_track.title"}}, {"id": "sunshine-live-house", "name": "sunshine live: House", "urls": ["https://stream.sunshine-live.de/house/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "sunshine-live-classic-vocal-house", "name": "sunshine live: Classic & Vocal House", "urls": ["https://stream.sunshine-live.de/vocalhouse/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "rm-fm-house", "name": "rm.fm House", "urls": ["https://house-high.rautemusik.fm/"], "home": "https://www.rm.fm/house"}, {"id": "technolovers-funky-house", "name": "Technolovers Funky House", "urls": ["https://stream.technolovers.fm/funky-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-deep-house", "name": "Technolovers Deep House", "urls": ["https://stream.technolovers.fm/deep-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-ibiza-house", "name": "Technolovers Ibiza House", "urls": ["https://stream.technolovers.fm/ibiza-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-house", "name": "Technolovers House", "urls": ["https://stream.technolovers.fm/house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-afro-house", "name": "Technolovers Afro House", "urls": ["https://stream.technolovers.fm/afro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-bass-house", "name": "Technolovers Bass House", "urls": ["https://stream.technolovers.fm/bass-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-dirty-house", "name": "Technolovers Dirty House", "urls": ["https://stream.technolovers.fm/dirty-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-electro-house", "name": "Technolovers Electro House", "urls": ["https://stream.technolovers.fm/electro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-future-house", "name": "Technolovers Future House", "urls": ["https://stream.technolovers.fm/future-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-latin-house", "name": "Technolovers Latin House", "urls": ["https://stream.technolovers.fm/latinhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tech-house", "name": "Technolovers Tech House", "urls": ["https://stream.technolovers.fm/techhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tropical-house", "name": "Technolovers Tropical House", "urls": ["https://stream.technolovers.fm/tropical-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-melodic-house-techno", "name": "Technolovers Melodic House & Techno", "urls": ["https://stream.technolovers.fm/melodic-house-techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-techno", "name": "Technolovers Techno", "urls": ["https://stream.technolovers.fm/techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-trance", "name": "Technolovers Trance", "urls": ["https://stream.technolovers.fm/trance"], "home": "https://technolovers.fm/"}, {"id": "technolovers-lounge", "name": "Technolovers Lounge", "urls": ["https://stream.technolovers.fm/lounge"], "home": "https://technolovers.fm/"}, {"id": "somafm-beatblender", "name": "SomaFM Beat Blender (deep house)", "urls": ["https://ice2.somafm.com/beatblender-128-mp3", "https://ice6.somafm.com/beatblender-128-mp3", "https://ice5.somafm.com/beatblender-128-mp3"], "home": "https://somafm.com/beatblender/", "now": {"url": "https://somafm.com/songs/beatblender.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-thetrip", "name": "SomaFM The Trip (progressive house)", "urls": ["https://ice2.somafm.com/thetrip-128-mp3", "https://ice6.somafm.com/thetrip-128-mp3", "https://ice5.somafm.com/thetrip-128-mp3"], "home": "https://somafm.com/thetrip/", "now": {"url": "https://somafm.com/songs/thetrip.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-groovesalad", "name": "SomaFM Groove Salad (downtempo)", "urls": ["https://ice2.somafm.com/groovesalad-128-mp3", "https://ice6.somafm.com/groovesalad-128-mp3", "https://ice5.somafm.com/groovesalad-128-mp3"], "home": "https://somafm.com/groovesalad/", "now": {"url": "https://somafm.com/songs/groovesalad.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-fluid", "name": "SomaFM Fluid (instrumental hip hop)", "urls": ["https://ice2.somafm.com/fluid-128-mp3", "https://ice6.somafm.com/fluid-128-mp3", "https://ice5.somafm.com/fluid-128-mp3"], "home": "https://somafm.com/fluid/", "now": {"url": "https://somafm.com/songs/fluid.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-spacestation", "name": "SomaFM Space Station Soma (space electronic)", "urls": ["https://ice2.somafm.com/spacestation-128-mp3", "https://ice6.somafm.com/spacestation-128-mp3", "https://ice5.somafm.com/spacestation-128-mp3"], "home": "https://somafm.com/spacestation/", "now": {"url": "https://somafm.com/songs/spacestation.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-secretagent", "name": "SomaFM Secret Agent (spy lounge)", "urls": ["https://ice2.somafm.com/secretagent-128-mp3", "https://ice6.somafm.com/secretagent-128-mp3", "https://ice5.somafm.com/secretagent-128-mp3"], "home": "https://somafm.com/secretagent/", "now": {"url": "https://somafm.com/songs/secretagent.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-u80s", "name": "SomaFM Underground 80s (synthpop)", "urls": ["https://ice6.somafm.com/u80s-128-mp3", "https://ice2.somafm.com/u80s-128-mp3", "https://ice5.somafm.com/u80s-128-mp3"], "home": "https://somafm.com/u80s/", "now": {"url": "https://somafm.com/songs/u80s.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-indiepop", "name": "SomaFM Indie Pop Rocks!", "urls": ["https://ice6.somafm.com/indiepop-128-mp3", "https://ice2.somafm.com/indiepop-128-mp3", "https://ice5.somafm.com/indiepop-128-mp3"], "home": "https://somafm.com/indiepop/", "now": {"url": "https://somafm.com/songs/indiepop.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}], "radioCredit": {"text": "Each station plays from its own stream. SomaFM is listener-supported and free of ads:", "href": "https://somafm.com/", "link": "somafm.com"}, "musicVolume": 0.25, "updates": true, "radioDefault": "technolovers-electro-house", "fxVolume": 0.5, "scores": {"url": "https://wow-jewels.nathan-05a.workers.dev", "key": "d7028dc8cd548206"}, "welcome": {"played": ["scores", "best"]}, "resumeKey": "d7028dc8cd548206", "build": "8b91d8d5f00d"}};
+const CONFIG = {"title": "Wow Jewels", "art": {"width": 1920, "height": 1080, "portrait": {"width": 1080, "height": 1920}}, "loop": 12, "film": {"global": "Game"}, "smooth": true, "game": {"keys": {"Space": "go", "Enter": "go", "KeyS": "meat"}, "background": "#1a1208", "moves": true, "fullscreen": true, "volume": 0.8, "pause": true, "home": true, "settings": true, "resume": "rules.js", "radio": [{"id": "house-nation-uk-house", "name": "House Nation UK (house)", "urls": ["https://streaming.radio.co/s06bd9d805/listen"], "home": "https://housenationuk.com/", "now": {"url": "https://public.radio.co/stations/s06bd9d805/status", "path": "current_track.title"}}, {"id": "sunshine-live-house", "name": "sunshine live: House", "urls": ["https://stream.sunshine-live.de/house/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "sunshine-live-classic-vocal-house", "name": "sunshine live: Classic & Vocal House", "urls": ["https://stream.sunshine-live.de/vocalhouse/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "rm-fm-house", "name": "rm.fm House", "urls": ["https://house-high.rautemusik.fm/"], "home": "https://www.rm.fm/house"}, {"id": "technolovers-funky-house", "name": "Technolovers Funky House", "urls": ["https://stream.technolovers.fm/funky-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-deep-house", "name": "Technolovers Deep House", "urls": ["https://stream.technolovers.fm/deep-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-ibiza-house", "name": "Technolovers Ibiza House", "urls": ["https://stream.technolovers.fm/ibiza-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-house", "name": "Technolovers House", "urls": ["https://stream.technolovers.fm/house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-afro-house", "name": "Technolovers Afro House", "urls": ["https://stream.technolovers.fm/afro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-bass-house", "name": "Technolovers Bass House", "urls": ["https://stream.technolovers.fm/bass-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-dirty-house", "name": "Technolovers Dirty House", "urls": ["https://stream.technolovers.fm/dirty-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-electro-house", "name": "Technolovers Electro House", "urls": ["https://stream.technolovers.fm/electro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-future-house", "name": "Technolovers Future House", "urls": ["https://stream.technolovers.fm/future-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-latin-house", "name": "Technolovers Latin House", "urls": ["https://stream.technolovers.fm/latinhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tech-house", "name": "Technolovers Tech House", "urls": ["https://stream.technolovers.fm/techhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tropical-house", "name": "Technolovers Tropical House", "urls": ["https://stream.technolovers.fm/tropical-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-melodic-house-techno", "name": "Technolovers Melodic House & Techno", "urls": ["https://stream.technolovers.fm/melodic-house-techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-techno", "name": "Technolovers Techno", "urls": ["https://stream.technolovers.fm/techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-trance", "name": "Technolovers Trance", "urls": ["https://stream.technolovers.fm/trance"], "home": "https://technolovers.fm/"}, {"id": "technolovers-lounge", "name": "Technolovers Lounge", "urls": ["https://stream.technolovers.fm/lounge"], "home": "https://technolovers.fm/"}, {"id": "somafm-beatblender", "name": "SomaFM Beat Blender (deep house)", "urls": ["https://ice2.somafm.com/beatblender-128-mp3", "https://ice6.somafm.com/beatblender-128-mp3", "https://ice5.somafm.com/beatblender-128-mp3"], "home": "https://somafm.com/beatblender/", "now": {"url": "https://somafm.com/songs/beatblender.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-thetrip", "name": "SomaFM The Trip (progressive house)", "urls": ["https://ice2.somafm.com/thetrip-128-mp3", "https://ice6.somafm.com/thetrip-128-mp3", "https://ice5.somafm.com/thetrip-128-mp3"], "home": "https://somafm.com/thetrip/", "now": {"url": "https://somafm.com/songs/thetrip.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-groovesalad", "name": "SomaFM Groove Salad (downtempo)", "urls": ["https://ice2.somafm.com/groovesalad-128-mp3", "https://ice6.somafm.com/groovesalad-128-mp3", "https://ice5.somafm.com/groovesalad-128-mp3"], "home": "https://somafm.com/groovesalad/", "now": {"url": "https://somafm.com/songs/groovesalad.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-fluid", "name": "SomaFM Fluid (instrumental hip hop)", "urls": ["https://ice2.somafm.com/fluid-128-mp3", "https://ice6.somafm.com/fluid-128-mp3", "https://ice5.somafm.com/fluid-128-mp3"], "home": "https://somafm.com/fluid/", "now": {"url": "https://somafm.com/songs/fluid.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-spacestation", "name": "SomaFM Space Station Soma (space electronic)", "urls": ["https://ice2.somafm.com/spacestation-128-mp3", "https://ice6.somafm.com/spacestation-128-mp3", "https://ice5.somafm.com/spacestation-128-mp3"], "home": "https://somafm.com/spacestation/", "now": {"url": "https://somafm.com/songs/spacestation.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-secretagent", "name": "SomaFM Secret Agent (spy lounge)", "urls": ["https://ice2.somafm.com/secretagent-128-mp3", "https://ice6.somafm.com/secretagent-128-mp3", "https://ice5.somafm.com/secretagent-128-mp3"], "home": "https://somafm.com/secretagent/", "now": {"url": "https://somafm.com/songs/secretagent.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-u80s", "name": "SomaFM Underground 80s (synthpop)", "urls": ["https://ice6.somafm.com/u80s-128-mp3", "https://ice2.somafm.com/u80s-128-mp3", "https://ice5.somafm.com/u80s-128-mp3"], "home": "https://somafm.com/u80s/", "now": {"url": "https://somafm.com/songs/u80s.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-indiepop", "name": "SomaFM Indie Pop Rocks!", "urls": ["https://ice6.somafm.com/indiepop-128-mp3", "https://ice2.somafm.com/indiepop-128-mp3", "https://ice5.somafm.com/indiepop-128-mp3"], "home": "https://somafm.com/indiepop/", "now": {"url": "https://somafm.com/songs/indiepop.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}], "radioCredit": {"text": "Each station plays from its own stream. SomaFM is listener-supported and free of ads:", "href": "https://somafm.com/", "link": "somafm.com"}, "musicVolume": 0.25, "updates": true, "radioDefault": "technolovers-electro-house", "fxVolume": 0.5, "scores": {"url": "https://wow-jewels.nathan-05a.workers.dev", "key": "d7028dc8cd548206"}, "welcome": {"played": ["scores", "best"]}, "resumeKey": "d7028dc8cd548206", "build": "741d9571d6aa"}};
 const GAME = CONFIG.game === true ? {} : CONFIG.game;
 // the picture's size: the config's, or its portrait size while the window is taller than it is wide
 const sizeNow = () => (CONFIG.art.portrait && window.innerHeight > window.innerWidth ? CONFIG.art.portrait : CONFIG.art);
@@ -4401,6 +4441,10 @@ function ask(o = {}) {
   return new Promise(done => { asking = v => { asking = null; form.hidden = true; field.blur(); done(v); }; });
 }
 $('ask').addEventListener('submit', e => { e.preventDefault(); if (asking) asking($('ask-text').value.trim() || null); });
+// Whether the world's best are up, the rows last fetched, and how they are put away; and a game over waiting to be
+// posted, the one posted, and the player's own on the world's board (see "scores" below).
+const BEST = { open: false, rows: null, close: () => {} };
+const P = { seen: -1, run: null, id: null, mine: null, due: false };
 // The game is made for one size of picture. When the window turns from wide to tall or back, it is made again
 // for the new size and told everything pressed so far, so a run carries on where it was.
 const pressed = [];
@@ -4413,6 +4457,7 @@ function start(size) {
     // that the page posts a game's scores to the world's board
     const touch = matchMedia('(pointer: coarse)').matches, scores = !!(GAME.scores && GAME.scores.url);
     game = window.__FILM__.create({ makeCanvas: mk, Path2D: window.Path2D, width: W, height: H, store, touch, ask, scores });
+    if (BEST.open && game.showBest) game.showBest(BEST.rows || [], P.mine);
     if (game.input) for (const e of pressed) game.input(e);
   } catch (e) {
     game = null;
@@ -4655,9 +4700,9 @@ if (GAME.pause) {
 // station that cannot be played from the page, as one that may not reach other sites, or one the station turns
 // away, says so, with a link to hear it in another tab.
 const R = { el: null, gain: null, tries: 0, failed: false, song: '', asking: null, later: false };
-// whether the settings card or the scores' is open: the game stands still then, but the radio and the page's
-// sound go on
-const carding = () => (!!GAME.settings && !$('settings').hidden) || (!!GAME.scores && !$('scores').hidden);
+// whether the settings card is open, or the world's best are up: the game stands still then, but the radio and
+// the page's sound go on
+const carding = () => (!!GAME.settings && !$('settings').hidden) || BEST.open;
 function level() {
   const v = A.muted ? 0 : SET.music;
   if (R.gain) R.gain.gain.value = v; else if (R.el) R.el.volume = v;
@@ -4803,95 +4848,65 @@ if (GAME.welcome && GAME.settings) {
 }
 // With "scores" in the game entry, { url }, the game's best scores are kept by a server, film-studio's
 // player/scores.js, which checks each one by playing the game again from what was pressed. A cup among the corner
-// buttons opens a card with the best. When a game is over, as the game's result(t) says, { game, score, level },
-// the card opens and offers to post it under a name, which is kept in the browser, and then says where it came. A
-// game that asks a name of its own, for a board it keeps, asks first, and the card comes after with that name. The
-// card is put away when the next game begins, and the cup still offers the last game until it is posted or another
-// is over. The game is paused while the card is open during a game, as it is for the settings, and opening one card
-// puts the other away.
-const P = { seen: -1, run: null, id: null, mine: null, due: false };
+// buttons has the game draw the world's best, with its showBest(rows, mine), over a game that stands still while
+// they are up, and a press anywhere puts them away. A game over, as the game's result(t) says, { game, score,
+// level }, is posted at once under the player's name, kept in the browser, when there is one, and the game is told
+// how it went with posted(t, how): 'checking', { rank, of } once it is kept, or false. A game that asks a name of
+// its own, for a board it keeps, asks first.
 if (GAME.scores && GAME.scores.url) {
-  const card = $('scores'), cup = $('cup'), says = $('scores-says'), field = $('post-name'), go = $('post-go');
-  const api = GAME.scores.url.replace(/\/$/, '');
+  const cup = $('cup'), api = GAME.scores.url.replace(/\/$/, '');
   cup.hidden = false;
   cup.style.right = `calc(${8 + 48 * ['full', 'pause', 'gear', 'next'].filter(id => !$(id).hidden).length}px + env(safe-area-inset-right, 0px))`;
-  // A name for the world's board is letters and digits only, and anything else is left out as it is typed. It is
-  // kept apart from the game's own, which may have more in it, and starts as that.
+  // A name for the world's board is letters and digits only, taken from the one the player gave, here or to the
+  // game's own board.
   const plain = v => String(v || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 16);
   const named = () => plain(store.get('world name') || store.get('name'));
-  field.value = named();
-  field.addEventListener('input', () => { const v = plain(field.value); if (v !== field.value) field.value = v; });
-  const commas = v => Number(v).toLocaleString('en-US');
-  const nth = k => k + (k % 100 >= 11 && k % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][k % 10] || 'th');
-  const say = text => { says.textContent = text; };
-  function list() {
-    fetch(api + '/scores', { cache: 'no-store' }).then(r => r.json()).then(b => {
-      $('best').replaceChildren(...(b.best || []).map(s => {
-        const li = document.createElement('li'), v = document.createElement('span');
-        li.textContent = s.name; v.textContent = commas(s.score); li.append(v);
-        if (s.id === P.mine) li.className = 'mine';
-        return li;
-      }));
-      $('best-none').hidden = !!(b.best && b.best.length);
-    }).catch(() => say('The scores cannot be reached just now.'));
+  // whether the cup stopped the game, which it lets go on again when the best are put away
+  let held = false;
+  const show = () => { if (BEST.open && game && game.showBest) game.showBest(BEST.rows || [], P.mine); };
+  BEST.close = () => {
+    if (!BEST.open) return;
+    BEST.open = false; cup.setAttribute('aria-expanded', 'false');
+    if (game && game.showBest) game.showBest(null);
+    if (held) { held = false; pause(false); } else if (C.paused) $('veil').hidden = false;
+  };
+  function openBest() {
+    // the settings put away, and the stop they held taken over
+    if (GAME.settings && !$('settings').hidden) { $('settings').hidden = true; $('gear').setAttribute('aria-expanded', 'false'); if (setPaused) { setPaused = false; held = true; } }
+    BEST.open = true; cup.setAttribute('aria-expanded', 'true');
+    if (GAME.pause && !C.paused && game && game.playing && game.playing(now())) { pause(true); held = true; }
+    // the game stands still under the best, but without the veil, so they can be read
+    $('veil').hidden = true;
+    show();
+    fetch(api + '/scores', { cache: 'no-store' }).then(r => r.json()).then(b => { BEST.rows = b.best || []; show(); }).catch(() => {});
   }
-  // the name and the button to post show while a game over waits to be posted
-  const offer = () => {
-    const on = !!P.run && !P.id;
-    $('post').hidden = !on; go.hidden = !on; go.disabled = false;
-    if (on) say('Your game came to ' + commas(P.run.claim.score) + '.');
-  };
-  // The card opens and shuts. It pauses a game going on, or takes the pause over from the settings card it puts away.
-  let cupPaused = false;
-  const open = on => {
-    if (on && GAME.settings && !$('settings').hidden) {
-      $('settings').hidden = true; $('gear').setAttribute('aria-expanded', 'false');
-      if (setPaused) { setPaused = false; cupPaused = true; }
-    }
-    card.hidden = !on; cup.setAttribute('aria-expanded', String(on));
-    if (on) { offer(); list(); }
-    if (on && GAME.pause && !C.paused && game && game.playing && game.playing(now())) { pause(true); cupPaused = true; }
-    else if (!on && cupPaused) { cupPaused = false; pause(false); }
-  };
-  cup.addEventListener('click', () => { open(card.hidden); cup.blur(); });
-  card.addEventListener('submit', e => { e.preventDefault(); open(false); });
-  $('veil').addEventListener('pointerdown', () => { card.hidden = true; cupPaused = false; cup.setAttribute('aria-expanded', 'false'); });
-  // the settings opened put this card away, and the pause it held goes to them
+  cup.addEventListener('click', () => { if (BEST.open) BEST.close(); else openBest(); cup.blur(); });
+  // the settings opened put the best away, and the stop the cup held goes to them
   if (GAME.settings) $('gear').addEventListener('click', () => {
-    if ($('settings').hidden || card.hidden) return;
-    card.hidden = true; cup.setAttribute('aria-expanded', 'false');
-    if (cupPaused) { cupPaused = false; setPaused = true; }
+    if (!BEST.open || $('settings').hidden) return;
+    BEST.open = false; cup.setAttribute('aria-expanded', 'false');
+    if (game && game.showBest) game.showBest(null);
+    if (held) { held = false; setPaused = true; }
   });
-  // Where the check of a posted game has come to, asked again until it is done. The game is told how it went
-  // by posted(t, kept), with the time its game was over, for a board of its own to show it.
+  const told = (ends, how) => { if (game && game.posted) game.posted(ends, how); };
+  // where the check of a posted game has come to, asked again until it is done
   function watch(id, ends, tries = 0) {
     fetch(api + '/runs/' + id, { cache: 'no-store' }).then(r => r.json()).then(b => {
-      if (b.state === 'checking') { say('Checking your game… ' + Math.round(b.done * 100) + '%'); setTimeout(() => watch(id, ends), 400); return; }
+      if (b.state === 'checking') { setTimeout(() => watch(id, ends), 400); return; }
       P.run = null;
-      if (game && game.posted) game.posted(ends, b.state === 'checked');
-      if (b.state === 'checked') { P.mine = id; say('You came ' + nth(b.rank) + ' of ' + commas(b.of) + ' on the world board.'); list(); }
-      else say('This game could not be checked, so it is not on the world board.');
-    }).catch(() => { if (tries < 20) setTimeout(() => watch(id, ends, tries + 1), 1500); else say('The scores cannot be reached just now.'); });
+      if (b.state === 'checked') { P.mine = id; told(ends, { rank: b.rank, of: b.of }); } else told(ends, false);
+    }).catch(() => { if (tries < 20) setTimeout(() => watch(id, ends, tries + 1), 1500); else told(ends, false); });
   }
   // A game is posted as what was pressed and when up to its end, with what it came to, for the server to play
   // again. Plain text asks the server nothing first.
-  function post() {
-    if (!P.run || P.id) return;
-    const name = plain(field.value);
-    if (!name) { field.focus(); say('A name is letters and numbers.'); return; }
-    store.set('world name', name);
-    go.disabled = true; say('Posting…');
+  function post(name) {
     const run = P.run;
+    P.id = 'posting';
+    told(run.ends, 'checking');
     fetch(api + '/runs', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ name, key: GAME.scores.key, ends: run.ends, claim: run.claim, events: run.events }) })
-      .then(r => r.json().then(b => [r.status, b])).then(([status, b]) => {
-        if (status === 409) { go.disabled = false; say('This page is out of date. Reload it to post scores.'); return; }
-        if (b.error === 'name') { go.disabled = false; say('A name is letters and numbers.'); return; }
-        if (!b.id) throw new Error(b.error);
-        P.id = b.id; offer(); field.blur(); watch(b.id, run.ends);
-      }).catch(() => { go.disabled = false; say('The scores cannot be reached just now. Try again in a moment.'); });
+      .then(r => r.json()).then(b => { if (!b.id) throw new Error(b.error); P.id = b.id; watch(b.id, run.ends); })
+      .catch(() => { P.run = null; told(run.ends, false); });
   }
-  go.addEventListener('click', post);
-  field.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); post(); } });
   // A game over is looked for four times a second, which is often enough, since a game stays over a while.
   setInterval(() => {
     if (!game || !game.result || C.fixed != null) return;
@@ -4903,15 +4918,14 @@ if (GAME.scores && GAME.scores.url) {
         P.id = null; P.due = true;
       }
     }
-    // and when a new game was begun instead, the cup keeps it
-    if (P.due && !asking) { P.due = false; field.value = named() || field.value; if (!(game.playing && game.playing(t))) open(true); }
-    else if (!r && !card.hidden && !C.paused && document.activeElement !== field && game.playing && game.playing(t)) open(false);
+    if (P.due && !asking) { P.due = false; const name = named(); if (name) post(name); else P.run = null; }
   }, 250);
 }
 document.addEventListener('keydown', e => {
   if (!$('welcome').hidden) return;
   if (asking) { if (e.code === 'Escape') asking(null); return; }
-  if (e.target && e.target.closest && e.target.closest('#settings, #scores')) return;
+  if (e.target && e.target.closest && e.target.closest('#settings')) return;
+  if (BEST.open) { if (!e.repeat && ['Escape', 'Space', 'Enter'].includes(e.code)) BEST.close(); e.preventDefault(); return; }
   if (GAME.pause && e.code === 'KeyP' && !KEYS.KeyP && !e.repeat) { pause(!C.paused); return; }
   if (C.paused) return;
   if (e.code === 'KeyF' && !KEYS.KeyF && !e.repeat) { toggleFullscreen(); return; }
@@ -4934,6 +4948,7 @@ window.addEventListener('blur', () => { for (const code of held) send({ type: 'r
 stage.addEventListener('pointerdown', e => {
   e.preventDefault();
   if (asking) { asking(null); return; }
+  if (BEST.open) { BEST.close(); return; }
   if (e.pointerType !== 'touch') cv.focus({ preventScroll: true });
   down.add(e.pointerId);
   if (GAME.moves) { try { stage.setPointerCapture(e.pointerId); } catch (err) { /* not capturable */ } }
