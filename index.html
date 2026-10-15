@@ -19,22 +19,27 @@
   #screen { display: block; image-rendering: pixelated; touch-action: none; outline: none; cursor: pointer; }
   #screen.smooth { image-rendering: auto; }
   #screen:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
-  .full { position: fixed; top: calc(8px + env(safe-area-inset-top, 0px)); right: calc(8px + env(safe-area-inset-right, 0px)); width: 40px; height: 40px; padding: 10px; border: 0; border-radius: 6px; background: var(--note-ground); color: var(--note); opacity: 0.5; cursor: pointer; touch-action: manipulation; }
+  .full { width: 40px; height: 40px; padding: 10px; border: 0; border-radius: 6px; background: var(--note-ground); color: var(--note); opacity: 0.5; cursor: pointer; touch-action: manipulation; }
   .full:hover, .full:focus-visible { opacity: 1; }
+  /* the corner buttons stand together, in a row along the top or down the side, wherever the picture leaves room;
+     a touch screen, which has no hover to bring them up, shows them clearly */
+  .corner { position: fixed; top: calc(8px + env(safe-area-inset-top, 0px)); right: calc(8px + env(safe-area-inset-right, 0px)); display: flex; gap: 8px; z-index: 2; }
+  .corner.side { flex-direction: column; }
+  .corner .full[hidden] { display: none; }
+  @media (hover: none) { .full { opacity: 0.85; } }
   .full:focus-visible { outline: 2px solid var(--focus); }
   .full svg { display: block; width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: square; }
   .full .in, .full.on .out { display: none; }
   .full.on .in { display: inline; }
-  /* the pause button stands beside the full screen one, or in its place when there is none; the veil of a paused
-     game blurs the picture under it, so a game against a clock cannot be studied while it stands still */
-  .full.pause.beside { right: calc(56px + env(safe-area-inset-right, 0px)); }
+  /* the veil of a paused game blurs the picture under it, so a game against a clock cannot be studied while it
+     stands still */
   .full.pause svg { stroke-width: 2.6; stroke-linecap: butt; stroke-linejoin: round; }
   /* the settings: a gear among the corner buttons, and a card under them with the volumes and the radio */
   .full.gear svg { stroke-width: 1.5; }
   .settings { position: fixed; top: calc(56px + env(safe-area-inset-top, 0px)); right: calc(8px + env(safe-area-inset-right, 0px)); box-sizing: border-box; width: min(380px, calc(100% - 16px)); display: grid; gap: 10px; margin: 0; padding: 14px; border-radius: 10px; background: var(--note-ground); color: var(--note); font: 14px/1.35 ui-sans-serif, system-ui, sans-serif; touch-action: manipulation; }
   .settings[hidden] { display: none; }
   .settings b { font-size: 15px; }
-  .settings label { display: grid; grid-template-columns: 64px 1fr; align-items: center; gap: 10px; }
+  .settings label { display: grid; grid-template-columns: 80px 1fr; align-items: center; gap: 10px; }
   .settings input[type=range] { width: 100%; accent-color: var(--focus); }
   .settings select { width: 100%; min-width: 0; padding: 6px 8px; border: 1px solid var(--note); border-radius: 6px; background: #fffdf6; color: #17110a; font: inherit; }
   .settings p { margin: 0; font-size: 13px; opacity: 0.9; }
@@ -87,13 +92,9 @@
 <body>
 <div class="stage"><canvas id="screen" tabindex="0" aria-label="Wow Jewels: a tray of jewels in the manner of Klimt, gold leaf and ornament. Change two jewels to make a row of three, and Eddy Wally comes up and says wow."></canvas></div>
 <div class="veil" id="veil" hidden><b>Paused</b><span id="veil-how"></span></div>
-<button class="full pause" id="pause" type="button" aria-label="Pause" aria-pressed="false" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path class="out" d="M5.2 3v10M10.8 3v10"/><path class="in" d="M5 3l8 5-8 5z"/></svg></button>
-<button class="full gear" id="gear" type="button" aria-label="Settings" aria-expanded="false" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="2.3"/><path d="M8 1.6v2.1M8 12.3v2.1M1.6 8h2.1M12.3 8h2.1M3.5 3.5L5 5M11 11l1.5 1.5M3.5 12.5L5 11M11 5l1.5-1.5"/></svg></button>
-<form class="settings" id="settings" autocomplete="off" hidden><b id="set-head">Sounds</b><div class="panel" id="set-panel"><label>Effects <input type="range" id="fx" min="0" max="100" step="1"></label><label>Music <input type="range" id="mu" min="0" max="100" step="1"></label><label>Station <select id="station"><option value="">Off</option></select></label><p id="radio-says"></p><p id="radio-song"></p><p id="radio-credit"></p></div><label class="check"><input type="checkbox" id="speed"> Speed stats</label><button type="submit">Done</button></form>
-<button class="full cup" id="cup" type="button" aria-label="Best scores" aria-expanded="false" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.6 2.4h6.8v3.4a3.4 3.4 0 0 1-6.8 0z"/><path d="M4.6 3.6H2.5v.8a2.5 2.5 0 0 0 2.6 2.5M11.4 3.6h2.1v.8a2.5 2.5 0 0 1-2.6 2.5M8 9.2v2.4M5.4 13.6h5.2M6.3 11.6h3.4v2"/></svg></button>
-<button class="full next" id="next" type="button" aria-label="Next station" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.2 3.6l5.2 4.4-5.2 4.4zM8.4 3.6l5.2 4.4-5.2 4.4z"/></svg></button>
+<div class="corner" id="corner"><button class="full cup" id="cup" type="button" aria-label="Best scores" aria-expanded="false" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.6 2.4h6.8v3.4a3.4 3.4 0 0 1-6.8 0z"/><path d="M4.6 3.6H2.5v.8a2.5 2.5 0 0 0 2.6 2.5M11.4 3.6h2.1v.8a2.5 2.5 0 0 1-2.6 2.5M8 9.2v2.4M5.4 13.6h5.2M6.3 11.6h3.4v2"/></svg></button><button class="full next" id="next" type="button" aria-label="Next station" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.2 3.6l5.2 4.4-5.2 4.4zM8.4 3.6l5.2 4.4-5.2 4.4z"/></svg></button><button class="full gear" id="gear" type="button" aria-label="Settings" aria-expanded="false" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="2.3"/><path d="M8 1.6v2.1M8 12.3v2.1M1.6 8h2.1M12.3 8h2.1M3.5 3.5L5 5M11 11l1.5 1.5M3.5 12.5L5 11M11 5l1.5-1.5"/></svg></button><button class="full pause" id="pause" type="button" aria-label="Pause" aria-pressed="false" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path class="out" d="M5.2 3v10M10.8 3v10"/><path class="in" d="M5 3l8 5-8 5z"/></svg></button><button class="full" id="full" type="button" aria-label="Full screen" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path class="out" d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/><path class="in" d="M6 2v4H2M14 6h-4V2M10 14v-4h4M2 10h4v4"/></svg></button></div>
+<form class="settings" id="settings" autocomplete="off" hidden><b id="set-head">Sounds</b><div class="panel" id="set-panel"><label>Effects <input type="range" id="fx" min="0" max="100" step="1"></label><label id="voice-row" hidden>Characters <input type="range" id="vo" min="0" max="100" step="1"></label><label>Music <input type="range" id="mu" min="0" max="100" step="1"></label><label>Station <select id="station"><option value="">Off</option></select></label><p id="radio-says"></p><p id="radio-song"></p><p id="radio-credit"></p></div><label class="check"><input type="checkbox" id="speed"> Speed stats</label><button type="submit">Done</button></form>
 <p class="tuned" id="tuned" hidden aria-live="polite"></p>
-<button class="full" id="full" type="button" aria-label="Full screen" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path class="out" d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/><path class="in" d="M6 2v4H2M14 6h-4V2M10 14v-4h4M2 10h4v4"/></svg></button>
 <form class="ask" id="ask" autocomplete="off" hidden><label id="ask-label" for="ask-text"></label><div><input id="ask-text" type="text" enterkeyhint="done" autocapitalize="words" spellcheck="false"><button type="submit">OK</button></div></form>
 <div class="home" id="update" hidden><p id="update-says"></p><div><button type="button" class="yes" id="update-go">Reload</button><button type="button" id="update-later">Later</button></div></div>
 <div class="home" id="home" hidden><p id="home-says"></p><div><button type="button" class="yes" id="home-yes">Show me how</button><button type="button" id="home-no">Not now</button></div></div>
@@ -3345,19 +3346,22 @@ const Game = (function () {
       if (e && !e.w) { e.w = true; save(); }
     }
     const nth = k => k + (k % 100 >= 11 && k % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][k % 10] || 'th');
-    // The world's best, as the page fetches them for its cup, with the player's own, or null when they are put away.
-    let best = null, bestMine = '';
-    const showBest = (rows, mine) => { best = rows ? rows.map(r => ({ id: r.id, s: r.score, l: r.level, n: r.name })) : null; bestMine = mine || ''; };
+    // The world's best, as the page fetches them for its cup, with the player's own and how many are playing now,
+    // or null when they are put away.
+    let best = null, bestMine = '', bestPlaying = 0;
+    const showBest = (rows, mine, playing) => { best = rows ? rows.map(r => ({ id: r.id, s: r.score, l: r.level, n: r.name })) : null; bestMine = mine || ''; bestPlaying = playing || 0; };
     // The world's best over the tray, darkened under them: a panel like the one at a game's end, its title, the rows
     // with the player's own picked out, and how to go back.
     function bestCard(g) {
-      const rows = best.slice(0, 10), w = tall ? 440 : 410, h = 136 + (rows.length ? 18 + rows.length * 25 : 24), cx = BX + BW / 2, y0 = BY + BW / 2 - h / 2;
+      const rows = best.slice(0, 10), now = bestPlaying ? 24 : 0, w = tall ? 440 : 410, h = 136 + now + (rows.length ? 18 + rows.length * 25 : 24), cx = BX + BW / 2, y0 = BY + BW / 2 - h / 2;
       g.fillStyle = 'rgba(12,8,4,0.5)'; g.fillRect(BX, BY, BW, BW);
       rect(g, cx - w / 2 + 6, y0 + 8, w, h, 'rgba(20,12,4,0.5)');
       panel(g, cx - w / 2, y0, w, h);
       label(g, 'THE WORLD\u2019S BEST', cx, y0 + 52, 29, { align: 'center', space: 3 });
-      if (rows.length) scores(g, cx, y0 + 60, w - 96, bestMine, rows, false, '');
-      else label(g, 'No scores yet.', cx, y0 + 92, 18, { align: 'center', weight: '500', color: C.umber });
+      // how many are playing now, the one looking among them
+      if (now) label(g, bestPlaying === 1 ? 'JUST YOU PLAYING NOW' : `${commas(bestPlaying)} PLAYING NOW`, cx, y0 + 78, 13, { align: 'center', color: C.red, space: 2.5 });
+      if (rows.length) scores(g, cx, y0 + 60 + now, w - 96, bestMine, rows, false, '');
+      else label(g, 'No scores yet.', cx, y0 + 92 + now, 18, { align: 'center', weight: '500', color: C.umber });
       label(g, `${env.touch ? 'TAP' : 'CLICK'} TO GO BACK`, cx, y0 + h - 24, 22, { align: 'center', color: C.red, space: 3 });
     }
     // whether a score is on the world's board: a small gold globe if it is, a faint ring if it was kept only here
@@ -4380,7 +4384,7 @@ window.__FILM__ = Game;
 <script>
 'use strict';
 // A generic game page: the game draws from the page's clock, and is told what is pressed and let go.
-const CONFIG = {"title": "Wow Jewels", "art": {"width": 1920, "height": 1080, "portrait": {"width": 1080, "height": 1920}}, "loop": 12, "film": {"global": "Game"}, "smooth": true, "game": {"keys": {"Space": "go", "Enter": "go", "KeyS": "meat"}, "background": "#1a1208", "moves": true, "fullscreen": true, "volume": 0.8, "pause": true, "home": true, "settings": true, "resume": "rules.js", "radio": [{"id": "house-nation-uk-house", "name": "House Nation UK (house)", "urls": ["https://streaming.radio.co/s06bd9d805/listen"], "home": "https://housenationuk.com/", "now": {"url": "https://public.radio.co/stations/s06bd9d805/status", "path": "current_track.title"}}, {"id": "sunshine-live-house", "name": "sunshine live: House", "urls": ["https://stream.sunshine-live.de/house/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "sunshine-live-classic-vocal-house", "name": "sunshine live: Classic & Vocal House", "urls": ["https://stream.sunshine-live.de/vocalhouse/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "rm-fm-house", "name": "rm.fm House", "urls": ["https://house-high.rautemusik.fm/"], "home": "https://www.rm.fm/house"}, {"id": "technolovers-funky-house", "name": "Technolovers Funky House", "urls": ["https://stream.technolovers.fm/funky-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-deep-house", "name": "Technolovers Deep House", "urls": ["https://stream.technolovers.fm/deep-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-ibiza-house", "name": "Technolovers Ibiza House", "urls": ["https://stream.technolovers.fm/ibiza-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-house", "name": "Technolovers House", "urls": ["https://stream.technolovers.fm/house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-afro-house", "name": "Technolovers Afro House", "urls": ["https://stream.technolovers.fm/afro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-bass-house", "name": "Technolovers Bass House", "urls": ["https://stream.technolovers.fm/bass-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-dirty-house", "name": "Technolovers Dirty House", "urls": ["https://stream.technolovers.fm/dirty-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-electro-house", "name": "Technolovers Electro House", "urls": ["https://stream.technolovers.fm/electro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-future-house", "name": "Technolovers Future House", "urls": ["https://stream.technolovers.fm/future-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-latin-house", "name": "Technolovers Latin House", "urls": ["https://stream.technolovers.fm/latinhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tech-house", "name": "Technolovers Tech House", "urls": ["https://stream.technolovers.fm/techhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tropical-house", "name": "Technolovers Tropical House", "urls": ["https://stream.technolovers.fm/tropical-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-melodic-house-techno", "name": "Technolovers Melodic House & Techno", "urls": ["https://stream.technolovers.fm/melodic-house-techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-techno", "name": "Technolovers Techno", "urls": ["https://stream.technolovers.fm/techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-trance", "name": "Technolovers Trance", "urls": ["https://stream.technolovers.fm/trance"], "home": "https://technolovers.fm/"}, {"id": "technolovers-lounge", "name": "Technolovers Lounge", "urls": ["https://stream.technolovers.fm/lounge"], "home": "https://technolovers.fm/"}, {"id": "somafm-beatblender", "name": "SomaFM Beat Blender (deep house)", "urls": ["https://ice2.somafm.com/beatblender-128-mp3", "https://ice6.somafm.com/beatblender-128-mp3", "https://ice5.somafm.com/beatblender-128-mp3"], "home": "https://somafm.com/beatblender/", "now": {"url": "https://somafm.com/songs/beatblender.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-thetrip", "name": "SomaFM The Trip (progressive house)", "urls": ["https://ice2.somafm.com/thetrip-128-mp3", "https://ice6.somafm.com/thetrip-128-mp3", "https://ice5.somafm.com/thetrip-128-mp3"], "home": "https://somafm.com/thetrip/", "now": {"url": "https://somafm.com/songs/thetrip.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-groovesalad", "name": "SomaFM Groove Salad (downtempo)", "urls": ["https://ice2.somafm.com/groovesalad-128-mp3", "https://ice6.somafm.com/groovesalad-128-mp3", "https://ice5.somafm.com/groovesalad-128-mp3"], "home": "https://somafm.com/groovesalad/", "now": {"url": "https://somafm.com/songs/groovesalad.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-fluid", "name": "SomaFM Fluid (instrumental hip hop)", "urls": ["https://ice2.somafm.com/fluid-128-mp3", "https://ice6.somafm.com/fluid-128-mp3", "https://ice5.somafm.com/fluid-128-mp3"], "home": "https://somafm.com/fluid/", "now": {"url": "https://somafm.com/songs/fluid.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-spacestation", "name": "SomaFM Space Station Soma (space electronic)", "urls": ["https://ice2.somafm.com/spacestation-128-mp3", "https://ice6.somafm.com/spacestation-128-mp3", "https://ice5.somafm.com/spacestation-128-mp3"], "home": "https://somafm.com/spacestation/", "now": {"url": "https://somafm.com/songs/spacestation.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-secretagent", "name": "SomaFM Secret Agent (spy lounge)", "urls": ["https://ice2.somafm.com/secretagent-128-mp3", "https://ice6.somafm.com/secretagent-128-mp3", "https://ice5.somafm.com/secretagent-128-mp3"], "home": "https://somafm.com/secretagent/", "now": {"url": "https://somafm.com/songs/secretagent.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-u80s", "name": "SomaFM Underground 80s (synthpop)", "urls": ["https://ice6.somafm.com/u80s-128-mp3", "https://ice2.somafm.com/u80s-128-mp3", "https://ice5.somafm.com/u80s-128-mp3"], "home": "https://somafm.com/u80s/", "now": {"url": "https://somafm.com/songs/u80s.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-indiepop", "name": "SomaFM Indie Pop Rocks!", "urls": ["https://ice6.somafm.com/indiepop-128-mp3", "https://ice2.somafm.com/indiepop-128-mp3", "https://ice5.somafm.com/indiepop-128-mp3"], "home": "https://somafm.com/indiepop/", "now": {"url": "https://somafm.com/songs/indiepop.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}], "radioCredit": {"text": "Each station plays from its own stream. SomaFM is listener-supported and free of ads:", "href": "https://somafm.com/", "link": "somafm.com"}, "musicVolume": 0.25, "updates": true, "radioDefault": "technolovers-electro-house", "fxVolume": 0.5, "scores": {"url": "https://wow-jewels.nathan-05a.workers.dev", "key": "d7028dc8cd548206"}, "welcome": {"played": ["scores", "best"]}, "resumeKey": "d7028dc8cd548206", "build": "741d9571d6aa"}};
+const CONFIG = {"title": "Wow Jewels", "art": {"width": 1920, "height": 1080, "portrait": {"width": 1080, "height": 1920}}, "loop": 12, "film": {"global": "Game"}, "smooth": true, "game": {"keys": {"Space": "go", "Enter": "go", "KeyS": "meat"}, "background": "#1a1208", "moves": true, "fullscreen": true, "volume": 0.8, "pause": true, "home": true, "settings": true, "resume": "rules.js", "radio": [{"id": "house-nation-uk-house", "name": "House Nation UK (house)", "urls": ["https://streaming.radio.co/s06bd9d805/listen"], "home": "https://housenationuk.com/", "now": {"url": "https://public.radio.co/stations/s06bd9d805/status", "path": "current_track.title"}}, {"id": "sunshine-live-house", "name": "sunshine live: House", "urls": ["https://stream.sunshine-live.de/house/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "sunshine-live-classic-vocal-house", "name": "sunshine live: Classic & Vocal House", "urls": ["https://stream.sunshine-live.de/vocalhouse/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "rm-fm-house", "name": "rm.fm House", "urls": ["https://house-high.rautemusik.fm/"], "home": "https://www.rm.fm/house"}, {"id": "technolovers-funky-house", "name": "Technolovers Funky House", "urls": ["https://stream.technolovers.fm/funky-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-deep-house", "name": "Technolovers Deep House", "urls": ["https://stream.technolovers.fm/deep-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-ibiza-house", "name": "Technolovers Ibiza House", "urls": ["https://stream.technolovers.fm/ibiza-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-house", "name": "Technolovers House", "urls": ["https://stream.technolovers.fm/house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-afro-house", "name": "Technolovers Afro House", "urls": ["https://stream.technolovers.fm/afro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-bass-house", "name": "Technolovers Bass House", "urls": ["https://stream.technolovers.fm/bass-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-dirty-house", "name": "Technolovers Dirty House", "urls": ["https://stream.technolovers.fm/dirty-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-electro-house", "name": "Technolovers Electro House", "urls": ["https://stream.technolovers.fm/electro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-future-house", "name": "Technolovers Future House", "urls": ["https://stream.technolovers.fm/future-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-latin-house", "name": "Technolovers Latin House", "urls": ["https://stream.technolovers.fm/latinhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tech-house", "name": "Technolovers Tech House", "urls": ["https://stream.technolovers.fm/techhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tropical-house", "name": "Technolovers Tropical House", "urls": ["https://stream.technolovers.fm/tropical-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-melodic-house-techno", "name": "Technolovers Melodic House & Techno", "urls": ["https://stream.technolovers.fm/melodic-house-techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-techno", "name": "Technolovers Techno", "urls": ["https://stream.technolovers.fm/techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-trance", "name": "Technolovers Trance", "urls": ["https://stream.technolovers.fm/trance"], "home": "https://technolovers.fm/"}, {"id": "technolovers-lounge", "name": "Technolovers Lounge", "urls": ["https://stream.technolovers.fm/lounge"], "home": "https://technolovers.fm/"}, {"id": "somafm-beatblender", "name": "SomaFM Beat Blender (deep house)", "urls": ["https://ice2.somafm.com/beatblender-128-mp3", "https://ice6.somafm.com/beatblender-128-mp3", "https://ice5.somafm.com/beatblender-128-mp3"], "home": "https://somafm.com/beatblender/", "now": {"url": "https://somafm.com/songs/beatblender.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-thetrip", "name": "SomaFM The Trip (progressive house)", "urls": ["https://ice2.somafm.com/thetrip-128-mp3", "https://ice6.somafm.com/thetrip-128-mp3", "https://ice5.somafm.com/thetrip-128-mp3"], "home": "https://somafm.com/thetrip/", "now": {"url": "https://somafm.com/songs/thetrip.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-groovesalad", "name": "SomaFM Groove Salad (downtempo)", "urls": ["https://ice2.somafm.com/groovesalad-128-mp3", "https://ice6.somafm.com/groovesalad-128-mp3", "https://ice5.somafm.com/groovesalad-128-mp3"], "home": "https://somafm.com/groovesalad/", "now": {"url": "https://somafm.com/songs/groovesalad.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-fluid", "name": "SomaFM Fluid (instrumental hip hop)", "urls": ["https://ice2.somafm.com/fluid-128-mp3", "https://ice6.somafm.com/fluid-128-mp3", "https://ice5.somafm.com/fluid-128-mp3"], "home": "https://somafm.com/fluid/", "now": {"url": "https://somafm.com/songs/fluid.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-spacestation", "name": "SomaFM Space Station Soma (space electronic)", "urls": ["https://ice2.somafm.com/spacestation-128-mp3", "https://ice6.somafm.com/spacestation-128-mp3", "https://ice5.somafm.com/spacestation-128-mp3"], "home": "https://somafm.com/spacestation/", "now": {"url": "https://somafm.com/songs/spacestation.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-secretagent", "name": "SomaFM Secret Agent (spy lounge)", "urls": ["https://ice2.somafm.com/secretagent-128-mp3", "https://ice6.somafm.com/secretagent-128-mp3", "https://ice5.somafm.com/secretagent-128-mp3"], "home": "https://somafm.com/secretagent/", "now": {"url": "https://somafm.com/songs/secretagent.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-u80s", "name": "SomaFM Underground 80s (synthpop)", "urls": ["https://ice6.somafm.com/u80s-128-mp3", "https://ice2.somafm.com/u80s-128-mp3", "https://ice5.somafm.com/u80s-128-mp3"], "home": "https://somafm.com/u80s/", "now": {"url": "https://somafm.com/songs/u80s.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-indiepop", "name": "SomaFM Indie Pop Rocks!", "urls": ["https://ice6.somafm.com/indiepop-128-mp3", "https://ice2.somafm.com/indiepop-128-mp3", "https://ice5.somafm.com/indiepop-128-mp3"], "home": "https://somafm.com/indiepop/", "now": {"url": "https://somafm.com/songs/indiepop.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}], "radioCredit": {"text": "Each station plays from its own stream. SomaFM is listener-supported and free of ads:", "href": "https://somafm.com/", "link": "somafm.com"}, "musicVolume": 0.25, "updates": true, "radioDefault": "technolovers-electro-house", "fxVolume": 0.5, "scores": {"url": "https://wow-jewels.nathan-05a.workers.dev", "key": "d7028dc8cd548206"}, "welcome": {"played": ["scores", "best"]}, "voices": ["wow", "borat", "tommy", "happy", "val", "mask", "urkel", "bueller", "schnikes", "cheer", "redeem", "church", "picard"], "voiceVolume": 0.5, "resumeKey": "d7028dc8cd548206", "build": "610e651d82a6"}};
 const GAME = CONFIG.game === true ? {} : CONFIG.game;
 // the picture's size: the config's, or its portrait size while the window is taller than it is wide
 const sizeNow = () => (CONFIG.art.portrait && window.innerHeight > window.innerWidth ? CONFIG.art.portrait : CONFIG.art);
@@ -4416,7 +4420,20 @@ function resize() {
   cv.height = Math.max(1, Math.round(H * k));
   cv.style.width = W * k / dpr + 'px';
   cv.style.height = H * k / dpr + 'px';
+  placeCorner();
 }
+// The corner buttons stand in a row along the top, in the middle of the band above the picture when there is one,
+// and down the side, in the middle of the band beside it, when that is wide enough and there is none above, as on a
+// phone turned on its side. The settings card and the station's name stand clear of them.
+function placeCorner() {
+  const box = $('corner'), r = cv.getBoundingClientRect(), safeTop = px0(getComputedStyle(stage).paddingTop), safeRight = px0(getComputedStyle(stage).paddingRight);
+  const above = r.top - safeTop, beside = window.innerWidth - r.right - safeRight, side = above < 48 && beside >= 52;
+  const top = safeTop + (!side && above >= 48 ? (above - 40) / 2 : 8), right = safeRight + (side ? (beside - 40) / 2 : 8);
+  box.classList.toggle('side', side);
+  box.style.top = top + 'px'; box.style.right = right + 'px';
+  for (const id of ['settings', 'tuned']) { const e = $(id); e.style.top = (side ? top : top + 48) + 'px'; e.style.right = (side ? right + 48 : right) + 'px'; }
+}
+const px0 = v => parseFloat(v) || 0;
 window.addEventListener('resize', resize);
 
 // ---------- the game ----------
@@ -4443,7 +4460,7 @@ function ask(o = {}) {
 $('ask').addEventListener('submit', e => { e.preventDefault(); if (asking) asking($('ask-text').value.trim() || null); });
 // Whether the world's best are up, the rows last fetched, and how they are put away; and a game over waiting to be
 // posted, the one posted, and the player's own on the world's board (see "scores" below).
-const BEST = { open: false, rows: null, close: () => {} };
+const BEST = { open: false, rows: null, playing: 0, close: () => {} };
 const P = { seen: -1, run: null, id: null, mine: null, due: false };
 // The game is made for one size of picture. When the window turns from wide to tall or back, it is made again
 // for the new size and told everything pressed so far, so a run carries on where it was.
@@ -4457,7 +4474,7 @@ function start(size) {
     // that the page posts a game's scores to the world's board
     const touch = matchMedia('(pointer: coarse)').matches, scores = !!(GAME.scores && GAME.scores.url);
     game = window.__FILM__.create({ makeCanvas: mk, Path2D: window.Path2D, width: W, height: H, store, touch, ask, scores });
-    if (BEST.open && game.showBest) game.showBest(BEST.rows || [], P.mine);
+    if (BEST.open && game.showBest) game.showBest(BEST.rows || [], P.mine, BEST.playing);
     if (game.input) for (const e of pressed) game.input(e);
   } catch (e) {
     game = null;
@@ -4535,13 +4552,17 @@ const A = { ctx: null, out: null, bufs: {}, last: null, muted: false, played: []
 // the settings a player has chosen, kept in the browser: the effects' volume and the music's, 0 to 1, and the
 // radio station, by its id or else its name, so that it stays the same station when the list changes, or '' for
 // none. "fxVolume" and "musicVolume" set the volumes to begin with, and "radioDefault" the station, by its id.
+// With "voices", the names of the sounds that are the characters speaking, those have a volume of their own,
+// which "voiceVolume" sets to begin with, and the effects' is the rest's.
 // Only what the player chose is kept, so the game's own settings can change under it.
 const CHOSEN = (GAME.settings && store.get('chosen')) || {};
-const SET = Object.assign({ fx: GAME.fxVolume ?? 1, music: GAME.musicVolume ?? 0.6, station: GAME.radioDefault || '' }, CHOSEN);
+const SET = Object.assign({ fx: GAME.fxVolume ?? 1, voice: GAME.voiceVolume ?? GAME.fxVolume ?? 1, music: GAME.musicVolume ?? 0.6, station: GAME.radioDefault || '' }, CHOSEN);
+const VOICED = new Set(GAME.voices || []);
 const choose = (key, value) => { SET[key] = CHOSEN[key] = value; store.set('chosen', CHOSEN); };
 const stationKey = st => st.id || st.name;
 const stationOf = key => (GAME.radio || []).find(st => stationKey(st) === key);
 const fxLevel = () => (A.muted ? 0 : (GAME.volume ?? 0.8) * SET.fx);
+const voiceLevel = () => (A.muted ? 0 : (GAME.volume ?? 0.8) * (VOICED.size ? SET.voice : SET.fx));
 // the sounds are made ready as the page loads, so the first press has only to let them through
 function unlock() {
   if (!A.ctx) return;
@@ -4557,6 +4578,10 @@ function unlock() {
   A.out = A.ctx.createGain();
   A.out.gain.value = fxLevel();
   A.out.connect(A.ctx.destination);
+  // the characters' voices, through a volume of their own
+  A.voice = A.ctx.createGain();
+  A.voice.gain.value = voiceLevel();
+  A.voice.connect(A.ctx.destination);
   for (const [name, b64] of Object.entries(SOUNDS)) {
     const bin = atob(b64), bytes = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
@@ -4576,7 +4601,8 @@ function sound(e) {
   src.playbackRate.value = e.rate || 1;
   g.gain.value = e.gain ?? 1;
   src.connect(g);
-  if (e.pan && A.ctx.createStereoPanner) { const p = A.ctx.createStereoPanner(); p.pan.value = e.pan; g.connect(p); p.connect(A.out); } else g.connect(A.out);
+  const out = VOICED.has(e.name) ? A.voice : A.out;
+  if (e.pan && A.ctx.createStereoPanner) { const p = A.ctx.createStereoPanner(); p.pan.value = e.pan; g.connect(p); p.connect(out); } else g.connect(out);
   src.start();
   if (STATS.on) STATS.sounds++;
   A.played.push(e.name);
@@ -4588,7 +4614,7 @@ function speak(e) {
   if (A.muted || !window.speechSynthesis || !window.SpeechSynthesisUtterance) return;
   try {
     const u = new SpeechSynthesisUtterance(e.say);
-    u.rate = e.rate || 1; u.pitch = e.pitch ?? 1; u.volume = Math.min(1, (e.gain ?? 1) * fxLevel() * 1.25); u.lang = e.lang || 'en-US';
+    u.rate = e.rate || 1; u.pitch = e.pitch ?? 1; u.volume = Math.min(1, (e.gain ?? 1) * voiceLevel() * 1.25); u.lang = e.lang || 'en-US';
     speechSynthesis.speak(u);
   } catch (err) { /* no voice */ }
 }
@@ -4687,7 +4713,6 @@ function pause(on) {
 if (GAME.pause) {
   const button = $('pause'), veil = $('veil');
   button.hidden = false;
-  button.classList.toggle('beside', !$('full').hidden);
   $('veil-how').textContent = matchMedia('(pointer: coarse)').matches ? 'Tap to go on' : 'Click or press P to go on';
   button.addEventListener('click', () => { pause(!C.paused); button.blur(); });
   veil.addEventListener('pointerdown', e => { e.preventDefault(); pause(false); });
@@ -4769,14 +4794,17 @@ let setPaused = false, openCard = () => {};
 if (GAME.settings) {
   const gear = $('gear'), card = $('settings'), fx = $('fx'), mu = $('mu'), station = $('station');
   gear.hidden = false;
-  // the gear stands to the left of whichever corner buttons are showing
-  const beside = ['full', 'pause'].filter(id => !$(id).hidden).length;
-  gear.style.right = `calc(${8 + 48 * beside}px + env(safe-area-inset-right, 0px))`;
   (GAME.radio || []).forEach(st => { const o = document.createElement('option'); o.value = stationKey(st); o.textContent = st.name; station.append(o); });
   if (!GAME.radio || !GAME.radio.length) { station.closest('label').hidden = true; mu.closest('label').hidden = true; }
   if (GAME.radioCredit) { const c = $('radio-credit'); c.textContent = GAME.radioCredit.text + ' '; if (GAME.radioCredit.href) { const a = document.createElement('a'); a.href = GAME.radioCredit.href; a.target = '_blank'; a.rel = 'noopener'; a.textContent = GAME.radioCredit.link || GAME.radioCredit.href; c.append(a); } }
   fx.value = Math.round(SET.fx * 100); mu.value = Math.round(SET.music * 100); station.value = SET.station;
   fx.addEventListener('input', () => { choose('fx', fx.value / 100); if (A.out) A.out.gain.value = fxLevel(); });
+  // the characters' own volume, where the game names its voices
+  const vo = $('vo');
+  if (VOICED.size) {
+    $('voice-row').hidden = false; vo.value = Math.round(SET.voice * 100);
+    vo.addEventListener('input', () => { choose('voice', vo.value / 100); if (A.voice) A.voice.gain.value = voiceLevel(); });
+  }
   mu.addEventListener('input', () => { choose('music', mu.value / 100); level(); });
   station.addEventListener('change', () => { choose('station', station.value); tune(station.value); });
   // the speed stats' box, ticked as it was left
@@ -4790,7 +4818,6 @@ if (GAME.settings) {
     const next = $('next'), tuned = $('tuned');
     let fade = 0;
     next.hidden = false;
-    next.style.right = `calc(${8 + 48 * (beside + 1)}px + env(safe-area-inset-right, 0px))`;
     next.addEventListener('click', () => {
       const at = GAME.radio.findIndex(st => stationKey(st) === SET.station), st = GAME.radio[(at + 1) % GAME.radio.length];
       choose('station', stationKey(st)); station.value = SET.station;
@@ -4856,14 +4883,13 @@ if (GAME.welcome && GAME.settings) {
 if (GAME.scores && GAME.scores.url) {
   const cup = $('cup'), api = GAME.scores.url.replace(/\/$/, '');
   cup.hidden = false;
-  cup.style.right = `calc(${8 + 48 * ['full', 'pause', 'gear', 'next'].filter(id => !$(id).hidden).length}px + env(safe-area-inset-right, 0px))`;
   // A name for the world's board is letters and digits only, taken from the one the player gave, here or to the
   // game's own board.
   const plain = v => String(v || '').replace(/[^A-Za-z0-9]/g, '').slice(0, 16);
   const named = () => plain(store.get('world name') || store.get('name'));
   // whether the cup stopped the game, which it lets go on again when the best are put away
   let held = false;
-  const show = () => { if (BEST.open && game && game.showBest) game.showBest(BEST.rows || [], P.mine); };
+  const show = () => { if (BEST.open && game && game.showBest) game.showBest(BEST.rows || [], P.mine, BEST.playing); };
   BEST.close = () => {
     if (!BEST.open) return;
     BEST.open = false; cup.setAttribute('aria-expanded', 'false');
@@ -4878,8 +4904,21 @@ if (GAME.scores && GAME.scores.url) {
     // the game stands still under the best, but without the veil, so they can be read
     $('veil').hidden = true;
     show();
-    fetch(api + '/scores', { cache: 'no-store' }).then(r => r.json()).then(b => { BEST.rows = b.best || []; show(); }).catch(() => {});
+    fetch(api + '/scores', { cache: 'no-store' }).then(r => r.json()).then(b => { BEST.rows = b.best || []; if (typeof b.playing === 'number') BEST.playing = b.playing; show(); }).catch(() => {});
   }
+  // The page says it is open every 45 seconds while it is shown, under a mark of its own kept for its tab, and the
+  // server counts the pages heard from lately as playing now.
+  let mark = '';
+  try { mark = sessionStorage.getItem('here') || ''; } catch (e) { /* storage blocked */ }
+  if (!mark) { mark = crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(36).slice(2) + Date.now().toString(36); try { sessionStorage.setItem('here', mark); } catch (e) { /* storage blocked */ } }
+  const here = () => {
+    if (document.hidden || C.fixed != null) return;
+    fetch(api + '/here', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify({ id: mark }) })
+      .then(r => r.json()).then(b => { if (typeof b.playing === 'number') { BEST.playing = b.playing; show(); } }).catch(() => {});
+  };
+  here();
+  setInterval(here, 45000);
+  document.addEventListener('visibilitychange', here);
   cup.addEventListener('click', () => { if (BEST.open) BEST.close(); else openBest(); cup.blur(); });
   // the settings opened put the best away, and the stop the cup held goes to them
   if (GAME.settings) $('gear').addEventListener('click', () => {
@@ -4929,7 +4968,7 @@ document.addEventListener('keydown', e => {
   if (GAME.pause && e.code === 'KeyP' && !KEYS.KeyP && !e.repeat) { pause(!C.paused); return; }
   if (C.paused) return;
   if (e.code === 'KeyF' && !KEYS.KeyF && !e.repeat) { toggleFullscreen(); return; }
-  if (e.code === 'KeyM' && !KEYS.KeyM && !e.repeat) { A.muted = !A.muted; if (A.out) A.out.gain.value = fxLevel(); level(); return; }
+  if (e.code === 'KeyM' && !KEYS.KeyM && !e.repeat) { A.muted = !A.muted; if (A.out) A.out.gain.value = fxLevel(); if (A.voice) A.voice.gain.value = voiceLevel(); level(); return; }
   const key = KEYS[e.code];
   if (!key || e.metaKey || e.ctrlKey || e.altKey) return;
   e.preventDefault();

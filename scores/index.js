@@ -5,7 +5,9 @@
 // rules come to it. player/build.py writes this beside a game's page, with the game's rules, play.js, setup.js
 // and a wrangler.jsonc, for `npx wrangler deploy` to put up.
 //
-//   GET  /scores      the best: { best: [{ id, name, score, level, at }], of }
+//   GET  /scores      the best: { best: [{ id, name, score, level, at }], of, playing }
+//   POST /here        { id }, a page's mark, every so often while it is open, gives { playing }: how many pages
+//                     have been heard from lately
 //   POST /runs        { name, key, ends, claim: { game, score, level }, events: [[t, type, key]] } gives { id }
 //   GET  /runs/<id>   how its check goes: { state: 'checking', done }, { state: 'checked', rank, of }, or
 //                     { state: 'refused', why }. Each look checks one more piece, and an alarm does the same.
@@ -24,6 +26,8 @@ const PIECE = HZ * 10, MOST = { events: 40000, seconds: 4 * 3600, bytes: 2e6, na
 // how long a run may wait to be checked, how many runs one address may post in ten minutes, and how many of the
 // best are shown
 const STALE = 864e5, POSTS = 8, SHOWN = 10;
+// how long a page counts as playing after it was last heard from, and how many pages one address may count as
+const HERE = 100e3, HERE_EACH = 4;
 const json = (body, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' } });
 
 export class Board extends DurableObject {
@@ -37,12 +41,16 @@ export class Board extends DurableObject {
     // it woke, since the first is the slowest
     this.posts = new Map();
     this.warm = false;
+    // the pages heard from lately, each { at, from }, kept only while the object is awake, as is all that is
+    // needed for a count of who is playing now
+    this.here = new Map();
   }
 
   async fetch(request) {
     const [what, id] = new URL(request.url).pathname.split('/').filter(Boolean);
     if (request.method === 'GET' && what === 'scores') return json(this.best());
     if (request.method === 'POST' && what === 'runs' && !id) return this.post(request);
+    if (request.method === 'POST' && what === 'here') return this.seen(request);
     if (request.method === 'GET' && what === 'runs' && id) { this.check(id); return json(this.state(id)); }
     return json({ error: 'not found' }, 404);
   }
@@ -57,7 +65,24 @@ export class Board extends DurableObject {
 
   best() {
     const best = this.sql.exec('SELECT id, name, score, level, at FROM scores ORDER BY score DESC, at LIMIT ?', SHOWN).toArray();
-    return { best, of: this.sql.exec('SELECT COUNT(*) AS n FROM scores').one().n };
+    return { best, of: this.sql.exec('SELECT COUNT(*) AS n FROM scores').one().n, playing: this.playing() };
+  }
+
+  // how many pages have been heard from lately, those not heard from for a while let go
+  playing() {
+    const now = Date.now();
+    for (const [id, h] of this.here) if (now - h.at > HERE) this.here.delete(id);
+    return this.here.size;
+  }
+
+  // A page says it is open, under a mark of its own. One address counts as only so many pages.
+  async seen(request) {
+    const b = await request.json().catch(() => null), id = b && typeof b.id === 'string' && /^[\w-]{8,64}$/.test(b.id) ? b.id : null;
+    if (!id) return json({ error: 'no mark' }, 400);
+    const from = request.headers.get('CF-Connecting-IP') || '', count = this.playing();
+    if (!this.here.has(id) && [...this.here.values()].filter(h => h.from === from).length >= HERE_EACH) return json({ playing: count });
+    this.here.set(id, { at: Date.now(), from });
+    return json({ playing: this.here.size });
   }
 
   async post(request) {
