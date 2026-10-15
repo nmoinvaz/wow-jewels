@@ -16,7 +16,8 @@
 // A row of four leaves a striped jewel where it was, which takes its whole row or column with it when it goes. A
 // row of five or more leaves a peacock, which is no kind: changed with a neighbour, it takes every jewel of the
 // neighbour's kind. A jewel with Starfleet's badge on it, which Picard's replicator makes, takes its row and its
-// column both when it goes.
+// column both when it goes. Two rows that cross leave a burning jewel where they meet, and when it goes its fire
+// spreads like wildfire, wave after wave, to the jewels round it.
 //
 // A row is worth more for a change made quickly after the tray comes to rest, for rows that come back to back,
 // for being of the kind wanted just then, which changes every half minute, and for having the gilded jewel in
@@ -65,7 +66,11 @@
   const MEAT_SHARE = 0.1, MEAT_MIN = 1000, MEAT_REST = HZ * 600, MEAT_BACK = 1.5;
   // The peacock is the kind after the last. A jewel is plain, or striped across, when it takes its row, or
   // striped down, when it takes its column, or wears the badge, when it takes both.
-  const PEACOCK = KINDS, PLAIN = 0, ACROSS = 1, DOWN = 2, BADGE = 3;
+  const PEACOCK = KINDS, PLAIN = 0, ACROSS = 1, DOWN = 2, BADGE = 3, FIRE = 4;
+  // A burning jewel that goes sets each jewel beside it alight, by so much chance, and each of those the jewels
+  // beside them, for so many waves and so many jewels at the most; a peacock does not burn. The fire takes so many
+  // steps to spread before the burnt jewels go.
+  const FIRE_CATCH = 0.6, FIRE_WAVES = 4, FIRE_MOST = 18, BURN = Math.round(HZ * 0.8);
   // Tommy says holy schnikes when a striped jewel goes off, at so long a cascade and when a peacock is used,
   // though not within so many steps of the last time; and the steps he stays for it
   const SCHNIKES = 4, SCHNIKES_REST = HZ * 45, SCHNIKES_UP = 184;
@@ -189,7 +194,7 @@
     const blank = () => Array.from({ length: CELLS }, () => 0);
     const init = () => {
       const S = { phase: 'title', n: 0, t: 0, seed: 20261012, board: [], drop: blank(), mode: 'still', k: 0, a: -1, b: -1, back: 0, gone: [], want: '', sel: -1, hint: -1, idle: 0,
-        score: 0, level: 1, into: 0, chain: 0, left: 0, games: 0, time: TIME, shown: TIME, why: '', wow: { said: -1e6, run: 0, n: -1e6, count: 0, len: 0, cells: [] }, wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, picard: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_AFTER, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 }, pops: [], ev: [] };
+        score: 0, level: 1, into: 0, chain: 0, left: 0, games: 0, time: TIME, shown: TIME, why: '', wow: { said: -1e6, run: 0, n: -1e6, count: 0, len: 0, cells: [] }, wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, picard: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, fire: { n: -1e6, at: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_AFTER, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 }, pops: [], ev: [] };
       S.board = deal(S);
       S.left = moves(S.board).length;
       return S;
@@ -197,7 +202,7 @@
     function begin(S) {
       // the tray is dealt from the moment the game was asked for, so no two games are alike
       S.seed = ((S.n + 1) * 48271 + S.games * 9973 + 12345) % 2147483647 || 1;
-      Object.assign(S, { phase: 'play', t: 0, mode: 'fall', k: 0, a: -1, b: -1, back: 0, gone: [], want: '', sel: -1, hint: -1, idle: 0, score: 0, level: 1, into: 0, chain: 0, pops: [], time: TIME, shown: TIME, why: '', wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, picard: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_AFTER, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 } });
+      Object.assign(S, { phase: 'play', t: 0, mode: 'fall', k: 0, a: -1, b: -1, back: 0, gone: [], want: '', sel: -1, hint: -1, idle: 0, score: 0, level: 1, into: 0, chain: 0, pops: [], time: TIME, shown: TIME, why: '', wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, picard: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, fire: { n: -1e6, at: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_AFTER, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 } });
       S.games++;
       S.spice = S.n + MASK_FIRST;
       S.spying = S.n + SPY_AFTER;
@@ -211,14 +216,21 @@
       S.drop = S.board.map((k, i) => N + (N - 1 - rowOf(i)) * 0.6);
       say(S, 'deal');
     }
-    // Every striped jewel among those going takes its row or its column with it, a badge both, and any striped
-    // jewel or badge in that takes its own. A peacock is not taken: it stays until it is used. What comes back is
-    // each line that went.
+    // Every striped jewel among those going takes its row or its column with it, a badge both, a burning jewel the
+    // jewels its wildfire reaches, and any of those that is one of these takes its own. A peacock is not taken: it
+    // stays until it is used. What comes back is each line that went, a fire among them.
     function burst(S, gone) {
       const lines = [], queue = [...gone];
       while (queue.length) {
         const i = queue.pop(), mark = S.spec[i];
         if (!mark || lines.some(l => l.at === i)) continue;
+        if (mark === FIRE) {
+          lines.push({ n: S.n, at: i, dir: FIRE });
+          const lit = wildfire(S, i);
+          S.fire = { n: S.n, at: i, cells: (S.fire.n === S.n ? S.fire.cells : []).concat([...lit]) };
+          for (const [j] of lit) if (!gone.has(j)) { gone.add(j); queue.push(j); }
+          continue;
+        }
         for (const dir of mark === BADGE ? [ACROSS, DOWN] : [mark]) {
           lines.push({ n: S.n, at: i, dir });
           for (let k = 0; k < N; k++) {
@@ -227,8 +239,26 @@
           }
         }
       }
-      if (lines.length) { S.lines = S.lines.concat(lines).slice(-6); say(S, 'stripe', lines.length); }
+      const beams = lines.filter(l => l.dir !== FIRE);
+      if (beams.length) { S.lines = S.lines.concat(beams).slice(-6); say(S, 'stripe', beams.length); }
+      if (beams.length < lines.length) say(S, 'fire', S.fire.cells.length);
       return lines;
+    }
+    // A wildfire from a burning jewel: each wave sets alight, by chance, the jewels beside those that caught in the
+    // wave before, a peacock never. What comes back is each cell alight with its wave, the jewel itself the first.
+    function wildfire(S, at) {
+      const lit = new Map([[at, 0]]);
+      let front = [at];
+      for (let wave = 1; wave <= FIRE_WAVES && front.length && lit.size < FIRE_MOST; wave++) {
+        const next = [];
+        for (const c of front) for (let d = 0; d < 4 && lit.size < FIRE_MOST; d++) {
+          const j = beside(c, d);
+          if (j < 0 || lit.has(j) || S.board[j] === PEACOCK) continue;
+          if (rnd(S) < FIRE_CATCH) { lit.set(j, wave); next.push(j); }
+        }
+        front = next;
+      }
+      return lit;
     }
     // The gilded jewel is taken: its gilding is done, and when it was taken is kept.
     const caught = S => { S.gilt = { i: -1, n: S.gilt.n, until: 0, got: S.n }; say(S, 'gilt', 1); };
@@ -315,6 +345,14 @@
         const down = cells[1] - cells[0] === N;
         return { at: down ? cells[cells.length - 1] : cells[cells.length >> 1], kind: cells.length >= 5 ? PEACOCK : S.board[cells[0]], mark: cells.length >= 5 ? PLAIN : down ? DOWN : ACROSS };
       });
+      // two rows that cross, one across and one down, leave a burning jewel where they meet, unless a longer row
+      // leaves its jewel there
+      const crossed = [];
+      for (const a of found) for (const b of found) {
+        if (a[1] - a[0] !== 1 || b[1] - b[0] !== N) continue;
+        const at = a.find(c => b.includes(c));
+        if (at !== undefined && !kept.some(k => k.at === at) && !crossed.some(k => k.at === at)) crossed.push({ at, kind: S.board[at], mark: FIRE });
+      }
       // the time given back, kept for the picture to show
       S.time = Math.min(TIME, S.time + given);
       S.gave = { n: S.n, secs: given / HZ, run: S.run };
@@ -322,12 +360,14 @@
       // where the jewel it leaves comes up.
       const long = found.filter(cells => cells.length >= 4);
       if (long.length) { const cells = [...new Set(long.flat())]; S.home = { n: S.n, cells, kinds: cells.map(i => S.board[i]), at: kept[0].at }; }
-      for (const k of kept) gone.delete(k.at);
+      for (const k of kept.concat(crossed)) gone.delete(k.at);
       S.gone = [...gone];
       broken(S, S.gone);
-      for (const k of kept) { S.board[k.at] = k.kind; S.spec[k.at] = k.mark; }
+      for (const k of kept.concat(crossed)) { S.board[k.at] = k.kind; S.spec[k.at] = k.mark; }
       if (kept.length) { S.born = { n: S.n, i: kept[0].at }; say(S, 'born', kept[0].kind === PEACOCK ? 2 : 1); }
-      Object.assign(S, { mode: 'clear', k: 0 });
+      if (crossed.length) say(S, 'lit', crossed.length);
+      // a wildfire spreads before what it burnt goes
+      Object.assign(S, { mode: S.fire.n === S.n ? 'burn' : 'clear', k: 0 });
       say(S, 'row', S.chain);
       rung(S);
       // Guests come up at what a row is: Harry at the first after the teacher's call, Tommy when the score has passed a mark, Happy and the Church Lady by
@@ -370,7 +410,7 @@
       S.fan = { n: S.n, at: pea, kind, cells: [...gone] };
       S.run = 1; S.last = S.n;
       scored(S);
-      Object.assign(S, { mode: 'clear', k: 0, gone: [...gone], chain: 0 });
+      Object.assign(S, { mode: S.fire.n === S.n ? 'burn' : 'clear', k: 0, gone: [...gone], chain: 0 });
       broken(S, S.gone);
       say(S, 'fan');
       rung(S);
@@ -421,7 +461,7 @@
       S.pops.push({ i: at, pts: pts + back, n: S.n, kind: S.board[at], run: 1, tags: back ? ['SPICY'] : [] });
       while (S.pops.length > 8) S.pops.shift();
       S.blast = { n: S.n, at, cells, kinds: cells.map(i => S.board[i]) };
-      Object.assign(S, { mode: 'clear', k: 0, gone: [...gone], chain: 0 });
+      Object.assign(S, { mode: S.fire.n === S.n ? 'burn' : 'clear', k: 0, gone: [...gone], chain: 0 });
       broken(S, S.gone);
       say(S, 'blast');
       rung(S);
@@ -552,6 +592,8 @@
         const found = rows(b);
         if (found.length) { S.chain = 1; score(S, found); }
         else { Object.assign(S, { back: 1, k: 0 }); say(S, 'no'); oops(S); }
+      } else if (S.mode === 'burn') {
+        if (++S.k >= BURN) Object.assign(S, { mode: 'clear', k: 0 });
       } else if (S.mode === 'clear') {
         if (++S.k >= CLEAR) settle(S);
       } else if (S.mode === 'fall') {
@@ -580,5 +622,5 @@
   // what a game came to once it is over, for a page to post and a server to check by playing it again, or null
   // while one is going
   const result = S => (S.phase === 'over' ? { game: S.games, score: S.score, level: S.level } : null);
-  return { create, result, rows, moves, beside, through, need, above, drain, N, CELLS, KINDS, PEACOCK, ACROSS, DOWN, BADGE, HZ, SWAP, CLEAR, FALL, HINT, AGAIN, WOW, WOW_GAP, TIME, BORAT, BORAT_IN, BORAT_UP, TOMMY_UP, HAPPY_UP, CHURCH_UP, PICARD_UP, VAL_UP, MASK_UP, MASK_LANDS, URKEL_UP, ROLL_UP, REDEEM_UP, CHEER_UP, SCHNIKES_UP, BLAST, BACK, MEAT_MIN, MEAT_REST, WANT_FOR, GILT_FOR, MARK, ALARM, ALARM_UP, TURNING, SPY_FOR };
+  return { create, result, rows, moves, beside, through, need, above, drain, N, CELLS, KINDS, PEACOCK, ACROSS, DOWN, BADGE, FIRE, FIRE_WAVES, BURN, HZ, SWAP, CLEAR, FALL, HINT, AGAIN, WOW, WOW_GAP, TIME, BORAT, BORAT_IN, BORAT_UP, TOMMY_UP, HAPPY_UP, CHURCH_UP, PICARD_UP, VAL_UP, MASK_UP, MASK_LANDS, URKEL_UP, ROLL_UP, REDEEM_UP, CHEER_UP, SCHNIKES_UP, BLAST, BACK, MEAT_MIN, MEAT_REST, WANT_FOR, GILT_FOR, MARK, ALARM, ALARM_UP, TURNING, SPY_FOR };
 });
