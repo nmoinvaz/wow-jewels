@@ -590,7 +590,8 @@ const MOUTHS = "{\"wow\":{\"fps\":30,\"open\":[0.0,0.12,0.21,0.44,0.52,0.62,0.85
 // falls in by luck. A player who does nothing for a while is called for, as a teacher calls a roll, and the first
 // row made after that is told it has redeemed itself. When the clock is getting low, or the next level is near,
 // a townie shouts you can do it. Now and then, as a jewel turns into another kind, as a replicator makes a thing,
-// Captain Picard asks for his tea, and the jewel it makes wears Starfleet's badge.
+// Captain Picard asks for his tea, and the jewel it makes wears Starfleet's badge. A pull of the slot machine's
+// lever spins every column of the tray as a reel, and each row the reels land in pays the stake back.
 //
 // A row of four leaves a striped jewel where it was, which takes its whole row or column with it when it goes. A
 // row of five or more leaves a peacock, which is no kind: changed with a neighbour, it takes every jewel of the
@@ -606,6 +607,7 @@ const MOUTHS = "{\"wow\":{\"fps\":30,\"open\":[0.0,0.12,0.21,0.44,0.52,0.62,0.85
 // of what was asked for and when, and a script can play it (check.js does). What is asked for comes as keys:
 //   go            begin a game, or another once one is over
 //   meat          buy a meatball with a tenth of the score: The Mask comes and his fire lands on the tray
+//   slot          stake a tenth of the score on a pull of the slot machine's lever: the columns spin as reels
 //   tip           tap whoever is up, once each time someone comes, for a few points
 //   p<i>          pick the jewel in cell i (0 to 63, by rows from the top left), or let it go if it is picked
 //   s<i>d<dir>    change the jewel in cell i with the one to its right (0), below (1), left (2) or above (3)
@@ -643,6 +645,11 @@ const MOUTHS = "{\"wow\":{\"fps\":30,\"open\":[0.0,0.12,0.21,0.44,0.52,0.62,0.85
   // many steps of play. Its fire pays back what it cost so many times over, on top of what the jewels it takes
   // are worth, so it is always worth having.
   const MEAT_SHARE = 0.1, MEAT_MIN = 1000, MEAT_REST = HZ * 600, MEAT_BACK = 1.5;
+  // A pull of the slot machine's lever stakes so much of the score, once the score is at least so much, and then
+  // not again for so many steps of play. Every column spins as a reel. The first stops so many steps into the spin
+  // and each after it so many steps later, left to right, and the tray rests so many steps before what the reels
+  // show is taken. By so much chance a whole row across lands all of one kind, the jackpot.
+  const SLOT_SHARE = 0.1, SLOT_MIN = 1000, SLOT_REST = HZ * 300, SPIN = 90, REEL_GAP = 18, SETTLE = 30, JACKPOT = 1 / 8;
   // The peacock is the kind after the last. A jewel is plain, or striped across, when it takes its row, or
   // striped down, when it takes its column, or wears the badge, when it takes both.
   const PEACOCK = KINDS, PLAIN = 0, ACROSS = 1, DOWN = 2, BADGE = 3, FIRE = 4;
@@ -773,7 +780,7 @@ const MOUTHS = "{\"wow\":{\"fps\":30,\"open\":[0.0,0.12,0.21,0.44,0.52,0.62,0.85
     const blank = () => Array.from({ length: CELLS }, () => 0);
     const init = () => {
       const S = { phase: 'title', n: 0, t: 0, seed: 20261012, board: [], drop: blank(), mode: 'still', k: 0, a: -1, b: -1, back: 0, gone: [], want: '', sel: -1, hint: -1, idle: 0,
-        score: 0, level: 1, into: 0, chain: 0, left: 0, games: 0, time: TIME, shown: TIME, why: '', wow: { said: -1e6, run: 0, n: -1e6, count: 0, len: 0, cells: [] }, wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, picard: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, fire: { n: -1e6, at: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_AFTER, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 }, pops: [], ev: [] };
+        score: 0, level: 1, into: 0, chain: 0, left: 0, games: 0, time: TIME, shown: TIME, why: '', wow: { said: -1e6, run: 0, n: -1e6, count: 0, len: 0, cells: [] }, wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, picard: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, fire: { n: -1e6, at: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, lever: 0, stake: { n: -1e6, cost: 0 }, pull: false, reels: { n: -1e6, to: [], line: -1 }, won: { n: -1e6, pts: 0, times: 0, line: -1 },urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_AFTER, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 }, pops: [], ev: [] };
       S.board = deal(S);
       S.left = moves(S.board).length;
       return S;
@@ -781,7 +788,7 @@ const MOUTHS = "{\"wow\":{\"fps\":30,\"open\":[0.0,0.12,0.21,0.44,0.52,0.62,0.85
     function begin(S) {
       // the tray is dealt from the moment the game was asked for, so no two games are alike
       S.seed = ((S.n + 1) * 48271 + S.games * 9973 + 12345) % 2147483647 || 1;
-      Object.assign(S, { phase: 'play', t: 0, mode: 'fall', k: 0, a: -1, b: -1, back: 0, gone: [], want: '', sel: -1, hint: -1, idle: 0, score: 0, level: 1, into: 0, chain: 0, pops: [], time: TIME, shown: TIME, why: '', wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, picard: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, fire: { n: -1e6, at: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_AFTER, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 } });
+      Object.assign(S, { phase: 'play', t: 0, mode: 'fall', k: 0, a: -1, b: -1, back: 0, gone: [], want: '', sel: -1, hint: -1, idle: 0, score: 0, level: 1, into: 0, chain: 0, pops: [], time: TIME, shown: TIME, why: '', wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, picard: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, fire: { n: -1e6, at: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, lever: 0, stake: { n: -1e6, cost: 0 }, pull: false, reels: { n: -1e6, to: [], line: -1 }, won: { n: -1e6, pts: 0, times: 0, line: -1 },urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_AFTER, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 } });
       S.games++;
       S.spice = S.n + MASK_FIRST;
       S.spying = S.n + SPY_AFTER;
@@ -1005,7 +1012,7 @@ const MOUTHS = "{\"wow\":{\"fps\":30,\"open\":[0.0,0.12,0.21,0.44,0.52,0.62,0.85
     // A meatball is bought: a tenth of the score is paid, The Mask is sent for, and whoever is up gives way to him.
     // It is not to be had again for a while.
     function buy(S) {
-      if (S.n < S.ready || S.score < MEAT_MIN || S.due || S.mode === 'mask') return;
+      if (S.n < S.ready || S.score < MEAT_MIN || S.due || S.mode === 'mask' || S.pull || S.mode === 'slot') return;
       const cost = Math.round(S.score * MEAT_SHARE / 10) * 10;
       S.score -= cost;
       S.bought = { n: S.n, cost };
@@ -1045,6 +1052,49 @@ const MOUTHS = "{\"wow\":{\"fps\":30,\"open\":[0.0,0.12,0.21,0.44,0.52,0.62,0.85
       say(S, 'blast');
       rung(S);
       risen(S);
+    }
+    // The slot machine's lever is pulled: a tenth of the score is staked, and the reels spin once the tray is
+    // still. It is not to be had again for a while.
+    function pull(S) {
+      if (S.n < S.lever || S.score < SLOT_MIN || S.pull || S.mode === 'slot' || S.due || S.mode === 'mask') return;
+      const cost = Math.round(S.score * SLOT_SHARE / 10) * 10;
+      S.score -= cost;
+      S.stake = { n: S.n, cost };
+      S.lever = S.n + SLOT_REST;
+      S.pull = true;
+      here(S);
+      say(S, 'pull');
+    }
+    // The reels spin, and where each will stop is chosen now: a tray with a row in it or something to be done.
+    // The gilded jewel's gilding is spun away with it.
+    function spin(S) {
+      const line = rnd(S) < JACKPOT ? Math.floor(rnd(S) * N) : -1, kind = Math.floor(rnd(S) * KINDS);
+      let to;
+      do {
+        to = Array.from({ length: CELLS }, () => Math.floor(rnd(S) * KINDS));
+        if (line >= 0) for (let c = 0; c < N; c++) to[line * N + c] = kind;
+      } while (!rows(to).length && moves(to).length < 3);
+      Object.assign(S, { mode: 'slot', k: 0, pull: false, sel: -1, hint: -1, idle: 0, want: '' });
+      S.gilt = { i: -1, n: S.gilt.n, until: 0, got: S.gilt.got };
+      S.reels = { n: S.n, to, line };
+      say(S, 'spin');
+    }
+    // The reels have stopped: the tray is what they show, its special jewels spun away. Each row they make goes as
+    // a change's row would, and pays the stake back once for each of its jewels past two, which counts to the score
+    // and not to the level. Reels that make nothing lose the stake, and Urkel may ask whether he did that.
+    function land(S) {
+      S.board = S.reels.to.slice();
+      S.spec = blank();
+      Object.assign(S, { mode: 'still', k: 0, idle: 0, rested: S.n, chain: 0, quick: false });
+      S.left = moves(S.board).length;
+      const found = rows(S.board), times = found.reduce((a, cells) => a + cells.length - 2, 0), pts = S.stake.cost * times;
+      S.won = { n: S.n, pts, times, line: S.reels.line };
+      if (!found.length) { say(S, 'bust'); oops(S); return; }
+      S.chain = 1;
+      score(S, found);
+      S.score += pts;
+      say(S, S.reels.line >= 0 ? 'jackpot' : 'win', times);
+      rung(S);
     }
     // The jewels above the gaps fall, and new ones come in over them: drop is how far each has to fall.
     function settle(S) {
@@ -1126,6 +1176,7 @@ const MOUTHS = "{\"wow\":{\"fps\":30,\"open\":[0.0,0.12,0.21,0.44,0.52,0.62,0.85
       if (S.phase === 'title') { if (hit.go) begin(S); return; }
       if (S.phase === 'over') { if (hit.go && S.t > AGAIN) begin(S); return; }
       if (hit.meat) buy(S);
+      if (hit.slot) pull(S);
       if (hit.tip) tip(S);
       // the wanted kind changes, to another, every so often
       if (S.n - S.wanted.n >= WANT_FOR) S.wanted = { kind: (S.wanted.kind + 1 + Math.floor(rnd(S) * (KINDS - 1))) % KINDS, n: S.n };
@@ -1133,15 +1184,15 @@ const MOUTHS = "{\"wow\":{\"fps\":30,\"open\":[0.0,0.12,0.21,0.44,0.52,0.62,0.85
       if (S.mode === 'still' && S.gilt.i >= 0 && S.n >= S.gilt.until) S.gilt = { i: -1, n: S.gilt.n, until: 0, got: S.gilt.got };
       else if (S.mode === 'still' && S.gilt.i < 0 && --S.gild <= 0) gild(S);
       // one thing asked for while the jewels are moving is kept until they are still
-      for (const key of keys) if (key !== 'go' && key !== 'meat' && key !== 'tip') S.want = key;
+      for (const key of keys) if (key !== 'go' && key !== 'meat' && key !== 'slot' && key !== 'tip') S.want = key;
       // the clock runs, and its last ten seconds are counted aloud; `shown` follows it without a jump, for the
       // picture, when a row puts time back
       const was = S.time;
       // How fast time is being won back, in steps a step, a mean over PACE steps: whatever the clock gained since
       // the last step's draining, which only rows and fire give it.
       S.pace += (Math.max(0, S.time - S.ran) - S.pace) / PACE;
-      // the clock stands while The Mask is at his work
-      if (o.clock !== false && S.mode !== 'mask') S.time = Math.max(0, S.time - drain(S.level));
+      // the clock stands while The Mask is at his work and while the reels spin
+      if (o.clock !== false && S.mode !== 'mask' && S.mode !== 'slot') S.time = Math.max(0, S.time - drain(S.level));
       S.ran = S.time;
       S.shown += (S.time - S.shown) * 0.07;
       if (S.time > 0 && S.time < HZ * 10 && Math.ceil(S.time / HZ) !== Math.ceil(was / HZ)) say(S, 'tick', Math.ceil(S.time / HZ));
@@ -1149,11 +1200,18 @@ const MOUTHS = "{\"wow\":{\"fps\":30,\"open\":[0.0,0.12,0.21,0.44,0.52,0.62,0.85
       if (SPY && S.n >= S.spying) { S.spy = S.n; S.spying = S.n + SPY_FOR + SPY_AFTER; say(S, 'spy'); }
       // the townie's shout, when the clock is getting low or the next level is near, and no one else is up
       const low = S.time < CHEER_UNDER && S.time > CHEER_OVER, near = S.cheered !== S.level && S.into >= CHEER_NEAR * need(S.level);
-      if (S.mode !== 'mask' && (low || near) && S.n > S.hush && S.n - S.cheer >= CHEER_REST) { S.cheer = S.n; S.hush = S.n + CHEER_UP; if (near) S.cheered = S.level; say(S, 'cheer'); }
+      if (S.mode !== 'mask' && S.mode !== 'slot' && (low || near) && S.n > S.hush && S.n - S.cheer >= CHEER_REST) { S.cheer = S.n; S.hush = S.n + CHEER_UP; if (near) S.cheered = S.level; say(S, 'cheer'); }
       // out of time, once the jewels are still: a row made at the last moment may yet put some back
       if (S.mode === 'still' && S.time <= 0) { Object.assign(S, { phase: 'over', t: 0, sel: -1, want: '', why: 'time', shown: 0 }); say(S, 'over'); return; }
       if (S.mode === 'still' && S.due && S.n > S.hush) feed(S);
+      else if (S.mode === 'still' && S.pull) spin(S);
       else if (S.mode === 'mask') { if (++S.k >= MASK_LANDS) blast(S); }
+      else if (S.mode === 'slot') {
+        // the reels stop one after another, left to right, and the tray rests a moment before what they show goes
+        const stop = ++S.k - SPIN;
+        if (stop >= 0 && stop % REEL_GAP === 0 && stop / REEL_GAP < N) say(S, 'reel', stop / REEL_GAP);
+        if (stop >= (N - 1) * REEL_GAP + SETTLE) land(S);
+      }
       else if (S.mode === 'still') {
         if (S.want) { const key = S.want; S.want = ''; ask(S, key); }
         if (S.mode === 'still' && ++S.idle === HINT) { const m = moves(S.board); S.hint = m.length ? m[Math.floor(rnd(S) * m.length)][0] : -1; }
@@ -1191,6 +1249,7 @@ const MOUTHS = "{\"wow\":{\"fps\":30,\"open\":[0.0,0.12,0.21,0.44,0.52,0.62,0.85
         Object.assign(S, { mode: 'still', chain: 0, idle: 0, rested: S.n });
         S.left = moves(S.board).length;
         if (S.due && S.n > S.hush) feed(S);
+        else if (S.pull) spin(S);
         else if (!S.left) { Object.assign(S, { phase: 'over', t: 0, sel: -1, want: '', why: 'moves' }); say(S, 'over'); }
       }
     }
@@ -1201,7 +1260,7 @@ const MOUTHS = "{\"wow\":{\"fps\":30,\"open\":[0.0,0.12,0.21,0.44,0.52,0.62,0.85
   // what a game came to once it is over, for a page to post and a server to check by playing it again, or null
   // while one is going
   const result = S => (S.phase === 'over' ? { game: S.games, score: S.score, level: S.level } : null);
-  return { create, result, rows, moves, beside, through, need, above, drain, N, CELLS, KINDS, PEACOCK, ACROSS, DOWN, BADGE, FIRE, FIRE_WAVES, BURN, HZ, SWAP, CLEAR, FALL, HINT, AGAIN, WOW, WOW_GAP, TIME, BORAT, BORAT_IN, BORAT_UP, TOMMY_UP, HAPPY_UP, CHURCH_UP, PICARD_UP, VAL_UP, MASK_UP, MASK_LANDS, URKEL_UP, ROLL_UP, REDEEM_UP, CHEER_UP, SCHNIKES_UP, BLAST, BACK, MEAT_MIN, MEAT_REST, WANT_FOR, GILT_FOR, MARK, ALARM, ALARM_UP, TURNING, SPY_FOR };
+  return { create, result, rows, moves, beside, through, need, above, drain, N, CELLS, KINDS, PEACOCK, ACROSS, DOWN, BADGE, FIRE, FIRE_WAVES, BURN, HZ, SWAP, CLEAR, FALL, HINT, AGAIN, WOW, WOW_GAP, TIME, BORAT, BORAT_IN, BORAT_UP, TOMMY_UP, HAPPY_UP, CHURCH_UP, PICARD_UP, VAL_UP, MASK_UP, MASK_LANDS, URKEL_UP, ROLL_UP, REDEEM_UP, CHEER_UP, SCHNIKES_UP, BLAST, BACK, MEAT_MIN, MEAT_REST, SLOT_MIN, SLOT_REST, SPIN, REEL_GAP, SETTLE, WANT_FOR, GILT_FOR, MARK, ALARM, ALARM_UP, TURNING, SPY_FOR };
 });
 
 </script>
@@ -3093,7 +3152,9 @@ if (typeof module === 'object' && module.exports) module.exports = Townie;
 // it has redeemed itself, and when the clock is getting low or the next level is near a townie shouts you can do it. A medallion beside the
 // title buys a meatball with a tenth of the score, which is The Mask and his fire, once in ten minutes, and Elliott
 // rides to it with E.T. in his basket, as near as the game is to being lost. Now and then, as a jewel turns into
-// another kind and shimmers as a replicator's work does, Captain Picard asks for his tea.
+// another kind and shimmers as a replicator's work does, Captain Picard asks for his tea. A second medallion pulls
+// a slot machine's lever with a tenth of the score, once in five minutes: every column of the tray spins as a
+// reel, the reels stop one after another, and the rows they land in pay the stake back.
 //
 // A row is worth more for a quick change, for rows back to back, for being of the kind wanted, which the score's
 // card shows with a small jewel, and for having the gilded jewel in it, which wears a gold ring that runs down.
@@ -3105,7 +3166,7 @@ if (typeof module === 'object' && module.exports) module.exports = Townie;
 // seconds.
 const Game = (function () {
   'use strict';
-  const R = Rules, { N, CELLS, HZ, SWAP, CLEAR, WOW, TIME, BORAT_UP, TOMMY_UP, HAPPY_UP, CHURCH_UP, PICARD_UP, VAL_UP, MASK_UP, MASK_LANDS, URKEL_UP, ROLL_UP, REDEEM_UP, CHEER_UP, SCHNIKES_UP, BLAST, PEACOCK, ACROSS, DOWN, BADGE, FIRE, FIRE_WAVES, BURN, FALL, MEAT_MIN, MEAT_REST, WANT_FOR, GILT_FOR, ALARM, ALARM_UP, TURNING, SPY_FOR } = R, TAU = Math.PI * 2;
+  const R = Rules, { N, CELLS, KINDS, HZ, SWAP, CLEAR, WOW, TIME, BORAT_UP, TOMMY_UP, HAPPY_UP, CHURCH_UP, PICARD_UP, VAL_UP, MASK_UP, MASK_LANDS, URKEL_UP, ROLL_UP, REDEEM_UP, CHEER_UP, SCHNIKES_UP, BLAST, PEACOCK, ACROSS, DOWN, BADGE, FIRE, FIRE_WAVES, BURN, FALL, MEAT_MIN, MEAT_REST, SLOT_MIN, SLOT_REST, SPIN, REEL_GAP, SETTLE, WANT_FOR, GILT_FOR, ALARM, ALARM_UP, TURNING, SPY_FOR } = R, TAU = Math.PI * 2;
   const clamp = (v, a, b) => (v < a ? a : v > b ? b : v), lerp = (a, b, u) => a + (b - a) * u;
   const ease = u => u * u * (3 - 2 * u), back = u => 1 + 2.70158 * Math.pow(u - 1, 3) + 1.70158 * Math.pow(u - 1, 2);
   const commas = n => String(n).replace(/\B(?=(\d{3})+$)/g, ',');
@@ -3134,6 +3195,8 @@ const Game = (function () {
     const WANT_AT = tall ? [HUD.x + 158, HUD.y + 45] : [HUD.x + 132, HUD.y + HUD.h / 2 - 35];
     // the medallion that buys a meatball: its middle and how large it is
     const MEAT = tall ? [31, 48, 26] : [396, 119, 25];
+    // the medallion that pulls the slot machine's lever: above the meatball's when wide, and after the name when tall
+    const SLOT = tall ? [440, 48, 26] : [396, 50, 23];
     // The way Elliott rides with E.T. to the meatball, a curve of four points from where they wait while the game
     // is safe to beside the medallion. Wide, they wait on the meadow and fly up the gap by the tray; tall, they
     // wait in the corner across from the medallion and fly over the name. `face` is the way they look, `k` their
@@ -3688,6 +3751,97 @@ const Game = (function () {
     }
 
     // ---------- the tray, drawn ----------
+    // ---------- the slot machine: every column of the tray a reel ----------
+    // A reel pulls back a little before it spins, over so many steps, gathers speed over so many to its full speed,
+    // in cells a step, and comes to its stop over so many, running past and coming back as far as KICK says.
+    const WIND = 8, RUSH = 10, WHIRL = 0.55, STOPS = 14, KICK = 2.2;
+    const outBack = u => 1 + (KICK + 1) * Math.pow(u - 1, 3) + KICK * Math.pow(u - 1, 2);
+    // the step of the spin at which reel c stops, and the last reel's
+    const stopOf = c => SPIN + c * REEL_GAP, LAST = stopOf(N - 1);
+    // How far reel c has turned k steps into the spin, in cells down: a little back up at first, and at its stop a
+    // whole number of cells, so that the jewels it lands on sit in their places.
+    function turned(c, k) {
+      if (k <= 0) return 0;
+      if (k < WIND) return -0.3 * Math.sin(Math.PI * k / WIND);
+      const v0 = 0.3 * Math.PI / WIND, run = stopOf(c) - STOPS - WIND, far = WHIRL * STOPS / (KICK + 3), j = k - WIND;
+      const rush = s => { const u = Math.min(s, RUSH); return v0 * u + (WHIRL - v0) * u * u / (2 * RUSH) + WHIRL * Math.max(0, s - RUSH); };
+      const whole = rush(run) + far, cells = Math.ceil(whole);
+      if (j >= run + STOPS) return cells;
+      return (j <= run ? rush(j) : rush(run) + far * outBack((j - run) / STOPS)) * cells / whole;
+    }
+    // The reels: down each column run the jewels the tray had, then those the reel holds, then those it lands on. At
+    // speed each jewel keeps its shape and trails fainter copies of itself, and a reel just stopped flashes.
+    function reels(g, now) {
+      const k = now.k, to = now.reels.to;
+      for (let c = 0; c < N; c++) {
+        const p = turned(c, k), v = turned(c, k + 0.5) - turned(c, k - 0.5), blur = clamp(Math.abs(v) / WHIRL, 0, 1), L = turned(c, stopOf(c)), x = BX + (c + 0.5) * CELL;
+        for (let j = Math.floor(-p) - 1; j <= Math.ceil(N - p); j++) {
+          const row = j + p, i = j * N + c, first = j >= 0 && j < N;
+          if (row <= -1 || row >= N) continue;
+          const kind = first ? now.board[i] : j >= -L && j < N - L ? to[(j + L) * N + c] : Math.floor(hash(c * 31.7 + j * 7.3 + now.reels.n * 0.013) * KINDS);
+          if (kind < 0) continue;
+          const from = sheet(kind, first ? now.spec[i] : 0).canvas, y = BY + (row + 0.5) * CELL;
+          for (let q = blur > 0.15 ? 2 : 0; q >= 0; q--) {
+            g.globalAlpha = q ? 0.2 * blur / q : 1;
+            g.drawImage(from, x - CELL / 2, y - q * v * CELL * 0.5 - CELL / 2, CELL, CELL);
+          }
+          g.globalAlpha = 1;
+        }
+        const stopped = k - stopOf(c);
+        if (stopped >= 0 && stopped < 12) rect(g, BX + c * CELL, BY, CELL, BW, `rgba(255,246,207,${0.3 * (1 - stopped / 12)})`);
+      }
+    }
+    // Over the reels while they spin: each shaded round as a drum is, dark at its top and foot, and gold rods between
+    // them. The rows they land in are ringed in gold once every reel under them has stopped, red and white for the
+    // jackpot.
+    function drums(g, now, t) {
+      if (now.mode !== 'slot') return;
+      const k = now.k, fade = Math.min(clamp(k / WIND, 0, 1), clamp((LAST + SETTLE - k) / 12, 0, 1));
+      g.globalAlpha = fade;
+      const shade = g.createLinearGradient(0, BY, 0, BY + BW);
+      for (const [u, a] of [[0, 0.5], [0.22, 0], [0.78, 0], [1, 0.5]]) shade.addColorStop(u, `rgba(8,5,2,${a})`);
+      rect(g, BX, BY, BW, BW, shade);
+      for (let c = 1; c < N; c++) { rect(g, BX + c * CELL - 2, BY, 4, BW, INK); rect(g, BX + c * CELL - 1, BY, 2, BW, C.goldLight); }
+      const ring = clamp((LAST + SETTLE - k) / 6, 0, 1), beat = 0.6 + 0.4 * Math.sin(t * 12);
+      for (const cells of R.rows(now.reels.to)) {
+        if (k < stopOf(Math.max(...cells.map(i => i % N))) + 4) continue;
+        const [x0, y0] = at(cells[0]), [x1, y1] = at(cells[cells.length - 1]), r = CELL * 0.46;
+        round(g, x0 - r, y0 - r, x1 - x0 + r * 2, y1 - y0 + r * 2, r * 0.6);
+        g.globalAlpha = ring; g.strokeStyle = INK; g.lineWidth = 6; g.stroke();
+        g.globalAlpha = ring * beat; g.strokeStyle = now.reels.line < 0 ? C.goldPale : Math.floor(t * 8) % 2 ? '#fffbe6' : C.red; g.lineWidth = 3.4; g.stroke();
+      }
+      g.globalAlpha = 1;
+    }
+    // The tray's border lamps chase round while the reels spin, and flash at what they paid, red and white by turns
+    // at the jackpot.
+    function marquee(g, now) {
+      const spinning = now.mode === 'slot', since = now.n - now.won.n, paid = since >= 0 && since < 90 && now.won.times > 0;
+      if (now.phase !== 'play' || (!spinning && !paid)) return;
+      const turn = Math.floor(now.n / (spinning ? 4 : 7)), big = !spinning && now.won.line >= 0;
+      SQUARES.forEach(([x, y], j) => {
+        const on = spinning ? (j - turn) % 3 === 0 : (j + turn) % 2 === 0;
+        if (on || big) rect(g, x - 4.6, y - 4.6, 9.2, 9.2, on ? '#fffbe6' : C.red);
+      });
+    }
+    // What the reels paid, on a ribbon over the tray: the jackpot, or the win and how many times the stake came
+    // back, or that they made nothing. It hangs between where a level and a cascade are written, and two bells ring
+    // for the jackpot.
+    function payout(g, now, t) {
+      const since = now.n - now.won.n;
+      if (now.phase !== 'play' || since < 0 || since >= 110) return;
+      const big = now.won.line >= 0, pts = now.won.pts, shown = back(clamp(since / 12, 0, 1)), gone = ease(clamp((since - 86) / 24, 0, 1));
+      const head = big ? 'JACKPOT!' : now.won.times ? `WIN ×${now.won.times}` : 'NO WIN', size = big ? 40 : 30, more = pts ? `+${commas(pts)}` : '';
+      const w = Math.max(width(g, head, size, 3), width(g, more, 22, 1)) + 64, h = size + (more ? 48 : 30);
+      g.save();
+      g.translate(BX + BW / 2, BY + BW * 0.345 - 10 * gone); g.scale(shown, shown); g.globalAlpha = 1 - gone;
+      rect(g, -w / 2 + 6, -h / 2 + 8, w, h, 'rgba(20,12,4,0.5)');
+      panel(g, -w / 2, -h / 2, w, h);
+      label(g, head, 0, -h / 2 + 14 + size * 0.74, size, { align: 'center', color: big ? C.red : now.won.times ? INK : C.umber, space: 3 });
+      if (more) label(g, more, 0, h / 2 - 15, 22, { align: 'center', color: C.goldDeep, space: 1 });
+      if (big) for (const sx of [-1, 1]) bell(g, sx * (w / 2 + 22), -10, 13, 0.5 * Math.sin(t * 30 + sx));
+      g.restore();
+    }
+
     function tray(g, now, t, rings) {
       const gone = now.mode === 'clear' ? new Set(now.gone) : null, cu = now.k / CLEAR, calm = now.mode === 'still';
       const going = gone && now.n - now.home.n <= CLEAR ? new Set(now.home.cells) : null;
@@ -3695,7 +3849,9 @@ const Game = (function () {
       const fell = now.n - now.fell.n, longest = Math.sqrt(2 * now.fell.far / FALL), born = now.n - now.born.n;
       g.save();
       g.beginPath(); g.rect(BX, BY, BW, BW); g.clip();
-      now.board.forEach((kind, i) => {
+      // while the reels spin they are drawn in the jewels' place
+      if (now.mode === 'slot') reels(g, now);
+      else now.board.forEach((kind, i) => {
         if (kind < 0) return;
         // where the jewel is, as the rules have it moving
         let [x, y] = at(i), scale = 1, alpha = 1, turn = 0, own = -1, squash = 0;
@@ -3770,6 +3926,7 @@ const Game = (function () {
       if (since >= 0 && since < 60) now.wow.cells.forEach((i, k) => { const [x, y] = at(i); garden.sprout(g, x, y, since - (k % 4) * 2, i); });
       shatter(g, now);
       beams(g, now);
+      drums(g, now, t);
       // the gilded jewel: a gold ring round it that runs down with its time, and a star at the ring's end
       if (now.gilt.i >= 0 && now.board[now.gilt.i] >= 0) {
         const i = now.gilt.i, [x, y0] = at(i), y = y0 - (now.mode === 'fall' ? R.above(now.drop[i], now.k) * CELL : 0);
@@ -3979,7 +4136,7 @@ const Game = (function () {
     // the score it rang for, between two bells, low on the tray
     function rung(g, now, rings, t) {
       if (rings >= 92) return;
-      const shown = back(clamp(rings / 10, 0, 1)), gone = ease(clamp((rings - 70) / 22, 0, 1)), size = tall ? 46 : 44, word = commas(now.rung * ALARM), wide = size * 0.36 * word.length + 30;
+      const shown = back(clamp(rings / 10, 0, 1)), gone = ease(clamp((rings - 70) / 22, 0, 1)), size = tall ? 38 : 36, word = commas(now.rung * ALARM), wide = size * 0.36 * word.length + 30;
       g.save();
       g.translate(BX + BW / 2, BY + BW * 0.82 - 8 * gone); g.scale(shown, shown); g.globalAlpha = 1 - gone;
       label(g, word, 0, size * 0.34, size, { align: 'center', color: '#fff6cf', edge: C.red, space: 3 });
@@ -4281,6 +4438,59 @@ const Game = (function () {
         g.globalAlpha = 1;
       }
     }
+    // The medallion that pulls the slot machine's lever. Ready, three small reels in its window turn now and then,
+    // and it says what a pull stakes. Not ready, it is dull: it says how long there is to wait, with the wait cut out
+    // of it as a slice, or the score it needs. Its reels turn while the tray's do. Its lever goes down when it is
+    // pulled, and what was staked goes up from it in red.
+    function lever(g, now, t) {
+      if (now.phase !== 'play') return;
+      const [x, y, r] = SLOT, wait = now.lever - now.n, busy = now.pull || now.mode === 'slot';
+      const can = wait <= 0 && now.score >= SLOT_MIN && !busy && !now.due && now.mode !== 'mask';
+      const disc = (q, c) => { g.fillStyle = c; g.beginPath(); g.arc(x, y, q, 0, TAU); g.fill(); };
+      // the lever on its right, a rod with a red knob, swung down for a moment when it is pulled
+      const pulled = now.n - now.stake.n, down = pulled < 0 ? 0 : pulled < 8 ? ease(pulled / 8) : 1 - ease(clamp((pulled - 14) / 20, 0, 1));
+      const a = lerp(-Math.PI / 2 + 0.35, Math.PI / 2 - 0.35, down), px = x + r * 0.9, py = y + r * 0.08, kx = px + Math.cos(a) * r * 0.95, ky = py + Math.sin(a) * r * 0.95;
+      g.lineCap = 'round';
+      g.strokeStyle = INK; g.lineWidth = 5; g.beginPath(); g.moveTo(px, py); g.lineTo(kx, ky); g.stroke();
+      g.strokeStyle = can ? C.silver : '#8a8070'; g.lineWidth = 2.6; g.beginPath(); g.moveTo(px, py); g.lineTo(kx, ky); g.stroke();
+      g.lineCap = 'butt';
+      disc(r + 2, INK); disc(r, can ? C.goldLight : C.bronze); disc(r - 3.5, can ? '#16222e' : '#241a12');
+      g.fillStyle = INK; g.beginPath(); g.arc(kx, ky, r * 0.24 + 1.6, 0, TAU); g.fill();
+      g.fillStyle = can ? C.red : '#7a4a3a'; g.beginPath(); g.arc(kx, ky, r * 0.24, 0, TAU); g.fill();
+      g.fillStyle = 'rgba(255,246,207,0.7)'; g.beginPath(); g.arc(kx - r * 0.07, ky - r * 0.07, r * 0.08, 0, TAU); g.fill();
+      // the window: three reels, which turn for a moment every few seconds while it is ready
+      const ww = r * 1.36, wh = r * 0.7, wx = x - ww / 2, wy = y - wh / 2 - r * 0.04, s = wh * 0.9 / CELL;
+      const cycle = Math.floor(t / 3.2), into = t - cycle * 3.2;
+      rect(g, wx - 1.5, wy - 1.5, ww + 3, wh + 3, INK);
+      rect(g, wx, wy, ww, wh, can || busy ? CREAM : '#a89880');
+      g.save(); g.beginPath(); g.rect(wx, wy, ww, wh); g.clip();
+      for (let j = 0; j < 3; j++) {
+        const cx = wx + ww * (j + 0.5) / 3, cy = wy + wh / 2, alpha = can || busy ? 1 : 0.45;
+        if (busy || (can && into < 0.5 + 0.18 * j)) {
+          const f = t * 9 + j * 0.37, m = Math.floor(f), kindOf = q => Math.floor(hash(q * 1.3 + j * 5.1) * KINDS);
+          jewel(g, kindOf(m), cx, cy + (f - m) * wh, { scale: s, alpha });
+          jewel(g, kindOf(m + 1), cx, cy + (f - m - 1) * wh, { scale: s, alpha });
+        } else jewel(g, Math.floor(hash(cycle * 3.1 + j * 7.7) * KINDS), cx, cy, { scale: s, alpha });
+      }
+      g.restore();
+      for (const j of [1, 2]) rect(g, wx + ww * j / 3 - 0.6, wy, 1.2, wh, INK);
+      if (can) { const q = (t * 0.5 + 0.5) % 1; if (q < 0.25) Gems.star(g, x - r * 0.62, y - r * 0.62, 8 * Math.sin(Math.PI * q / 0.25), '#fff6cf'); }
+      // the wait left, as a slice of shadow that closes like a clock's hand coming round
+      else if (wait > 0) { g.fillStyle = 'rgba(0,0,0,0.5)'; g.beginPath(); g.moveTo(x, y); g.arc(x, y, r - 3.5, -Math.PI / 2, -Math.PI / 2 + TAU * clamp(wait / SLOT_REST, 0, 1)); g.closePath(); g.fill(); }
+      const says = can ? '\u221210%' : wait > 0 ? (wait > HZ * 90 ? `${Math.ceil(wait / HZ / 60)} MIN` : `${Math.ceil(wait / HZ)} S`) : busy || now.due || now.mode === 'mask' ? '' : commas(SLOT_MIN);
+      if (says) {
+        g.font = `bold 11px ${FACE}`; const w = g.measureText(says).width + 12;
+        round(g, x - w / 2 - 1.2, y + r + 1.8, w + 2.4, 16.4, 6); g.fillStyle = INK; g.fill();
+        round(g, x - w / 2, y + r + 3, w, 14, 5); g.fillStyle = can ? CREAM : C.silver; g.fill();
+        label(g, says, x, y + r + 14, 11, { align: 'center', color: can ? C.red : INK, space: 0.5 });
+      }
+      const paid = now.n - now.stake.n;
+      if (paid >= 0 && paid < 110) {
+        g.globalAlpha = 1 - ease(clamp((paid - 80) / 30, 0, 1));
+        label(g, `\u2212${commas(now.stake.cost)}`, x - 34, y + 6 - 20 * ease(clamp(paid / 30, 0, 1)), 19 * back(clamp(paid / 10, 0, 1)), { align: 'right', color: C.red, edge: CREAM });
+        g.globalAlpha = 1;
+      }
+    }
 
     // ---------- a frame ----------
     function draw(ctx, t) {
@@ -4311,8 +4521,10 @@ const Game = (function () {
       name(ctx, night);
       hud(ctx, now);
       medallion(ctx, now, t);
+      lever(ctx, now, t);
       if (c) chase(ctx, c);
       if (rings >= 0) lamps(ctx, rings, glow);
+      marquee(ctx, now);
       tray(ctx, now, t, rings);
       points(ctx, now);
       homing(ctx, now);
@@ -4329,6 +4541,7 @@ const Game = (function () {
       spicy(ctx, now, t);
       fireworks(ctx, now);
       tipped(ctx, now);
+      payout(ctx, now, t);
       if (c) flourish(ctx, c, now, t);
       risen(ctx, now);
       if (rings >= 0) rung(ctx, now, rings, t);
@@ -4349,6 +4562,7 @@ const Game = (function () {
       if (e.type === 'press') {
         if (world.at(e.t).phase !== 'play') tell('go');
         else if (Math.hypot(x - MEAT[0], y - MEAT[1]) <= MEAT[2] + 9) tell('meat');
+        else if (Math.hypot(x - SLOT[0], y - SLOT[1]) <= SLOT[2] + 9) tell('slot');
         else if (Math.hypot(x - SPEAKER[0], y - SPEAKER[1]) <= SPEAKER[2]) tell('tip');
         else { const i = cellAt(x, y); if (i >= 0) fingers.set(id, { i, x, y, done: false }); }
       } else if (f && !f.done && (e.type === 'move' || e.type === 'release')) {
@@ -4429,6 +4643,18 @@ const Game = (function () {
       // The Mask: what he swallowed goes off inside him, he brings the fire up, and when it has landed he speaks
       if (name === 'mask') return [[BOOM / HZ, { name: 'boom', gain: 0.5 }], [BURP / HZ, { name: 'burp', gain: 0.7 }]];
       if (name === 'blast') return [[0, { name: 'blast', gain: 0.9 }], [MASK_LINE, REAL.includes('mask') ? { name: 'mask', gain: 0.7 } : { say: 'That\u2019s a spicy meatball!', pitch: 1.3, rate: 1 }]];
+      // the slot machine: its lever pulled and coming home, the reels' rattle, thinning as they stop, the clunk of
+      // each one stopping, and what they paid
+      if (name === 'pull') return [[0, { name: 'swap', gain: 0.5, rate: 0.7 }], [0.13, { name: 'land', gain: 0.45, rate: 0.6 }]];
+      if (name === 'spin') {
+        const out = [];
+        for (let k = WIND; k < LAST; k += 3) { let moving = 0; for (let c = 0; c < N; c++) if (k < stopOf(c)) moving++; out.push([k / HZ, { name: 'pick', gain: 0.05 + 0.1 * moving / N, rate: 1.7 + 0.1 * hash(k) }]); }
+        return out;
+      }
+      if (name === 'reel') return [[0, { name: 'land', gain: 0.55, rate: 0.75 + 0.04 * arg }]];
+      if (name === 'win') return [[0.05, { name: 'chime', gain: 0.5, rate: 1 + 0.04 * Math.min(arg, 6) }]];
+      if (name === 'jackpot') return [[0, { name: 'alarm', gain: 0.6 }], [0.15, { name: 'level', gain: 0.55 }], [0.5, { say: 'Jackpot!', pitch: 1.2, rate: 1 }]];
+      if (name === 'bust') return [[0, { name: 'no', gain: 0.5 }]];
       // the teacher's three calls, each a little lower than the last. One is made only while he is still up: the
       // player's doing anything sends him off.
       if (name === 'roll') return now.roll !== n ? [] : [0, 1, 2].map(k => [ROLL_SAYS + k * ROLL_EVERY, REAL.includes('bueller') ? { name: 'bueller', gain: 0.55, rate: 1 - 0.04 * k } : { say: 'Bueller?', pitch: 0.5, rate: 0.8 }]);
@@ -4473,7 +4699,7 @@ window.__FILM__ = Game;
 <script>
 'use strict';
 // A generic game page: the game draws from the page's clock, and is told what is pressed and let go.
-const CONFIG = {"title": "Wow Jewels", "art": {"width": 1920, "height": 1080, "portrait": {"width": 1080, "height": 1920}}, "loop": 12, "film": {"global": "Game"}, "smooth": true, "game": {"keys": {"Space": "go", "Enter": "go", "KeyS": "meat"}, "background": "#1a1208", "moves": true, "fullscreen": true, "volume": 0.8, "pause": true, "home": true, "settings": true, "resume": "rules.js", "radio": [{"id": "house-nation-uk-house", "name": "House Nation UK (house)", "urls": ["https://streaming.radio.co/s06bd9d805/listen"], "home": "https://housenationuk.com/", "now": {"url": "https://public.radio.co/stations/s06bd9d805/status", "path": "current_track.title"}}, {"id": "sunshine-live-house", "name": "sunshine live: House", "urls": ["https://stream.sunshine-live.de/house/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "sunshine-live-classic-vocal-house", "name": "sunshine live: Classic & Vocal House", "urls": ["https://stream.sunshine-live.de/vocalhouse/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "rm-fm-house", "name": "rm.fm House", "urls": ["https://house-high.rautemusik.fm/"], "home": "https://www.rm.fm/house"}, {"id": "technolovers-funky-house", "name": "Technolovers Funky House", "urls": ["https://stream.technolovers.fm/funky-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-deep-house", "name": "Technolovers Deep House", "urls": ["https://stream.technolovers.fm/deep-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-ibiza-house", "name": "Technolovers Ibiza House", "urls": ["https://stream.technolovers.fm/ibiza-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-house", "name": "Technolovers House", "urls": ["https://stream.technolovers.fm/house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-afro-house", "name": "Technolovers Afro House", "urls": ["https://stream.technolovers.fm/afro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-bass-house", "name": "Technolovers Bass House", "urls": ["https://stream.technolovers.fm/bass-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-dirty-house", "name": "Technolovers Dirty House", "urls": ["https://stream.technolovers.fm/dirty-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-electro-house", "name": "Technolovers Electro House", "urls": ["https://stream.technolovers.fm/electro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-future-house", "name": "Technolovers Future House", "urls": ["https://stream.technolovers.fm/future-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-latin-house", "name": "Technolovers Latin House", "urls": ["https://stream.technolovers.fm/latinhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tech-house", "name": "Technolovers Tech House", "urls": ["https://stream.technolovers.fm/techhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tropical-house", "name": "Technolovers Tropical House", "urls": ["https://stream.technolovers.fm/tropical-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-melodic-house-techno", "name": "Technolovers Melodic House & Techno", "urls": ["https://stream.technolovers.fm/melodic-house-techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-techno", "name": "Technolovers Techno", "urls": ["https://stream.technolovers.fm/techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-trance", "name": "Technolovers Trance", "urls": ["https://stream.technolovers.fm/trance"], "home": "https://technolovers.fm/"}, {"id": "technolovers-lounge", "name": "Technolovers Lounge", "urls": ["https://stream.technolovers.fm/lounge"], "home": "https://technolovers.fm/"}, {"id": "somafm-beatblender", "name": "SomaFM Beat Blender (deep house)", "urls": ["https://ice2.somafm.com/beatblender-128-mp3", "https://ice6.somafm.com/beatblender-128-mp3", "https://ice5.somafm.com/beatblender-128-mp3"], "home": "https://somafm.com/beatblender/", "now": {"url": "https://somafm.com/songs/beatblender.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-thetrip", "name": "SomaFM The Trip (progressive house)", "urls": ["https://ice2.somafm.com/thetrip-128-mp3", "https://ice6.somafm.com/thetrip-128-mp3", "https://ice5.somafm.com/thetrip-128-mp3"], "home": "https://somafm.com/thetrip/", "now": {"url": "https://somafm.com/songs/thetrip.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-groovesalad", "name": "SomaFM Groove Salad (downtempo)", "urls": ["https://ice2.somafm.com/groovesalad-128-mp3", "https://ice6.somafm.com/groovesalad-128-mp3", "https://ice5.somafm.com/groovesalad-128-mp3"], "home": "https://somafm.com/groovesalad/", "now": {"url": "https://somafm.com/songs/groovesalad.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-fluid", "name": "SomaFM Fluid (instrumental hip hop)", "urls": ["https://ice2.somafm.com/fluid-128-mp3", "https://ice6.somafm.com/fluid-128-mp3", "https://ice5.somafm.com/fluid-128-mp3"], "home": "https://somafm.com/fluid/", "now": {"url": "https://somafm.com/songs/fluid.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-spacestation", "name": "SomaFM Space Station Soma (space electronic)", "urls": ["https://ice2.somafm.com/spacestation-128-mp3", "https://ice6.somafm.com/spacestation-128-mp3", "https://ice5.somafm.com/spacestation-128-mp3"], "home": "https://somafm.com/spacestation/", "now": {"url": "https://somafm.com/songs/spacestation.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-secretagent", "name": "SomaFM Secret Agent (spy lounge)", "urls": ["https://ice2.somafm.com/secretagent-128-mp3", "https://ice6.somafm.com/secretagent-128-mp3", "https://ice5.somafm.com/secretagent-128-mp3"], "home": "https://somafm.com/secretagent/", "now": {"url": "https://somafm.com/songs/secretagent.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-u80s", "name": "SomaFM Underground 80s (synthpop)", "urls": ["https://ice6.somafm.com/u80s-128-mp3", "https://ice2.somafm.com/u80s-128-mp3", "https://ice5.somafm.com/u80s-128-mp3"], "home": "https://somafm.com/u80s/", "now": {"url": "https://somafm.com/songs/u80s.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-indiepop", "name": "SomaFM Indie Pop Rocks!", "urls": ["https://ice6.somafm.com/indiepop-128-mp3", "https://ice2.somafm.com/indiepop-128-mp3", "https://ice5.somafm.com/indiepop-128-mp3"], "home": "https://somafm.com/indiepop/", "now": {"url": "https://somafm.com/songs/indiepop.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}], "radioCredit": {"text": "Each station plays from its own stream. SomaFM is listener-supported and free of ads:", "href": "https://somafm.com/", "link": "somafm.com"}, "musicVolume": 0.25, "updates": true, "radioDefault": "technolovers-electro-house", "fxVolume": 0.5, "scores": {"url": "https://wow-jewels.nathan-05a.workers.dev", "key": "f623f6421cbe5471"}, "welcome": {"played": ["scores", "best"]}, "voices": ["wow", "borat", "tommy", "happy", "val", "mask", "urkel", "bueller", "schnikes", "cheer", "redeem", "church", "picard"], "voiceVolume": 0.5, "resumeKey": "f623f6421cbe5471", "build": "9ee562af8401"}};
+const CONFIG = {"title": "Wow Jewels", "art": {"width": 1920, "height": 1080, "portrait": {"width": 1080, "height": 1920}}, "loop": 12, "film": {"global": "Game"}, "smooth": true, "game": {"keys": {"Space": "go", "Enter": "go", "KeyS": "meat", "KeyL": "slot"}, "background": "#1a1208", "moves": true, "fullscreen": true, "volume": 0.8, "pause": true, "home": true, "settings": true, "resume": "rules.js", "radio": [{"id": "house-nation-uk-house", "name": "House Nation UK (house)", "urls": ["https://streaming.radio.co/s06bd9d805/listen"], "home": "https://housenationuk.com/", "now": {"url": "https://public.radio.co/stations/s06bd9d805/status", "path": "current_track.title"}}, {"id": "sunshine-live-house", "name": "sunshine live: House", "urls": ["https://stream.sunshine-live.de/house/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "sunshine-live-classic-vocal-house", "name": "sunshine live: Classic & Vocal House", "urls": ["https://stream.sunshine-live.de/vocalhouse/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "rm-fm-house", "name": "rm.fm House", "urls": ["https://house-high.rautemusik.fm/"], "home": "https://www.rm.fm/house"}, {"id": "technolovers-funky-house", "name": "Technolovers Funky House", "urls": ["https://stream.technolovers.fm/funky-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-deep-house", "name": "Technolovers Deep House", "urls": ["https://stream.technolovers.fm/deep-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-ibiza-house", "name": "Technolovers Ibiza House", "urls": ["https://stream.technolovers.fm/ibiza-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-house", "name": "Technolovers House", "urls": ["https://stream.technolovers.fm/house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-afro-house", "name": "Technolovers Afro House", "urls": ["https://stream.technolovers.fm/afro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-bass-house", "name": "Technolovers Bass House", "urls": ["https://stream.technolovers.fm/bass-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-dirty-house", "name": "Technolovers Dirty House", "urls": ["https://stream.technolovers.fm/dirty-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-electro-house", "name": "Technolovers Electro House", "urls": ["https://stream.technolovers.fm/electro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-future-house", "name": "Technolovers Future House", "urls": ["https://stream.technolovers.fm/future-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-latin-house", "name": "Technolovers Latin House", "urls": ["https://stream.technolovers.fm/latinhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tech-house", "name": "Technolovers Tech House", "urls": ["https://stream.technolovers.fm/techhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tropical-house", "name": "Technolovers Tropical House", "urls": ["https://stream.technolovers.fm/tropical-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-melodic-house-techno", "name": "Technolovers Melodic House & Techno", "urls": ["https://stream.technolovers.fm/melodic-house-techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-techno", "name": "Technolovers Techno", "urls": ["https://stream.technolovers.fm/techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-trance", "name": "Technolovers Trance", "urls": ["https://stream.technolovers.fm/trance"], "home": "https://technolovers.fm/"}, {"id": "technolovers-lounge", "name": "Technolovers Lounge", "urls": ["https://stream.technolovers.fm/lounge"], "home": "https://technolovers.fm/"}, {"id": "somafm-beatblender", "name": "SomaFM Beat Blender (deep house)", "urls": ["https://ice2.somafm.com/beatblender-128-mp3", "https://ice6.somafm.com/beatblender-128-mp3", "https://ice5.somafm.com/beatblender-128-mp3"], "home": "https://somafm.com/beatblender/", "now": {"url": "https://somafm.com/songs/beatblender.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-thetrip", "name": "SomaFM The Trip (progressive house)", "urls": ["https://ice2.somafm.com/thetrip-128-mp3", "https://ice6.somafm.com/thetrip-128-mp3", "https://ice5.somafm.com/thetrip-128-mp3"], "home": "https://somafm.com/thetrip/", "now": {"url": "https://somafm.com/songs/thetrip.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-groovesalad", "name": "SomaFM Groove Salad (downtempo)", "urls": ["https://ice2.somafm.com/groovesalad-128-mp3", "https://ice6.somafm.com/groovesalad-128-mp3", "https://ice5.somafm.com/groovesalad-128-mp3"], "home": "https://somafm.com/groovesalad/", "now": {"url": "https://somafm.com/songs/groovesalad.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-fluid", "name": "SomaFM Fluid (instrumental hip hop)", "urls": ["https://ice2.somafm.com/fluid-128-mp3", "https://ice6.somafm.com/fluid-128-mp3", "https://ice5.somafm.com/fluid-128-mp3"], "home": "https://somafm.com/fluid/", "now": {"url": "https://somafm.com/songs/fluid.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-spacestation", "name": "SomaFM Space Station Soma (space electronic)", "urls": ["https://ice2.somafm.com/spacestation-128-mp3", "https://ice6.somafm.com/spacestation-128-mp3", "https://ice5.somafm.com/spacestation-128-mp3"], "home": "https://somafm.com/spacestation/", "now": {"url": "https://somafm.com/songs/spacestation.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-secretagent", "name": "SomaFM Secret Agent (spy lounge)", "urls": ["https://ice2.somafm.com/secretagent-128-mp3", "https://ice6.somafm.com/secretagent-128-mp3", "https://ice5.somafm.com/secretagent-128-mp3"], "home": "https://somafm.com/secretagent/", "now": {"url": "https://somafm.com/songs/secretagent.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-u80s", "name": "SomaFM Underground 80s (synthpop)", "urls": ["https://ice6.somafm.com/u80s-128-mp3", "https://ice2.somafm.com/u80s-128-mp3", "https://ice5.somafm.com/u80s-128-mp3"], "home": "https://somafm.com/u80s/", "now": {"url": "https://somafm.com/songs/u80s.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-indiepop", "name": "SomaFM Indie Pop Rocks!", "urls": ["https://ice6.somafm.com/indiepop-128-mp3", "https://ice2.somafm.com/indiepop-128-mp3", "https://ice5.somafm.com/indiepop-128-mp3"], "home": "https://somafm.com/indiepop/", "now": {"url": "https://somafm.com/songs/indiepop.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}], "radioCredit": {"text": "Each station plays from its own stream. SomaFM is listener-supported and free of ads:", "href": "https://somafm.com/", "link": "somafm.com"}, "musicVolume": 0.25, "updates": true, "radioDefault": "technolovers-electro-house", "fxVolume": 0.5, "scores": {"url": "https://wow-jewels.nathan-05a.workers.dev", "key": "79a177c337ff1e95"}, "welcome": {"played": ["scores", "best"]}, "voices": ["wow", "borat", "tommy", "happy", "val", "mask", "urkel", "bueller", "schnikes", "cheer", "redeem", "church", "picard"], "voiceVolume": 0.5, "resumeKey": "79a177c337ff1e95", "build": "b5b76291713d"}};
 const GAME = CONFIG.game === true ? {} : CONFIG.game;
 // the picture's size: the config's, or its portrait size while the window is taller than it is wide
 const sizeNow = () => (CONFIG.art.portrait && window.innerHeight > window.innerWidth ? CONFIG.art.portrait : CONFIG.art);

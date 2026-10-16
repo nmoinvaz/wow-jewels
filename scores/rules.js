@@ -11,7 +11,8 @@
 // falls in by luck. A player who does nothing for a while is called for, as a teacher calls a roll, and the first
 // row made after that is told it has redeemed itself. When the clock is getting low, or the next level is near,
 // a townie shouts you can do it. Now and then, as a jewel turns into another kind, as a replicator makes a thing,
-// Captain Picard asks for his tea, and the jewel it makes wears Starfleet's badge.
+// Captain Picard asks for his tea, and the jewel it makes wears Starfleet's badge. A pull of the slot machine's
+// lever spins every column of the tray as a reel, and each row the reels land in pays the stake back.
 //
 // A row of four leaves a striped jewel where it was, which takes its whole row or column with it when it goes. A
 // row of five or more leaves a peacock, which is no kind: changed with a neighbour, it takes every jewel of the
@@ -27,6 +28,7 @@
 // of what was asked for and when, and a script can play it (check.js does). What is asked for comes as keys:
 //   go            begin a game, or another once one is over
 //   meat          buy a meatball with a tenth of the score: The Mask comes and his fire lands on the tray
+//   slot          stake a tenth of the score on a pull of the slot machine's lever: the columns spin as reels
 //   tip           tap whoever is up, once each time someone comes, for a few points
 //   p<i>          pick the jewel in cell i (0 to 63, by rows from the top left), or let it go if it is picked
 //   s<i>d<dir>    change the jewel in cell i with the one to its right (0), below (1), left (2) or above (3)
@@ -64,6 +66,11 @@
   // many steps of play. Its fire pays back what it cost so many times over, on top of what the jewels it takes
   // are worth, so it is always worth having.
   const MEAT_SHARE = 0.1, MEAT_MIN = 1000, MEAT_REST = HZ * 600, MEAT_BACK = 1.5;
+  // A pull of the slot machine's lever stakes so much of the score, once the score is at least so much, and then
+  // not again for so many steps of play. Every column spins as a reel. The first stops so many steps into the spin
+  // and each after it so many steps later, left to right, and the tray rests so many steps before what the reels
+  // show is taken. By so much chance a whole row across lands all of one kind, the jackpot.
+  const SLOT_SHARE = 0.1, SLOT_MIN = 1000, SLOT_REST = HZ * 300, SPIN = 90, REEL_GAP = 18, SETTLE = 30, JACKPOT = 1 / 8;
   // The peacock is the kind after the last. A jewel is plain, or striped across, when it takes its row, or
   // striped down, when it takes its column, or wears the badge, when it takes both.
   const PEACOCK = KINDS, PLAIN = 0, ACROSS = 1, DOWN = 2, BADGE = 3, FIRE = 4;
@@ -194,7 +201,7 @@
     const blank = () => Array.from({ length: CELLS }, () => 0);
     const init = () => {
       const S = { phase: 'title', n: 0, t: 0, seed: 20261012, board: [], drop: blank(), mode: 'still', k: 0, a: -1, b: -1, back: 0, gone: [], want: '', sel: -1, hint: -1, idle: 0,
-        score: 0, level: 1, into: 0, chain: 0, left: 0, games: 0, time: TIME, shown: TIME, why: '', wow: { said: -1e6, run: 0, n: -1e6, count: 0, len: 0, cells: [] }, wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, picard: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, fire: { n: -1e6, at: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_AFTER, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 }, pops: [], ev: [] };
+        score: 0, level: 1, into: 0, chain: 0, left: 0, games: 0, time: TIME, shown: TIME, why: '', wow: { said: -1e6, run: 0, n: -1e6, count: 0, len: 0, cells: [] }, wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, picard: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, fire: { n: -1e6, at: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, lever: 0, stake: { n: -1e6, cost: 0 }, pull: false, reels: { n: -1e6, to: [], line: -1 }, won: { n: -1e6, pts: 0, times: 0, line: -1 },urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_AFTER, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 }, pops: [], ev: [] };
       S.board = deal(S);
       S.left = moves(S.board).length;
       return S;
@@ -202,7 +209,7 @@
     function begin(S) {
       // the tray is dealt from the moment the game was asked for, so no two games are alike
       S.seed = ((S.n + 1) * 48271 + S.games * 9973 + 12345) % 2147483647 || 1;
-      Object.assign(S, { phase: 'play', t: 0, mode: 'fall', k: 0, a: -1, b: -1, back: 0, gone: [], want: '', sel: -1, hint: -1, idle: 0, score: 0, level: 1, into: 0, chain: 0, pops: [], time: TIME, shown: TIME, why: '', wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, picard: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, fire: { n: -1e6, at: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_AFTER, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 } });
+      Object.assign(S, { phase: 'play', t: 0, mode: 'fall', k: 0, a: -1, b: -1, back: 0, gone: [], want: '', sel: -1, hint: -1, idle: 0, score: 0, level: 1, into: 0, chain: 0, pops: [], time: TIME, shown: TIME, why: '', wows: [], quiet: -1e6, borat: -1e6, tommy: -1e6, happy: -1e6, church: -1e6, picard: -1e6, val: -1e6, mask: -1e6, due: false, spice: MASK_FIRST, spec: blank(), born: { n: -1e6, i: -1 }, lines: [], fan: { n: -1e6, at: 0, kind: 0, cells: [] }, fire: { n: -1e6, at: 0, cells: [] }, broke: [], fell: { n: -1e6, far: 0, drop: [] }, schnikes: -1e6, quick: false, rested: 0, wanted: { kind: 0, n: 0 }, gilt: { i: -1, n: -1e6, until: 0, got: -1e6 }, gild: HZ * 20, tip: { n: -1e6, pts: 0 }, tipped: -1, bought: { n: -1e6, cost: 0 }, owed: 0, ready: 0, lever: 0, stake: { n: -1e6, cost: 0 }, pull: false, reels: { n: -1e6, to: [], line: -1 }, won: { n: -1e6, pts: 0, times: 0, line: -1 },urkel: -1e6, oops: 0, roll: -1e6, called: false, redeem: -1e6, cheer: -1e6, cheered: 0, run: 0, last: -1e6, gave: { n: -1e6, secs: 0, run: 0 }, blast: { n: -1e6, at: 0, cells: [], kinds: [] }, home: { n: -1e6, cells: [], kinds: [], at: 0 }, hush: -1e6, pace: 1, ran: TIME, spy: -1e6, spying: SPY_AFTER, mark: MARK, rose: -1e6, alarm: -1e6, rung: 0, shift: HZ * 6, morph: { n: -1e6, i: 0, from: 0 } });
       S.games++;
       S.spice = S.n + MASK_FIRST;
       S.spying = S.n + SPY_AFTER;
@@ -426,7 +433,7 @@
     // A meatball is bought: a tenth of the score is paid, The Mask is sent for, and whoever is up gives way to him.
     // It is not to be had again for a while.
     function buy(S) {
-      if (S.n < S.ready || S.score < MEAT_MIN || S.due || S.mode === 'mask') return;
+      if (S.n < S.ready || S.score < MEAT_MIN || S.due || S.mode === 'mask' || S.pull || S.mode === 'slot') return;
       const cost = Math.round(S.score * MEAT_SHARE / 10) * 10;
       S.score -= cost;
       S.bought = { n: S.n, cost };
@@ -466,6 +473,49 @@
       say(S, 'blast');
       rung(S);
       risen(S);
+    }
+    // The slot machine's lever is pulled: a tenth of the score is staked, and the reels spin once the tray is
+    // still. It is not to be had again for a while.
+    function pull(S) {
+      if (S.n < S.lever || S.score < SLOT_MIN || S.pull || S.mode === 'slot' || S.due || S.mode === 'mask') return;
+      const cost = Math.round(S.score * SLOT_SHARE / 10) * 10;
+      S.score -= cost;
+      S.stake = { n: S.n, cost };
+      S.lever = S.n + SLOT_REST;
+      S.pull = true;
+      here(S);
+      say(S, 'pull');
+    }
+    // The reels spin, and where each will stop is chosen now: a tray with a row in it or something to be done.
+    // The gilded jewel's gilding is spun away with it.
+    function spin(S) {
+      const line = rnd(S) < JACKPOT ? Math.floor(rnd(S) * N) : -1, kind = Math.floor(rnd(S) * KINDS);
+      let to;
+      do {
+        to = Array.from({ length: CELLS }, () => Math.floor(rnd(S) * KINDS));
+        if (line >= 0) for (let c = 0; c < N; c++) to[line * N + c] = kind;
+      } while (!rows(to).length && moves(to).length < 3);
+      Object.assign(S, { mode: 'slot', k: 0, pull: false, sel: -1, hint: -1, idle: 0, want: '' });
+      S.gilt = { i: -1, n: S.gilt.n, until: 0, got: S.gilt.got };
+      S.reels = { n: S.n, to, line };
+      say(S, 'spin');
+    }
+    // The reels have stopped: the tray is what they show, its special jewels spun away. Each row they make goes as
+    // a change's row would, and pays the stake back once for each of its jewels past two, which counts to the score
+    // and not to the level. Reels that make nothing lose the stake, and Urkel may ask whether he did that.
+    function land(S) {
+      S.board = S.reels.to.slice();
+      S.spec = blank();
+      Object.assign(S, { mode: 'still', k: 0, idle: 0, rested: S.n, chain: 0, quick: false });
+      S.left = moves(S.board).length;
+      const found = rows(S.board), times = found.reduce((a, cells) => a + cells.length - 2, 0), pts = S.stake.cost * times;
+      S.won = { n: S.n, pts, times, line: S.reels.line };
+      if (!found.length) { say(S, 'bust'); oops(S); return; }
+      S.chain = 1;
+      score(S, found);
+      S.score += pts;
+      say(S, S.reels.line >= 0 ? 'jackpot' : 'win', times);
+      rung(S);
     }
     // The jewels above the gaps fall, and new ones come in over them: drop is how far each has to fall.
     function settle(S) {
@@ -547,6 +597,7 @@
       if (S.phase === 'title') { if (hit.go) begin(S); return; }
       if (S.phase === 'over') { if (hit.go && S.t > AGAIN) begin(S); return; }
       if (hit.meat) buy(S);
+      if (hit.slot) pull(S);
       if (hit.tip) tip(S);
       // the wanted kind changes, to another, every so often
       if (S.n - S.wanted.n >= WANT_FOR) S.wanted = { kind: (S.wanted.kind + 1 + Math.floor(rnd(S) * (KINDS - 1))) % KINDS, n: S.n };
@@ -554,15 +605,15 @@
       if (S.mode === 'still' && S.gilt.i >= 0 && S.n >= S.gilt.until) S.gilt = { i: -1, n: S.gilt.n, until: 0, got: S.gilt.got };
       else if (S.mode === 'still' && S.gilt.i < 0 && --S.gild <= 0) gild(S);
       // one thing asked for while the jewels are moving is kept until they are still
-      for (const key of keys) if (key !== 'go' && key !== 'meat' && key !== 'tip') S.want = key;
+      for (const key of keys) if (key !== 'go' && key !== 'meat' && key !== 'slot' && key !== 'tip') S.want = key;
       // the clock runs, and its last ten seconds are counted aloud; `shown` follows it without a jump, for the
       // picture, when a row puts time back
       const was = S.time;
       // How fast time is being won back, in steps a step, a mean over PACE steps: whatever the clock gained since
       // the last step's draining, which only rows and fire give it.
       S.pace += (Math.max(0, S.time - S.ran) - S.pace) / PACE;
-      // the clock stands while The Mask is at his work
-      if (o.clock !== false && S.mode !== 'mask') S.time = Math.max(0, S.time - drain(S.level));
+      // the clock stands while The Mask is at his work and while the reels spin
+      if (o.clock !== false && S.mode !== 'mask' && S.mode !== 'slot') S.time = Math.max(0, S.time - drain(S.level));
       S.ran = S.time;
       S.shown += (S.time - S.shown) * 0.07;
       if (S.time > 0 && S.time < HZ * 10 && Math.ceil(S.time / HZ) !== Math.ceil(was / HZ)) say(S, 'tick', Math.ceil(S.time / HZ));
@@ -570,11 +621,18 @@
       if (SPY && S.n >= S.spying) { S.spy = S.n; S.spying = S.n + SPY_FOR + SPY_AFTER; say(S, 'spy'); }
       // the townie's shout, when the clock is getting low or the next level is near, and no one else is up
       const low = S.time < CHEER_UNDER && S.time > CHEER_OVER, near = S.cheered !== S.level && S.into >= CHEER_NEAR * need(S.level);
-      if (S.mode !== 'mask' && (low || near) && S.n > S.hush && S.n - S.cheer >= CHEER_REST) { S.cheer = S.n; S.hush = S.n + CHEER_UP; if (near) S.cheered = S.level; say(S, 'cheer'); }
+      if (S.mode !== 'mask' && S.mode !== 'slot' && (low || near) && S.n > S.hush && S.n - S.cheer >= CHEER_REST) { S.cheer = S.n; S.hush = S.n + CHEER_UP; if (near) S.cheered = S.level; say(S, 'cheer'); }
       // out of time, once the jewels are still: a row made at the last moment may yet put some back
       if (S.mode === 'still' && S.time <= 0) { Object.assign(S, { phase: 'over', t: 0, sel: -1, want: '', why: 'time', shown: 0 }); say(S, 'over'); return; }
       if (S.mode === 'still' && S.due && S.n > S.hush) feed(S);
+      else if (S.mode === 'still' && S.pull) spin(S);
       else if (S.mode === 'mask') { if (++S.k >= MASK_LANDS) blast(S); }
+      else if (S.mode === 'slot') {
+        // the reels stop one after another, left to right, and the tray rests a moment before what they show goes
+        const stop = ++S.k - SPIN;
+        if (stop >= 0 && stop % REEL_GAP === 0 && stop / REEL_GAP < N) say(S, 'reel', stop / REEL_GAP);
+        if (stop >= (N - 1) * REEL_GAP + SETTLE) land(S);
+      }
       else if (S.mode === 'still') {
         if (S.want) { const key = S.want; S.want = ''; ask(S, key); }
         if (S.mode === 'still' && ++S.idle === HINT) { const m = moves(S.board); S.hint = m.length ? m[Math.floor(rnd(S) * m.length)][0] : -1; }
@@ -612,6 +670,7 @@
         Object.assign(S, { mode: 'still', chain: 0, idle: 0, rested: S.n });
         S.left = moves(S.board).length;
         if (S.due && S.n > S.hush) feed(S);
+        else if (S.pull) spin(S);
         else if (!S.left) { Object.assign(S, { phase: 'over', t: 0, sel: -1, want: '', why: 'moves' }); say(S, 'over'); }
       }
     }
@@ -622,5 +681,5 @@
   // what a game came to once it is over, for a page to post and a server to check by playing it again, or null
   // while one is going
   const result = S => (S.phase === 'over' ? { game: S.games, score: S.score, level: S.level } : null);
-  return { create, result, rows, moves, beside, through, need, above, drain, N, CELLS, KINDS, PEACOCK, ACROSS, DOWN, BADGE, FIRE, FIRE_WAVES, BURN, HZ, SWAP, CLEAR, FALL, HINT, AGAIN, WOW, WOW_GAP, TIME, BORAT, BORAT_IN, BORAT_UP, TOMMY_UP, HAPPY_UP, CHURCH_UP, PICARD_UP, VAL_UP, MASK_UP, MASK_LANDS, URKEL_UP, ROLL_UP, REDEEM_UP, CHEER_UP, SCHNIKES_UP, BLAST, BACK, MEAT_MIN, MEAT_REST, WANT_FOR, GILT_FOR, MARK, ALARM, ALARM_UP, TURNING, SPY_FOR };
+  return { create, result, rows, moves, beside, through, need, above, drain, N, CELLS, KINDS, PEACOCK, ACROSS, DOWN, BADGE, FIRE, FIRE_WAVES, BURN, HZ, SWAP, CLEAR, FALL, HINT, AGAIN, WOW, WOW_GAP, TIME, BORAT, BORAT_IN, BORAT_UP, TOMMY_UP, HAPPY_UP, CHURCH_UP, PICARD_UP, VAL_UP, MASK_UP, MASK_LANDS, URKEL_UP, ROLL_UP, REDEEM_UP, CHEER_UP, SCHNIKES_UP, BLAST, BACK, MEAT_MIN, MEAT_REST, SLOT_MIN, SLOT_REST, SPIN, REEL_GAP, SETTLE, WANT_FOR, GILT_FOR, MARK, ALARM, ALARM_UP, TURNING, SPY_FOR };
 });
