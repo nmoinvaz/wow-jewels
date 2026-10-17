@@ -95,7 +95,7 @@
 <div class="stage"><canvas id="screen" tabindex="0" aria-label="Wow Jewels: a tray of jewels in the manner of Klimt, gold leaf and ornament. Change two jewels to make a row of three, and Eddy Wally comes up and says wow."></canvas></div>
 <div class="veil" id="veil" hidden><b>Paused</b><span id="veil-how"></span></div>
 <div class="corner" id="corner"><button class="full cup" id="cup" type="button" aria-label="Best scores" aria-expanded="false" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.6 2.4h6.8v3.4a3.4 3.4 0 0 1-6.8 0z"/><path d="M4.6 3.6H2.5v.8a2.5 2.5 0 0 0 2.6 2.5M11.4 3.6h2.1v.8a2.5 2.5 0 0 1-2.6 2.5M8 9.2v2.4M5.4 13.6h5.2M6.3 11.6h3.4v2"/></svg></button><button class="full next" id="next" type="button" aria-label="Next station" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.2 3.6l5.2 4.4-5.2 4.4zM8.4 3.6l5.2 4.4-5.2 4.4z"/></svg></button><button class="full gear" id="gear" type="button" aria-label="Settings" aria-expanded="false" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="2.3"/><path d="M8 1.6v2.1M8 12.3v2.1M1.6 8h2.1M12.3 8h2.1M3.5 3.5L5 5M11 11l1.5 1.5M3.5 12.5L5 11M11 5l1.5-1.5"/></svg></button><button class="full pause" id="pause" type="button" aria-label="Pause" aria-pressed="false" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path class="out" d="M5.2 3v10M10.8 3v10"/><path class="in" d="M5 3l8 5-8 5z"/></svg></button><button class="full" id="full" type="button" aria-label="Full screen" hidden><svg viewBox="0 0 16 16" aria-hidden="true"><path class="out" d="M2 6V2h4M10 2h4v4M14 10v4h-4M6 14H2v-4"/><path class="in" d="M6 2v4H2M14 6h-4V2M10 14v-4h4M2 10h4v4"/></svg></button></div>
-<form class="settings" id="settings" autocomplete="off" hidden><b id="set-head">Sounds</b><div class="panel" id="set-panel"><label>Effects <input type="range" id="fx" min="0" max="100" step="1"></label><label id="voice-row" hidden>Characters <input type="range" id="vo" min="0" max="100" step="1"></label><label>Music <input type="range" id="mu" min="0" max="100" step="1"></label><p id="music-note" hidden>On this phone the music plays at the phone’s own volume, so use its buttons. The slider at 0 turns it off.</p><label>Station <select id="station"><option value="">Off</option></select></label><p id="radio-says"></p><p id="radio-song"></p><p id="radio-credit"></p></div><label class="check"><input type="checkbox" id="speed"> Speed stats</label><button type="submit">Done</button></form>
+<form class="settings" id="settings" autocomplete="off" hidden><b id="set-head">Sounds</b><div class="panel" id="set-panel"><label>Effects <input type="range" id="fx" min="0" max="100" step="1"></label><label id="voice-row" hidden>Characters <input type="range" id="vo" min="0" max="100" step="1"></label><label>Music <input type="range" id="mu" min="0" max="100" step="1"></label><p id="music-note" hidden>On this phone the music plays at the phone’s own volume, so use its buttons. The slider at 0 turns it off.</p><label>Station <select id="station"><option value="">Off</option></select></label><p id="radio-says"></p><p id="radio-song"></p><p id="radio-credit"></p></div><label class="check" id="colorblind-row" hidden><input type="checkbox" id="colorblind"> Color blind mode</label><label class="check"><input type="checkbox" id="speed"> Speed stats</label><button type="submit">Done</button></form>
 <p class="tuned" id="tuned" hidden aria-live="polite"></p>
 <form class="ask" id="ask" autocomplete="off" hidden><label id="ask-label" for="ask-text"></label><div><input id="ask-text" type="text" enterkeyhint="done" autocapitalize="words" spellcheck="false"><button type="submit">OK</button></div></form>
 <div class="home" id="update" hidden><p id="update-says"></p><div><button type="button" class="yes" id="update-go">Reload</button><button type="button" id="update-later">Later</button></div></div>
@@ -1274,15 +1274,27 @@ const Gems = (function () {
   'use strict';
   const TAU = Math.PI * 2;
   const INK = '#1e1712', GOLD = '#c9a13b', LIGHT = '#e3c46a', PALE = '#f1dc93', DEEP = '#9a7426', BLACK = '#15110e', WHITE = '#f3eee2', SILVER = '#bdb8ac';
-  // each jewel's name, its colour and the paler one it throws, for the sparks of a row and what it was worth
+  // each jewel's name, its colour and the paler one it throws, for the sparks of a row and what it was worth, and
+  // the colours it is filled with, from the outside in
   const KINDS = [
-    { name: 'ruby', color: '#b02f2a', pale: '#f0a08c' },
-    { name: 'amber', color: '#d9822a', pale: '#f6c98a' },
-    { name: 'topaz', color: '#e8c33a', pale: '#fff0a8' },
-    { name: 'emerald', color: '#3f7f4a', pale: '#a9dba6' },
-    { name: 'sapphire', color: '#2b4a8c', pale: '#a9c4ee' },
-    { name: 'amethyst', color: '#7a5a93', pale: '#d6bfe8' },
-    { name: 'pearl', color: '#f3eee2', pale: '#ffffff' },
+    { name: 'ruby', color: '#b02f2a', pale: '#f0a08c', fills: ['#b02f2a'] },
+    { name: 'amber', color: '#d9822a', pale: '#f6c98a', fills: ['#e0842a', '#a8501a'] },
+    { name: 'topaz', color: '#e8c33a', pale: '#fff0a8', fills: ['#e8c33a', '#d9892e'] },
+    { name: 'emerald', color: '#3f7f4a', pale: '#a9dba6', fills: ['#3f7f4a', '#2a4f30'] },
+    { name: 'sapphire', color: '#2b4a8c', pale: '#a9c4ee', fills: ['#2b4a8c', '#8fb0cf', '#23386a'] },
+    { name: 'amethyst', color: '#7a5a93', pale: '#d6bfe8', fills: ['#7a5a93', '#b59ac9'] },
+    { name: 'pearl', color: '#f3eee2', pale: '#ffffff', fills: [] },
+  ];
+  // The jewels for a player without full colour vision: a crimson, an ochre, a light green and a bright blue in
+  // place of the ruby's red, the amber's orange, the emerald's green and the sapphire's blue. With the topaz,
+  // amethyst and pearl as they are, no two stay as close under any colour blindness as the topaz and the pearl.
+  const SAFE = [
+    { name: 'ruby', color: '#ad1f42', pale: '#dea5b3', fills: ['#ad1f42'] },
+    { name: 'amber', color: '#aa6909', pale: '#ddba86', fills: ['#aa6909', '#6e4406'] },
+    KINDS[2],
+    { name: 'emerald', color: '#88d279', pale: '#cfedc9', fills: ['#88d279', '#4f8a45'] },
+    { name: 'sapphire', color: '#0b6cda', pale: '#9dc4f0', fills: ['#0b6cda', '#9cc8f2', '#0a3f86'] },
+    KINDS[5], KINDS[6],
   ];
   // a closed path through points, filled and then edged in ink
   function shape(g, R, color, draw, edge = 0.055) {
@@ -1302,61 +1314,61 @@ const Gems = (function () {
   }
   const DRAW = [
     // ruby: a square in gold, red within it, and a black square with a silver one inside, as on the man's robe
-    (g, R) => {
+    (g, R, f) => {
       const s = 0.9 * R, sq = k => g => { const a = s * k, r = R * 0.1 * k; g.moveTo(-a + r, -a); g.lineTo(a - r, -a); g.quadraticCurveTo(a, -a, a, -a + r); g.lineTo(a, a - r); g.quadraticCurveTo(a, a, a - r, a); g.lineTo(-a + r, a); g.quadraticCurveTo(-a, a, -a, a - r); g.lineTo(-a, -a + r); g.quadraticCurveTo(-a, -a, -a + r, -a); };
       shape(g, R, LIGHT, sq(1));
-      shape(g, R, '#b02f2a', sq(0.82), 0.035);
+      shape(g, R, f[0], sq(0.82), 0.035);
       shape(g, R, BLACK, sq(0.48), 0);
       shape(g, R, SILVER, sq(0.24), 0);
       for (const [x, y] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) shape(g, R, PALE, disc(x * s * 0.65, y * s * 0.65, R * 0.07), 0);
     },
     // amber: a six-sided stone standing on a point, a darker one cut inside it round a black bead, and a pale
     // bead at each of its inner corners
-    (g, R) => {
+    (g, R, f) => {
       const H = Array.from({ length: 6 }, (v, i) => { const a = -Math.PI / 2 + i / 6 * TAU; return [Math.cos(a) * R * 1.04, Math.sin(a) * R * 1.04]; });
       shape(g, R, LIGHT, poly(H));
-      shape(g, R, '#e0842a', poly(scaled(H, 0.8)), 0.035);
-      shape(g, R, '#a8501a', poly(scaled(H, 0.5)), 0);
+      shape(g, R, f[0], poly(scaled(H, 0.8)), 0.035);
+      shape(g, R, f[1], poly(scaled(H, 0.5)), 0);
       for (const [x, y] of scaled(H, 0.64)) shape(g, R, PALE, disc(x, y, R * 0.06), 0);
       shape(g, R, BLACK, disc(0, 0, R * 0.2), 0);
       shape(g, R, PALE, disc(0, 0, R * 0.08), 0);
     },
     // topaz: a triangle, with a round eye in it, as in the Stoclet frieze
-    (g, R) => {
+    (g, R, f) => {
       const T = [[0, -1.02 * R], [1.0 * R, 0.8 * R], [-1.0 * R, 0.8 * R]], c = [0, 0.2 * R];
       shape(g, R, LIGHT, poly(T));
-      shape(g, R, '#e8c33a', poly(scaled(T, 0.76, c)), 0.035);
-      shape(g, R, '#d9892e', poly(scaled(T, 0.5, c)), 0);
+      shape(g, R, f[0], poly(scaled(T, 0.76, c)), 0.035);
+      shape(g, R, f[1], poly(scaled(T, 0.5, c)), 0);
       shape(g, R, BLACK, disc(c[0], c[1] + R * 0.04, R * 0.17), 0);
       shape(g, R, PALE, disc(c[0], c[1] + R * 0.04, R * 0.07), 0);
     },
     // emerald: an eye standing on end, green within green round a gold pupil
-    (g, R) => {
+    (g, R, f) => {
       const eye = k => g => { g.moveTo(0, -1.06 * R * k); g.bezierCurveTo(0.86 * R * k, -0.5 * R * k, 0.86 * R * k, 0.5 * R * k, 0, 1.06 * R * k); g.bezierCurveTo(-0.86 * R * k, 0.5 * R * k, -0.86 * R * k, -0.5 * R * k, 0, -1.06 * R * k); };
       shape(g, R, LIGHT, eye(1));
-      shape(g, R, '#3f7f4a', eye(0.8), 0.035);
-      shape(g, R, '#2a4f30', eye(0.52), 0);
+      shape(g, R, f[0], eye(0.8), 0.035);
+      shape(g, R, f[1], eye(0.52), 0);
       shape(g, R, PALE, disc(0, 0, R * 0.2), 0);
       shape(g, R, BLACK, disc(0, 0, R * 0.09), 0);
     },
     // sapphire: a lozenge, blue within blue, set with white beads
-    (g, R) => {
+    (g, R, f) => {
       const L = [[0, -1.08 * R], [0.86 * R, 0], [0, 1.08 * R], [-0.86 * R, 0]];
       shape(g, R, LIGHT, poly(L));
-      shape(g, R, '#2b4a8c', poly(scaled(L, 0.8)), 0.035);
-      shape(g, R, '#8fb0cf', poly(scaled(L, 0.46)), 0);
-      shape(g, R, '#23386a', poly(scaled(L, 0.22)), 0);
+      shape(g, R, f[0], poly(scaled(L, 0.8)), 0.035);
+      shape(g, R, f[1], poly(scaled(L, 0.46)), 0);
+      shape(g, R, f[2], poly(scaled(L, 0.22)), 0);
       for (const [x, y] of [[0, -0.64], [0.5, 0], [0, 0.64], [-0.5, 0]]) shape(g, R, WHITE, disc(x * R, y * R, R * 0.065), 0);
     },
     // amethyst: a flower of five petals round a gold middle
-    (g, R) => {
-      for (const [k, c, e] of [[1, LIGHT, 0.055], [0.78, '#7a5a93', 0.03]]) for (let i = 0; i < 5; i++) {
+    (g, R, f) => {
+      for (const [k, c, e] of [[1, LIGHT, 0.055], [0.78, f[0], 0.03]]) for (let i = 0; i < 5; i++) {
         const a = -Math.PI / 2 + i / 5 * TAU, x = Math.cos(a) * R * 0.56, y = Math.sin(a) * R * 0.56;
         g.save(); g.translate(x, y); g.rotate(a);
         shape(g, R, c, disc(0, 0, R * 0.46 * k, R * 0.4 * k), e);
         g.restore();
       }
-      for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i / 5 * TAU; shape(g, R, '#b59ac9', disc(Math.cos(a) * R * 0.62, Math.sin(a) * R * 0.62, R * 0.13), 0); }
+      for (let i = 0; i < 5; i++) { const a = -Math.PI / 2 + i / 5 * TAU; shape(g, R, f[1], disc(Math.cos(a) * R * 0.62, Math.sin(a) * R * 0.62, R * 0.13), 0); }
       shape(g, R, PALE, disc(0, 0, R * 0.26), 0.035);
       shape(g, R, DEEP, disc(0, 0, R * 0.1), 0);
     },
@@ -1370,8 +1382,9 @@ const Gems = (function () {
       for (const sx of [-1, 1]) shape(g, R, BLACK, g2 => g2.rect(sx * R * 0.7 - R * 0.04, -R * 0.07, R * 0.08, R * 0.14), 0);
     },
   ];
-  // one jewel about (0, 0), R from its middle to its edge, on a context already moved to where it lies
-  const flat = (g, kind, R) => DRAW[kind](g, R);
+  // one jewel about (0, 0), R from its middle to its edge, on a context already moved to where it lies, in the
+  // colours of `set`, KINDS or SAFE
+  const flat = (g, kind, R, set = KINDS) => DRAW[kind](g, R, set[kind].fills);
 
   // ---------- the jewels' own small turns ----------
   // Now and then a jewel does a small thing of its own, each kind its own. motion(kind, p) says how the jewel
@@ -1420,7 +1433,7 @@ const Gems = (function () {
       g.beginPath(); g.ellipse((p - 0.5) * R * 1.1, -R * 0.2, R * 0.2, R * 0.075, -0.4, 0, TAU); g.fill(); g.globalAlpha = 1;
     }
   }
-  return { KINDS, flat, spiral, motion, spark, star, INK, GOLD, LIGHT, PALE, DEEP, BLACK, WHITE, SILVER };
+  return { KINDS, SAFE, flat, spiral, motion, spark, star, INK, GOLD, LIGHT, PALE, DEEP, BLACK, WHITE, SILVER };
 })();
 if (typeof module === 'object' && module.exports) module.exports = Gems;
 
@@ -3333,9 +3346,11 @@ const Game = (function () {
 
     // ---------- the jewels: each drawn once, over the shadow it throws ----------
     const GR = CELL * 0.39, GM = CELL / 2;
+    // the jewels' colours, or those that can be told apart without full colour vision when the player asks for them
+    const HUES = env.colorblind ? Gems.SAFE : Gems.KINDS;
     const GEMS = Gems.KINDS.map((kind, i) => {
-      const shape = K.layer(CELL, CELL, g => { g.translate(GM, GM); Gems.flat(g, i, GR); g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#080503'; g.fillRect(0, 0, CELL * S + 2, CELL * S + 2); });
-      return K.layer(CELL, CELL, g => { g.globalAlpha = 0.5; K.sprite(g, shape, 2.4, 3); g.globalAlpha = 1; g.translate(GM, GM); Gems.flat(g, i, GR); });
+      const shape = K.layer(CELL, CELL, g => { g.translate(GM, GM); Gems.flat(g, i, GR, HUES); g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#080503'; g.fillRect(0, 0, CELL * S + 2, CELL * S + 2); });
+      return K.layer(CELL, CELL, g => { g.globalAlpha = 0.5; K.sprite(g, shape, 2.4, 3); g.globalAlpha = 1; g.translate(GM, GM); Gems.flat(g, i, GR, HUES); });
     });
     // The peacock, which is no kind: the eye of a feather, blue in green in gold, with fine gold barbs to its rim.
     const PEA = { color: '#1f8a80', pale: '#8fd6cc' };
@@ -3353,7 +3368,7 @@ const Game = (function () {
       return K.layer(CELL, CELL, g => { g.globalAlpha = 0.5; K.sprite(g, shape, 2.4, 3); g.globalAlpha = 1; g.translate(GM, GM); feather(g, GR); });
     })());
     // A striped jewel: its kind's jewel with three bright bars over it, across or down, cut to the jewel's shape.
-    const SOLID = Gems.KINDS.map((kind, i) => K.layer(CELL, CELL, g => { g.translate(GM, GM); Gems.flat(g, i, GR); g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#000000'; g.fillRect(0, 0, CELL * S + 2, CELL * S + 2); }));
+    const SOLID = Gems.KINDS.map((kind, i) => K.layer(CELL, CELL, g => { g.translate(GM, GM); Gems.flat(g, i, GR, HUES); g.setTransform(1, 0, 0, 1, 0, 0); g.globalCompositeOperation = 'source-in'; g.fillStyle = '#000000'; g.fillRect(0, 0, CELL * S + 2, CELL * S + 2); }));
     const striped = down => Gems.KINDS.map((kind, i) => {
       const bars = K.layer(CELL, CELL, g => {
         g.save(); g.translate(GM, GM); if (down) g.rotate(Math.PI / 2);
@@ -3917,7 +3932,7 @@ const Game = (function () {
       // a row going: gold discs and small squares of its colour thrown out from each jewel
       if (gone) for (const i of gone) {
         if (going && going.has(i)) continue;
-        const [x, y] = at(i), kind = Gems.KINDS[now.board[i]] || PEA, u = ease(cu);
+        const [x, y] = at(i), kind = HUES[now.board[i]] || PEA, u = ease(cu);
         g.globalAlpha = 1 - cu * cu;
         for (let k = 0; k < 8; k++) {
           const a = k / 8 * TAU + hash(i * 3.3 + k) * 0.8, d = CELL * (0.22 + (0.5 + 0.4 * hash(i + k * 5.1)) * u), px = x + Math.cos(a) * d, py = y + Math.sin(a) * d, r = 3.4 * (1 - 0.5 * cu);
@@ -3980,7 +3995,7 @@ const Game = (function () {
         if (age < 0 || age >= 58) continue;
         g.globalAlpha = 1 - ease(clamp((age - 40) / 18, 0, 1));
         b.cells.forEach((i, j) => {
-          const [x0, y0] = at(i), kind = Gems.KINDS[b.kinds[j]] || PEA;
+          const [x0, y0] = at(i), kind = HUES[b.kinds[j]] || PEA;
           for (let k = 0; k < 5; k++) {
             const h1 = hash(i * 5.3 + k * 2.1 + b.n * 0.37), h2 = hash(i * 9.1 + k * 4.7 + b.n * 0.11), vx = (h1 - 0.5) * 3.6, vy = -(1.4 + 3 * h2);
             let x = x0 + vx * age, y = y0 + vy * age + 0.5 * grav * age * age;
@@ -4704,7 +4719,7 @@ window.__FILM__ = Game;
 <script>
 'use strict';
 // A generic game page: the game draws from the page's clock, and is told what is pressed and let go.
-const CONFIG = {"title": "Wow Jewels", "art": {"width": 1920, "height": 1080, "portrait": {"width": 1080, "height": 1920}}, "loop": 12, "film": {"global": "Game"}, "smooth": true, "game": {"keys": {"Space": "go", "Enter": "go", "KeyS": "meat", "KeyL": "slot"}, "background": "#1a1208", "moves": true, "fullscreen": true, "volume": 0.8, "pause": true, "home": true, "settings": true, "resume": "rules.js", "radio": [{"id": "house-nation-uk-house", "name": "House Nation UK (house)", "urls": ["https://streaming.radio.co/s06bd9d805/listen"], "home": "https://housenationuk.com/", "now": {"url": "https://public.radio.co/stations/s06bd9d805/status", "path": "current_track.title"}}, {"id": "sunshine-live-house", "name": "sunshine live: House", "urls": ["https://stream.sunshine-live.de/house/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "sunshine-live-classic-vocal-house", "name": "sunshine live: Classic & Vocal House", "urls": ["https://stream.sunshine-live.de/vocalhouse/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "rm-fm-house", "name": "rm.fm House", "urls": ["https://house-high.rautemusik.fm/"], "home": "https://www.rm.fm/house"}, {"id": "technolovers-funky-house", "name": "Technolovers Funky House", "urls": ["https://stream.technolovers.fm/funky-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-deep-house", "name": "Technolovers Deep House", "urls": ["https://stream.technolovers.fm/deep-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-ibiza-house", "name": "Technolovers Ibiza House", "urls": ["https://stream.technolovers.fm/ibiza-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-house", "name": "Technolovers House", "urls": ["https://stream.technolovers.fm/house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-afro-house", "name": "Technolovers Afro House", "urls": ["https://stream.technolovers.fm/afro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-bass-house", "name": "Technolovers Bass House", "urls": ["https://stream.technolovers.fm/bass-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-dirty-house", "name": "Technolovers Dirty House", "urls": ["https://stream.technolovers.fm/dirty-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-electro-house", "name": "Technolovers Electro House", "urls": ["https://stream.technolovers.fm/electro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-future-house", "name": "Technolovers Future House", "urls": ["https://stream.technolovers.fm/future-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-latin-house", "name": "Technolovers Latin House", "urls": ["https://stream.technolovers.fm/latinhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tech-house", "name": "Technolovers Tech House", "urls": ["https://stream.technolovers.fm/techhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tropical-house", "name": "Technolovers Tropical House", "urls": ["https://stream.technolovers.fm/tropical-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-melodic-house-techno", "name": "Technolovers Melodic House & Techno", "urls": ["https://stream.technolovers.fm/melodic-house-techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-techno", "name": "Technolovers Techno", "urls": ["https://stream.technolovers.fm/techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-trance", "name": "Technolovers Trance", "urls": ["https://stream.technolovers.fm/trance"], "home": "https://technolovers.fm/"}, {"id": "technolovers-lounge", "name": "Technolovers Lounge", "urls": ["https://stream.technolovers.fm/lounge"], "home": "https://technolovers.fm/"}, {"id": "somafm-beatblender", "name": "SomaFM Beat Blender (deep house)", "urls": ["https://ice2.somafm.com/beatblender-128-mp3", "https://ice6.somafm.com/beatblender-128-mp3", "https://ice5.somafm.com/beatblender-128-mp3"], "home": "https://somafm.com/beatblender/", "now": {"url": "https://somafm.com/songs/beatblender.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-thetrip", "name": "SomaFM The Trip (progressive house)", "urls": ["https://ice2.somafm.com/thetrip-128-mp3", "https://ice6.somafm.com/thetrip-128-mp3", "https://ice5.somafm.com/thetrip-128-mp3"], "home": "https://somafm.com/thetrip/", "now": {"url": "https://somafm.com/songs/thetrip.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-groovesalad", "name": "SomaFM Groove Salad (downtempo)", "urls": ["https://ice2.somafm.com/groovesalad-128-mp3", "https://ice6.somafm.com/groovesalad-128-mp3", "https://ice5.somafm.com/groovesalad-128-mp3"], "home": "https://somafm.com/groovesalad/", "now": {"url": "https://somafm.com/songs/groovesalad.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-fluid", "name": "SomaFM Fluid (instrumental hip hop)", "urls": ["https://ice2.somafm.com/fluid-128-mp3", "https://ice6.somafm.com/fluid-128-mp3", "https://ice5.somafm.com/fluid-128-mp3"], "home": "https://somafm.com/fluid/", "now": {"url": "https://somafm.com/songs/fluid.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-spacestation", "name": "SomaFM Space Station Soma (space electronic)", "urls": ["https://ice2.somafm.com/spacestation-128-mp3", "https://ice6.somafm.com/spacestation-128-mp3", "https://ice5.somafm.com/spacestation-128-mp3"], "home": "https://somafm.com/spacestation/", "now": {"url": "https://somafm.com/songs/spacestation.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-secretagent", "name": "SomaFM Secret Agent (spy lounge)", "urls": ["https://ice2.somafm.com/secretagent-128-mp3", "https://ice6.somafm.com/secretagent-128-mp3", "https://ice5.somafm.com/secretagent-128-mp3"], "home": "https://somafm.com/secretagent/", "now": {"url": "https://somafm.com/songs/secretagent.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-u80s", "name": "SomaFM Underground 80s (synthpop)", "urls": ["https://ice6.somafm.com/u80s-128-mp3", "https://ice2.somafm.com/u80s-128-mp3", "https://ice5.somafm.com/u80s-128-mp3"], "home": "https://somafm.com/u80s/", "now": {"url": "https://somafm.com/songs/u80s.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-indiepop", "name": "SomaFM Indie Pop Rocks!", "urls": ["https://ice6.somafm.com/indiepop-128-mp3", "https://ice2.somafm.com/indiepop-128-mp3", "https://ice5.somafm.com/indiepop-128-mp3"], "home": "https://somafm.com/indiepop/", "now": {"url": "https://somafm.com/songs/indiepop.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}], "radioCredit": {"text": "Each station plays from its own stream. SomaFM is listener-supported and free of ads:", "href": "https://somafm.com/", "link": "somafm.com"}, "musicVolume": 0.25, "updates": true, "radioDefault": "technolovers-electro-house", "fxVolume": 0.5, "scores": {"url": "https://wow-jewels.nathan-05a.workers.dev", "key": "79a177c337ff1e95"}, "welcome": {"played": ["scores", "best"]}, "voices": ["wow", "borat", "tommy", "happy", "val", "mask", "urkel", "bueller", "schnikes", "cheer", "redeem", "church", "picard"], "voiceVolume": 0.5, "resumeKey": "79a177c337ff1e95", "build": "8c1cbe2a47b6"}};
+const CONFIG = {"title": "Wow Jewels", "art": {"width": 1920, "height": 1080, "portrait": {"width": 1080, "height": 1920}}, "loop": 12, "film": {"global": "Game"}, "smooth": true, "game": {"keys": {"Space": "go", "Enter": "go", "KeyS": "meat", "KeyL": "slot"}, "background": "#1a1208", "moves": true, "fullscreen": true, "volume": 0.8, "pause": true, "home": true, "settings": true, "colorblind": true, "resume": "rules.js", "radio": [{"id": "house-nation-uk-house", "name": "House Nation UK (house)", "urls": ["https://streaming.radio.co/s06bd9d805/listen"], "home": "https://housenationuk.com/", "now": {"url": "https://public.radio.co/stations/s06bd9d805/status", "path": "current_track.title"}}, {"id": "sunshine-live-house", "name": "sunshine live: House", "urls": ["https://stream.sunshine-live.de/house/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "sunshine-live-classic-vocal-house", "name": "sunshine live: Classic & Vocal House", "urls": ["https://stream.sunshine-live.de/vocalhouse/mp3-192/stream.sunshine-live.de/"], "home": "https://sunshine-live.de/"}, {"id": "rm-fm-house", "name": "rm.fm House", "urls": ["https://house-high.rautemusik.fm/"], "home": "https://www.rm.fm/house"}, {"id": "technolovers-funky-house", "name": "Technolovers Funky House", "urls": ["https://stream.technolovers.fm/funky-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-deep-house", "name": "Technolovers Deep House", "urls": ["https://stream.technolovers.fm/deep-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-ibiza-house", "name": "Technolovers Ibiza House", "urls": ["https://stream.technolovers.fm/ibiza-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-house", "name": "Technolovers House", "urls": ["https://stream.technolovers.fm/house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-afro-house", "name": "Technolovers Afro House", "urls": ["https://stream.technolovers.fm/afro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-bass-house", "name": "Technolovers Bass House", "urls": ["https://stream.technolovers.fm/bass-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-dirty-house", "name": "Technolovers Dirty House", "urls": ["https://stream.technolovers.fm/dirty-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-electro-house", "name": "Technolovers Electro House", "urls": ["https://stream.technolovers.fm/electro-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-future-house", "name": "Technolovers Future House", "urls": ["https://stream.technolovers.fm/future-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-latin-house", "name": "Technolovers Latin House", "urls": ["https://stream.technolovers.fm/latinhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tech-house", "name": "Technolovers Tech House", "urls": ["https://stream.technolovers.fm/techhouse"], "home": "https://technolovers.fm/"}, {"id": "technolovers-tropical-house", "name": "Technolovers Tropical House", "urls": ["https://stream.technolovers.fm/tropical-house"], "home": "https://technolovers.fm/"}, {"id": "technolovers-melodic-house-techno", "name": "Technolovers Melodic House & Techno", "urls": ["https://stream.technolovers.fm/melodic-house-techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-techno", "name": "Technolovers Techno", "urls": ["https://stream.technolovers.fm/techno"], "home": "https://technolovers.fm/"}, {"id": "technolovers-trance", "name": "Technolovers Trance", "urls": ["https://stream.technolovers.fm/trance"], "home": "https://technolovers.fm/"}, {"id": "technolovers-lounge", "name": "Technolovers Lounge", "urls": ["https://stream.technolovers.fm/lounge"], "home": "https://technolovers.fm/"}, {"id": "somafm-beatblender", "name": "SomaFM Beat Blender (deep house)", "urls": ["https://ice2.somafm.com/beatblender-128-mp3", "https://ice6.somafm.com/beatblender-128-mp3", "https://ice5.somafm.com/beatblender-128-mp3"], "home": "https://somafm.com/beatblender/", "now": {"url": "https://somafm.com/songs/beatblender.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-thetrip", "name": "SomaFM The Trip (progressive house)", "urls": ["https://ice2.somafm.com/thetrip-128-mp3", "https://ice6.somafm.com/thetrip-128-mp3", "https://ice5.somafm.com/thetrip-128-mp3"], "home": "https://somafm.com/thetrip/", "now": {"url": "https://somafm.com/songs/thetrip.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-groovesalad", "name": "SomaFM Groove Salad (downtempo)", "urls": ["https://ice2.somafm.com/groovesalad-128-mp3", "https://ice6.somafm.com/groovesalad-128-mp3", "https://ice5.somafm.com/groovesalad-128-mp3"], "home": "https://somafm.com/groovesalad/", "now": {"url": "https://somafm.com/songs/groovesalad.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-fluid", "name": "SomaFM Fluid (instrumental hip hop)", "urls": ["https://ice2.somafm.com/fluid-128-mp3", "https://ice6.somafm.com/fluid-128-mp3", "https://ice5.somafm.com/fluid-128-mp3"], "home": "https://somafm.com/fluid/", "now": {"url": "https://somafm.com/songs/fluid.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-spacestation", "name": "SomaFM Space Station Soma (space electronic)", "urls": ["https://ice2.somafm.com/spacestation-128-mp3", "https://ice6.somafm.com/spacestation-128-mp3", "https://ice5.somafm.com/spacestation-128-mp3"], "home": "https://somafm.com/spacestation/", "now": {"url": "https://somafm.com/songs/spacestation.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-secretagent", "name": "SomaFM Secret Agent (spy lounge)", "urls": ["https://ice2.somafm.com/secretagent-128-mp3", "https://ice6.somafm.com/secretagent-128-mp3", "https://ice5.somafm.com/secretagent-128-mp3"], "home": "https://somafm.com/secretagent/", "now": {"url": "https://somafm.com/songs/secretagent.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-u80s", "name": "SomaFM Underground 80s (synthpop)", "urls": ["https://ice6.somafm.com/u80s-128-mp3", "https://ice2.somafm.com/u80s-128-mp3", "https://ice5.somafm.com/u80s-128-mp3"], "home": "https://somafm.com/u80s/", "now": {"url": "https://somafm.com/songs/u80s.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}, {"id": "somafm-indiepop", "name": "SomaFM Indie Pop Rocks!", "urls": ["https://ice6.somafm.com/indiepop-128-mp3", "https://ice2.somafm.com/indiepop-128-mp3", "https://ice5.somafm.com/indiepop-128-mp3"], "home": "https://somafm.com/indiepop/", "now": {"url": "https://somafm.com/songs/indiepop.json", "path": "songs.0", "show": "{artist} \u2013 {title}"}}], "radioCredit": {"text": "Each station plays from its own stream. SomaFM is listener-supported and free of ads:", "href": "https://somafm.com/", "link": "somafm.com"}, "musicVolume": 0.25, "updates": true, "radioDefault": "technolovers-electro-house", "fxVolume": 0.5, "scores": {"url": "https://wow-jewels.nathan-05a.workers.dev", "key": "79a177c337ff1e95"}, "welcome": {"played": ["scores", "best"]}, "voices": ["wow", "borat", "tommy", "happy", "val", "mask", "urkel", "bueller", "schnikes", "cheer", "redeem", "church", "picard"], "voiceVolume": 0.5, "resumeKey": "79a177c337ff1e95", "build": "08d749939150"}};
 const GAME = CONFIG.game === true ? {} : CONFIG.game;
 // the picture's size: the config's, or its portrait size while the window is taller than it is wide
 const sizeNow = () => (CONFIG.art.portrait && window.innerHeight > window.innerWidth ? CONFIG.art.portrait : CONFIG.art);
@@ -4801,10 +4816,12 @@ function start(size) {
   W = size.width; H = size.height;
   art = mk(W, H); ag = art.getContext('2d');
   try {
-    // touch says the page is on a touch screen, so the game can say tap where it would name a key, and scores
-    // that the page posts a game's scores to the world's board
+    // touch says the page is on a touch screen, so the game can say tap where it would name a key, scores
+    // that the page posts a game's scores to the world's board, and colorblind that the player asked in the
+    // settings for colours that can be told apart without full colour vision
     const touch = matchMedia('(pointer: coarse)').matches, scores = !!(GAME.scores && GAME.scores.url);
-    game = window.__FILM__.create({ makeCanvas: mk, Path2D: window.Path2D, width: W, height: H, store, touch, ask, scores });
+    const colorblind = !!(GAME.colorblind && GAME.settings && (store.get('chosen') || {}).colorblind);
+    game = window.__FILM__.create({ makeCanvas: mk, Path2D: window.Path2D, width: W, height: H, store, touch, ask, scores, colorblind });
     if (BEST.open && game.showBest) game.showBest(BEST.rows || [], P.mine, BEST.playing);
     if (game.input) for (const e of pressed) game.input(e);
   } catch (e) {
@@ -5164,6 +5181,13 @@ if (GAME.settings) {
   speed.checked = !!SET.stats;
   speed.addEventListener('change', () => { choose('stats', speed.checked); speedStats(speed.checked); });
   if (SET.stats) speedStats(true);
+  // With "colorblind" a box asks for colours that can be told apart without full colour vision, and the game is
+  // made again with them, as it is when the window turns, so a game going on carries on.
+  const blind = $('colorblind');
+  if (GAME.colorblind) {
+    $('colorblind-row').hidden = false; blind.checked = !!SET.colorblind;
+    blind.addEventListener('change', () => { choose('colorblind', blind.checked); start({ width: W, height: H }); });
+  }
   // The next station: a button beside the gear that tunes in the station after the one playing, or the first when
   // none is, and says its name a while under the corner buttons.
   if (GAME.radio && GAME.radio.length) {
